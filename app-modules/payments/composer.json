@@ -1,0 +1,24 @@
+{
+	"name": "modules/payments",
+	"description": "[EXEMPLO — REMOVÍVEL] Implementa o contrato PaymentGateway do core. Demonstra o lado 'fornecedor' de uma fronteira: bind no provider, implementação escondida.",
+	"type": "library",
+	"version": "1.0",
+	"license": "proprietary",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"Modules\\Payments\\": "src/",
+			"Modules\\Payments\\Tests\\": "tests/",
+			"Modules\\Payments\\Database\\Factories\\": "database/factories/",
+			"Modules\\Payments\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Modules\\Payments\\Providers\\PaymentsServiceProvider"
+			]
+		}
+	}
+}

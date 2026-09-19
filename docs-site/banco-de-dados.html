@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de Dados (DER) · CampusOS</title>
+<meta name="description" content="Diagrama entidade-relacionamento do CampusOS — 24 tabelas em 6 módulos, com o porquê de cada decisão de modelagem.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 2rem 1.75rem 5rem; font-size: 15.5px; }
+
+  header.page { border-bottom: 1px solid var(--border); padding-bottom: 1.75rem; margin-bottom: 2rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-700); font-weight: 600; }
+  h1 { font-weight: 600; font-size: 2.5rem; margin: 0.35rem 0 0.6rem; text-wrap: balance; letter-spacing: -0.02em; }
+  .lede { max-width: 70ch; color: var(--ink-soft); font-size: 1.02rem; margin: 0 0 1.1rem; }
+  .lede strong { color: var(--ink); }
+
+  .meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-faint); }
+  .meta-row b { color: var(--ink-soft); font-weight: 600; }
+
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.75rem; margin: 1.75rem 0 2rem; }
+  .legend-item { border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 0.9rem; background: var(--surface); }
+  .legend-item p { margin: 0.45rem 0 0; font-size: 0.83rem; color: var(--ink-soft); }
+
+  .diagram-frame { border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); padding: 1.5rem 1.5rem 1rem; margin-bottom: 2.25rem; }
+  .diagram-frame h2 { margin-top: 0; font-weight: 600; font-size: 1.5rem; }
+  .diagram-scroll { overflow-x: auto; background: #fcfbf9; border: 1px solid var(--border); border-radius: 4px; padding: 1rem; }
+  .diagram-scroll pre.mermaid { margin: 0; background: transparent; padding: 0; }
+  .diagram-scroll svg { min-width: 1400px; height: auto !important; }
+  .diagram-caption { font-size: 0.8rem; color: var(--ink-faint); margin: 0.65rem 0 0; }
+  .dgm-expand-btn { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--ink-soft); padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+  .dgm-expand-btn:hover { background: var(--border); color: var(--ink); }
+
+  .dgm-lightbox { position: fixed; inset: 0; z-index: 999; background: rgba(15, 18, 26, 0.88); display: none; flex-direction: column; }
+  .dgm-lightbox.open { display: flex; }
+  .dgm-lightbox-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.85rem 1.25rem; color: #f3f4f6; font-family: var(--font-mono); font-size: 0.8rem; }
+  .dgm-lightbox-controls { display: flex; gap: 0.4rem; align-items: center; }
+  .dgm-lightbox-controls button { font-family: var(--font-mono); font-size: 0.95rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.28); color: #f3f4f6; width: 2.1rem; height: 2.1rem; border-radius: 4px; cursor: pointer; }
+  .dgm-lightbox-controls button:hover { background: rgba(255,255,255,0.2); }
+  .dgm-lightbox-controls #dgm-zoom-reset { width: auto; padding: 0 0.65rem; font-size: 0.7rem; }
+  .dgm-lightbox-stage { flex: 1; overflow: auto; cursor: grab; background: #fcfbf9; margin: 0 1.25rem 0.4rem; border-radius: 6px; padding: 2.5rem; }
+  .dgm-lightbox-stage.dragging { cursor: grabbing; }
+  .dgm-lightbox-stage svg { max-width: none !important; }
+  .dgm-lightbox-hint { text-align: center; color: rgba(255,255,255,0.5); font-size: 0.72rem; font-family: var(--font-mono); margin: 0 0 0.85rem; }
+  .diagram-key { font-size: 0.8rem; color: var(--ink-soft); background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem 0.75rem; margin: 0 0 1rem; }
+
+  section.module { margin-bottom: 3rem; }
+  .module-head { display: flex; align-items: baseline; gap: 0.85rem; border-bottom: 1px solid var(--border); padding-bottom: 0.55rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .module-head h2 { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.95rem; font-weight: 700; color: var(--ink); margin: 0; }
+  .module-head .module-tag { font-size: 0.76rem; color: var(--ink-faint); font-family: var(--font-sans); }
+  .module-intro { font-size: 0.87rem; color: var(--ink-soft); max-width: 78ch; margin: 0 0 1.25rem; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 1rem; }
+
+  .tcard { border: 1px solid var(--border); border-radius: 5px; background: var(--surface); overflow: hidden; }
+  .tcard.mvp { border-top: 3px solid var(--st-mvp-line); }
+  .tcard.stretch { border-top: 3px solid var(--st-stretch-line); }
+  .tcard.planned { border-top: 3px dashed var(--st-planned-line); }
+  .tcard.wide { grid-column: 1 / -1; }
+
+  .tcard-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.7rem 0.85rem 0.6rem; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .tcard-name { font-family: var(--font-mono); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.01em; }
+
+  .cols { list-style: none; margin: 0; padding: 0.55rem 0.85rem 0.75rem; }
+  .cols li { display: grid; grid-template-columns: 2.1rem 1fr auto; align-items: baseline; gap: 0.5rem; padding: 0.22rem 0; }
+  .cols li + li { border-top: 1px dotted var(--border); }
+  .key-tag { font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700; color: var(--ink-faint); }
+  .key-tag.pk { color: var(--brand-700); }
+  .key-tag.uk { color: var(--amber-700); }
+  .cols code { font-family: var(--font-mono); font-size: 0.85rem; color: var(--ink); background: none; border: none; padding: 0; }
+  .cols .type { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-faint); text-align: right; white-space: nowrap; }
+
+  .tcard-note { font-size: 0.79rem; color: var(--ink-faint); padding: 0.55rem 0.85rem 0.8rem; border-top: 1px dotted var(--border); line-height: 1.6; }
+  .tcard-note b { color: var(--ink-soft); }
+  .tcard-note code { font-size: 0.92em; }
+
+  @media (max-width: 720px) { .legend { grid-template-columns: repeat(2, 1fr); } h1 { font-size: 1.9rem; } }
+  @media (max-width: 560px) {
+    .wrap { padding: 1.5rem 1.1rem 4rem; }
+    .cols li { grid-template-columns: 1.6rem 1fr; row-gap: 0.15rem; }
+    .cols .type { grid-column: 1 / -1; text-align: left; white-space: normal; padding-left: 1.6rem; }
+    .diagram-frame { padding: 1.1rem 1.1rem 0.85rem; }
+    .dgm-lightbox-bar { flex-wrap: wrap; gap: 0.5rem; padding: 0.7rem 0.9rem; }
+    .dgm-lightbox-stage { margin: 0 0.75rem 0.4rem; padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="index.html">docs-site</a><span class="sep">/</span>banco-de-dados.html</span>
+</header>
+
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">CampusOS · modelo de dados</div>
+    <h1>Diagrama Entidade‑Relacionamento</h1>
+    <p class="lede">
+      <strong>24 tabelas em 6 módulos</strong>, nenhuma ainda em código. Convenções do template modular sem exceção:
+      prefixo de 3 letras em toda coluna, PK UUID gerada na aplicação, <code>SoftDeletes</code> em tudo que é transacional,
+      FK no formato <code>{tabela_singular}_{pk}</code>, e <code>entity_ent_id</code> em toda tabela com escopo de tenant.
+      Cada card traz a <strong>razão</strong> da modelagem — num hackathon, a decisão esquecida às 4 da manhã custa mais que a tabela errada.
+    </p>
+    <div class="meta-row">
+      <span><b>Código:</b> nenhum ainda</span>
+      <span><b>API:</b> /api/v1</span>
+      <span><b>Tenant:</b> entities = a instituição</span>
+      <span><b>Escrito:</b> 2026-09-19 01:45</span>
+    </div>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item"><span class="status-pill mvp">⚑ MVP · hoje</span><p>Precisa existir até as 16:00. Sem ela a demo não fecha.</p></div>
+    <div class="legend-item"><span class="status-pill stretch">◎ esticada</span><p>Entra se sobrar tempo. Melhora o pitch, não sustenta a demo.</p></div>
+    <div class="legend-item"><span class="status-pill planned">◇ planejado</span><p>Desenhada aqui, fora do escopo de hoje. Roadmap honesto na apresentação.</p></div>
+    <div class="legend-item"><span class="status-pill built">✅ em código</span><p>Migration, model e teste existem. <b>Nada tem esta marca ainda</b> — vire os pills conforme a noite andar.</p></div>
+  </div>
+
+  <div class="diagram-key">
+    <b>Como ler o mapa:</b> o <b>fundo pastel</b> do agrupamento é o <b>módulo dono</b> da tabela (rotulado no topo da caixa);
+    a <b>borda do nó</b> é o <b>status</b> da legenda acima. Só o módulo dono faz query nas suas tabelas — outro módulo pede por
+    contrato ou read model, nunca por Eloquent atravessando a fronteira.
+  </div>
+
+  <div class="diagram-frame">
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+      <div>
+        <h2>Mapa de relacionamentos</h2>
+        <p style="color:var(--ink-soft); font-size:0.9rem; margin-top:0; max-width:76ch;">
+          <code>entities</code> só aparece ligada a <code>campuses</code> e <code>users</code> — toda outra tabela com escopo de
+          tenant também carrega <code>entity_ent_id</code>, mas desenhar essa seta em cada nó viraria ruído. A coluna está nos cards abaixo.
+        </p>
+      </div>
+      <button type="button" class="dgm-expand-btn" data-dgm-expand="dgm-main" data-dgm-title="Mapa de relacionamentos">⤢ Expandir</button>
+    </div>
+    <div class="diagram-scroll" id="dgm-main">
+<pre class="mermaid">
+flowchart LR
+    classDef mvp fill:#fbf0d4,stroke:#d1911c,stroke-width:2px,color:#875613,font-weight:600;
+    classDef stretch fill:#e6ebfb,stroke:#5570d2,stroke-width:2px,color:#2a377e,font-weight:600;
+    classDef planned fill:#f0eee9,stroke:#a9a294,stroke-width:1.5px,stroke-dasharray:6 4,color:#4b5468;
+
+    %% Layout deliberado: CATALOG em cima e JOURNEY logo abaixo (são os dois
+    %% módulos com mais relação entre si — a matriz define a graduação, a
+    %% oferta recebe a matrícula), TENANCY/LIFEOS/CORE à direita. As duas
+    %% colunas invisíveis fixam essa posição; sem elas o layout automático
+    %% intercala os módulos pela direção das setas.
+    subgraph LEFTCOL[" "]
+        direction TB
+        subgraph CAT["catalog — o esqueleto acadêmico"]
+            direction TB
+            COURSES
+            CURRICULA
+            SUBJECTS
+            CURRICULUM_SUBJECTS
+            PREREQUISITES
+            TERMS
+            OFFERINGS
+            COMPLEMENTARY_CATEGORIES
+        end
+
+        subgraph JRN["journey — a trajetória do aluno"]
+            direction TB
+            STUDENTS
+            REGISTRATIONS
+            SUBJECT_ENROLLMENTS
+            ENROLLMENT_REQUESTS
+            COMPLEMENTARY_ACTIVITIES
+        end
+    end
+
+    subgraph RIGHTCOL[" "]
+        direction TB
+        subgraph TEN["tenancy — instituição e acesso"]
+            direction TB
+            ENTITIES
+            CAMPUSES
+            USERS
+        end
+
+        subgraph LOS["lifeos — o caderno do aluno"]
+            direction TB
+            NOTES
+            NOTE_ATTACHMENTS
+            NOTE_VOTES
+            TASKS
+            EVENTS
+            PROJECTS
+            TRANSACTIONS
+        end
+
+        subgraph CORE["core"]
+            AUDIT_LOGS
+        end
+    end
+
+    LEFTCOL ~~~ RIGHTCOL
+
+    %% Intra-módulo: relação completa. Entre módulos: só as quatro setas que
+    %% contam a história do produto — a FK completa está nos cards abaixo.
+    ENTITIES --> CAMPUSES
+    ENTITIES --> USERS
+    CAMPUSES --> USERS
+    USERS --> AUDIT_LOGS
+
+    COURSES --> CURRICULA
+    CURRICULA --> CURRICULUM_SUBJECTS
+    SUBJECTS --> CURRICULUM_SUBJECTS
+    CURRICULUM_SUBJECTS --> PREREQUISITES
+    CURRICULA --> COMPLEMENTARY_CATEGORIES
+    TERMS --> OFFERINGS
+    SUBJECTS --> OFFERINGS
+
+    STUDENTS --> REGISTRATIONS
+    REGISTRATIONS --> SUBJECT_ENROLLMENTS
+    REGISTRATIONS --> ENROLLMENT_REQUESTS
+    REGISTRATIONS --> COMPLEMENTARY_ACTIVITIES
+
+    NOTES --> NOTE_ATTACHMENTS
+    NOTES --> NOTE_VOTES
+    PROJECTS --> TASKS
+
+    CURRICULA -.-> REGISTRATIONS
+    OFFERINGS -.-> SUBJECT_ENROLLMENTS
+    COMPLEMENTARY_CATEGORIES -.-> COMPLEMENTARY_ACTIVITIES
+    SUBJECTS -.-> NOTES
+    USERS -.-> NOTES
+
+    class ENTITIES,CAMPUSES,USERS,AUDIT_LOGS,COURSES,CURRICULA,SUBJECTS,CURRICULUM_SUBJECTS,PREREQUISITES,TERMS,OFFERINGS,COMPLEMENTARY_CATEGORIES,STUDENTS,REGISTRATIONS,SUBJECT_ENROLLMENTS,ENROLLMENT_REQUESTS,COMPLEMENTARY_ACTIVITIES,NOTES,TASKS mvp
+    class NOTE_VOTES,EVENTS stretch
+    class NOTE_ATTACHMENTS,PROJECTS,TRANSACTIONS planned
+
+    style LEFTCOL fill:none,stroke:none
+    style RIGHTCOL fill:none,stroke:none
+    style TEN fill:#eef2fc,stroke:#5570d2,stroke-width:1.5px,color:#243063
+    style CORE fill:#f1f1f0,stroke:#8b8b86,stroke-width:1.5px,color:#2b2f38
+    style CAT fill:#fdf6e8,stroke:#c9921f,stroke-width:1.5px,color:#875613
+    style JRN fill:#eef7f1,stroke:#4f9c7c,stroke-width:1.5px,color:#14432a
+    style LOS fill:#f4f0fb,stroke:#8f6fd1,stroke-width:1.5px,color:#3a2371
+</pre>
+    </div>
+    <p class="diagram-caption">
+      As <b>setas pontilhadas</b> são as cinco que cruzam fronteira de módulo — as únicas desenhadas, de propósito.
+      Duas delas carregam o produto inteiro: <code>CURRICULA → REGISTRATIONS</code> (a matriz é o que define o que "formar" significa
+      para aquele aluno) e <code>SUBJECTS → NOTES</code> (a nota se pendura na <b>disciplina</b>, não na turma — é exatamente por isso que
+      o acervo do veterano atravessa semestres; ver <a href="features/acervo-compartilhado.html">o acervo do veterano</a>).
+      <b>AUDIT_LOGS</b> é o caso oposto levado ao limite: não carrega FK real de propósito — a trilha precisa sobreviver ao registro auditado.
+      O módulo <code>insights</code> não aparece porque <b>não possui tabela nenhuma</b>: ele só lê, por read model, o que
+      <code>journey</code> e <code>catalog</code> possuem.
+    </p>
+  </div>
+
+  <!-- TENANCY -->
+  <section class="module">
+    <div class="module-head"><h2>tenancy</h2><span class="module-tag">a instituição e quem entra · 3 tabelas</span></div>
+    <p class="module-intro">
+      A <code>Entity</code> do template passa a significar <b>a instituição de ensino</b>. Não renomeamos a tabela: <code>Entityable</code> e
+      <code>EntityScope</code> do <code>core</code> dependem literalmente de <code>entity_ent_id</code>, e trocar isso é uma hora de refactor
+      que nenhuma madrugada tem — o FibroMais tomou a mesma decisão pelo mesmo motivo. <b>Curso não é tenant</b>: dois cursos da mesma
+      universidade precisam enxergar o mesmo catálogo de disciplinas (Cálculo 1 é a mesma disciplina para Engenharia e para Química),
+      e é isso que permite o acervo atravessar cursos.
+    </p>
+    <div class="card-grid">
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">entities</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>ent_name</code><span class="type">string</span></li>
+          <li><span class="key-tag uk">UK</span><code>ent_acronym</code><span class="type">string — "UTFPR"</span></li>
+          <li><span class="key-tag"></span><code>ent_email_domain</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>ent_logo_path</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>ent_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>ent_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>ent_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          O tenant: <b>uma universidade</b>. <code>ent_email_domain</code> (<code>alunos.utfpr.edu.br</code>) é o que permite o autocadastro
+          descobrir sozinho a qual instituição a pessoa pertence a partir do e-mail — sem ela, o aluno teria que escolher a universidade
+          numa lista, e escolher errado. <b>Pendência aberta:</b> se verificação de e-mail entra hoje ou não (ver
+          <a href="index.html">pendências do dono do produto</a>).
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">campuses</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>cps_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>cps_name</code><span class="type">string</span></li>
+          <li><span class="key-tag uk">UK</span><code>cps_code</code><span class="type">string — por entity</span></li>
+          <li><span class="key-tag"></span><code>cps_city</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>cps_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>cps_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>cps_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          Recorte interno, não tenant. Existe porque a UTFPR tem 13 campi e o <b>mesmo curso em campi diferentes tem matriz diferente</b> —
+          a oferta e a turma também são por campus. Um aluno de Dois Vizinhos não deve ver o horário de Pato Branco.
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">users</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>usr_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>campus_cps_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag"></span><code>usr_name</code><span class="type">string</span></li>
+          <li><span class="key-tag uk">UK</span><code>usr_email</code><span class="type">string — por entity</span></li>
+          <li><span class="key-tag"></span><code>usr_password</code><span class="type">string (hash)</span></li>
+          <li><span class="key-tag"></span><code>usr_role</code><span class="type">enum — 5 valores</span></li>
+          <li><span class="key-tag"></span><code>usr_email_verified_at</code><span class="type">timestamp nullable</span></li>
+          <li><span class="key-tag"></span><code>usr_enabled_modules</code><span class="type">json</span></li>
+          <li><span class="key-tag"></span><code>usr_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>usr_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>usr_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          <code>usr_role</code>: <code>platform_admin</code> · <code>institution_admin</code> · <code>coordinator</code> ·
+          <code>professor</code> · <code>student</code>. <code>entity_ent_id</code> é nullable só pro admin de plataforma —
+          mesma solução do FibroMais. <code>campus_cps_id</code> só faz sentido pro coordenador (recorte de visão).
+          <b><code>usr_enabled_modules</code></b> é a resposta ao pedido de "não poluir a imagem": Finanças nasce <b>desligada</b>
+          e o aluno liga se quiser. Um json em vez de tabela de preferências porque são 3 ou 4 flags booleanas — extrair tabela
+          quando a fronteira doer, não antes. <b>RBAC granular</b> (tabela <code>permissions</code> própria, como no FibroMais):
+          <span class="status-pill planned">◇ planejado</span> — hoje, permissão é o enum de papel.
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- CORE -->
+  <section class="module">
+    <div class="module-head"><h2>core</h2><span class="module-tag">shared kernel · 1 tabela</span></div>
+    <p class="module-intro">Vem pronto do template. Não precisa ser tocado durante o hackathon — só herdado.</p>
+    <div class="card-grid">
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">audit_logs</span><span class="status-pill mvp">⚑ do template</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>aud_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>entity_ent_id</code><span class="type">uuid (sem FK)</span></li>
+          <li><span class="key-tag"></span><code>aud_user_id</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>aud_table</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>aud_record_id</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>aud_action</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>aud_before</code><span class="type">json nullable</span></li>
+          <li><span class="key-tag"></span><code>aud_after</code><span class="type">json nullable</span></li>
+          <li><span class="key-tag"></span><code>aud_created_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          Append-only, sem FK de propósito (regra de ouro nº 8) — a trilha sobrevive ao registro auditado.
+          Num produto acadêmico isso deixa de ser higiene e vira requisito: <b>quem alterou a nota de uma matrícula</b> e
+          <b>quem aprovou quantas horas complementares</b> são exatamente as perguntas que uma coordenação faz quando algo
+          dá errado. Sai de graça via <code>AuditObserver</code>.
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- CATALOG -->
+  <section class="module">
+    <div class="module-head"><h2>catalog</h2><span class="module-tag">o esqueleto acadêmico · 8 tabelas</span></div>
+    <p class="module-intro">
+      Dados <b>mestres</b>: mudam por resolução de colegiado, não por ação de aluno. É o módulo que o aluno nunca escreve e do qual tudo depende —
+      por isso é o primeiro a ser semeado e o mais caro em tempo de digitação, não de código. A separação entre <code>subjects</code>
+      (a disciplina, global) e <code>curriculum_subjects</code> (a disciplina <i>dentro de uma matriz</i>) é a decisão mais importante desta página:
+      é ela que permite Cálculo 1 ser 3º período numa matriz e 2º em outra, <b>continuando a ser a mesma disciplina</b> — e é essa identidade
+      única que faz o acervo do veterano de Engenharia servir ao calouro de Química.
+    </p>
+    <div class="card-grid">
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">courses</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>crs_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>campus_cps_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>crs_name</code><span class="type">string</span></li>
+          <li><span class="key-tag uk">UK</span><code>crs_code</code><span class="type">string — por entity</span></li>
+          <li><span class="key-tag"></span><code>crs_degree</code><span class="type">enum — bacharelado | licenciatura | tecnologo</span></li>
+          <li><span class="key-tag"></span><code>crs_shift</code><span class="type">enum — integral | matutino | vespertino | noturno</span></li>
+          <li><span class="key-tag"></span><code>crs_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>crs_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>crs_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">O curso é <b>por campus</b> — "Engenharia de Software em Dois Vizinhos" e a homônima em outro campus são registros distintos, com matrizes distintas.</div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">curricula</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>cur_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>course_crs_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag uk">UK</span><code>cur_code</code><span class="type">string — "2023/1", por curso</span></li>
+          <li><span class="key-tag"></span><code>cur_effective_from</code><span class="type">date</span></li>
+          <li><span class="key-tag"></span><code>cur_is_active</code><span class="type">boolean</span></li>
+          <li><span class="key-tag"></span><code>cur_mandatory_hours</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>cur_elective_hours</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>cur_complementary_hours</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>cur_internship_hours</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>cur_capstone_hours</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>cur_expected_terms</code><span class="type">smallint</span></li>
+          <li><span class="key-tag"></span><code>cur_max_terms</code><span class="type">smallint</span></li>
+          <li><span class="key-tag"></span><code>cur_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>cur_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>cur_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          <b>A tabela que define o que "formar" significa.</b> As cinco colunas de hora são as <b>regras de integralização</b> viradas
+          dado — é delas que sai a barra de progresso inteira, e é por isso que ela funciona para qualquer curso sem uma linha de
+          código nova. <b>Não existe <code>cur_total_hours</code></b> de propósito: total é a soma das cinco, e duas fontes para o mesmo
+          número sempre acabam discordando. <code>cur_max_terms</code> é o prazo de integralização — alimenta o alerta de jubilamento.
+          Matriz é <b>versionada</b> (<code>cur_code</code> + <code>cur_effective_from</code>) porque um aluno de 2021 se forma pela matriz de 2021,
+          não pela vigente — ignorar isso é o erro clássico de sistema acadêmico.
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">subjects</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>sbj_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag uk">UK</span><code>sbj_code</code><span class="type">string — "ES42B", por entity</span></li>
+          <li><span class="key-tag"></span><code>sbj_name</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>sbj_hours</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>sbj_credits</code><span class="type">smallint nullable</span></li>
+          <li><span class="key-tag"></span><code>sbj_syllabus</code><span class="type">text nullable</span></li>
+          <li><span class="key-tag"></span><code>sbj_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>sbj_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>sbj_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          Global na instituição, <b>não por curso</b> — é o que faz a nota do veterano de Engenharia aparecer pro calouro de Química
+          que cursa a mesma Cálculo 1. Se <code>subjects</code> fosse por curso, o desafio 5.2 perderia metade do alcance
+          de graça, e ninguém perceberia até a demo. <b>Esta é a tabela na qual o acervo se pendura</b> (ver <code>notes</code>).
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">curriculum_subjects</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>cbs_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>curriculum_cur_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>subject_sbj_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>cbs_term</code><span class="type">smallint — período sugerido</span></li>
+          <li><span class="key-tag"></span><code>cbs_nature</code><span class="type">enum — mandatory | elective | optional</span></li>
+          <li><span class="key-tag uk">UK</span><code>(curriculum, subject)</code><span class="type">índice único</span></li>
+          <li><span class="key-tag"></span><code>cbs_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>cbs_updated_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          A tabela de junção que segura a distinção do parágrafo de abertura deste módulo. <code>cbs_term</code> é o
+          <b>período sugerido</b> — a linha da grade impressa — e não onde o aluno de fato cursou: isso é
+          <code>subject_enrollments.term_trm_id</code>. Confundir os dois é o bug número um de sistema acadêmico, porque
+          quem atrasou uma disciplina cursa o "3º período" no 5º semestre.
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">prerequisites</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>prq_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>curriculum_subject_cbs_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>required_cbs_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag"></span><code>prq_type</code><span class="type">enum — prerequisite | corequisite | minimum_hours</span></li>
+          <li><span class="key-tag"></span><code>prq_min_hours</code><span class="type">integer nullable</span></li>
+          <li><span class="key-tag"></span><code>prq_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>prq_updated_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          Pré-requisito é <b>da matriz, não da disciplina</b> — a mesma Cálculo 2 pode exigir coisas diferentes em cursos diferentes,
+          e apontar de <code>subject</code> para <code>subject</code> tornaria isso impossível de representar.
+          <code>required_cbs_id</code> é nullable porque <code>minimum_hours</code> não aponta pra disciplina nenhuma:
+          é a regra "só cursa TCC quem já integralizou 2400 horas", que existe em praticamente toda matriz de engenharia.
+          <b>Alimenta a simulação de reprovação</b> (ver <a href="features/matricula-e-progressao.html">Fase 5</a>).
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">terms</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>trm_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>trm_year</code><span class="type">smallint</span></li>
+          <li><span class="key-tag"></span><code>trm_period</code><span class="type">smallint — 1 | 2</span></li>
+          <li><span class="key-tag"></span><code>trm_starts_at</code><span class="type">date</span></li>
+          <li><span class="key-tag"></span><code>trm_ends_at</code><span class="type">date</span></li>
+          <li><span class="key-tag"></span><code>trm_status</code><span class="type">enum — planned | open | current | closed</span></li>
+          <li><span class="key-tag uk">UK</span><code>(entity, year, period)</code><span class="type">índice único</span></li>
+          <li><span class="key-tag"></span><code>trm_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>trm_updated_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          O semestre letivo como <b>entidade de primeira classe</b>, não uma string "2026/1" espalhada pelo sistema.
+          É o eixo do tempo de todo o produto: a matrícula acontece num termo, a nota do veterano foi escrita num termo,
+          e a previsão de formatura é uma contagem de termos. Semear do ingresso do aluno mais antigo até uns 5 anos à frente
+          custa 10 linhas de seeder e evita todo um gênero de bug.
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">offerings</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>ofr_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>term_trm_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>subject_sbj_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>campus_cps_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>ofr_class_code</code><span class="type">string — "S71"</span></li>
+          <li><span class="key-tag"></span><code>ofr_professor_name</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>ofr_schedule</code><span class="type">json — [{dia, início, fim, sala}]</span></li>
+          <li><span class="key-tag"></span><code>ofr_seats</code><span class="type">smallint nullable</span></li>
+          <li><span class="key-tag uk">UK</span><code>(term, subject, class_code, campus)</code><span class="type">índice único</span></li>
+          <li><span class="key-tag"></span><code>ofr_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>ofr_updated_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          A <b>turma</b>: disciplina × semestre × código de turma × campus. É a granularidade do "meu colega deste semestre"
+          (contra <code>subjects</code>, que é a do "veterano de qualquer semestre") — a diferença entre as duas é literalmente
+          o desafio 5.2. <code>ofr_professor_name</code> é <b>texto</b>, não FK para <code>users</code>: hoje nenhum professor tem conta,
+          e criar a tabela de docentes pra guardar um nome seria over-engineering. Vira FK quando o professor entrar no produto.
+          <code>ofr_schedule</code> em json é o que gera o calendário de aulas sozinho (<span class="status-pill stretch">◎ esticada</span>).
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">complementary_categories</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>ccg_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>curriculum_cur_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>ccg_name</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>ccg_max_hours</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>ccg_conversion_note</code><span class="type">text nullable</span></li>
+          <li><span class="key-tag"></span><code>ccg_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>ccg_updated_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          O <b>teto por categoria</b> da resolução de atividades complementares, virado dado: monitoria até 80h, eventos até 40h,
+          publicação até 60h, e por aí. Pertence ao <code>catalog</code> e não ao <code>journey</code> porque é regra de <b>matriz</b>,
+          não fato de aluno. É a tabela que permite ao sistema dizer "você tem 60h de evento mas só 40 contam" — a conta que
+          todo universitário descobre errada no último semestre. <b>Pendência:</b> precisa da resolução real do curso pra semear.
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- JOURNEY -->
+  <section class="module">
+    <div class="module-head"><h2>journey</h2><span class="module-tag">a trajetória do aluno · 5 tabelas</span></div>
+    <p class="module-intro">
+      O desafio 5.1 inteiro mora aqui. É o módulo que <b>lê</b> o catálogo e <b>escreve</b> o que aconteceu de fato com uma pessoa.
+      Toda a progressão — percentual, horas, pendências, previsão de formatura — é <b>calculada</b> sobre estas tabelas, nunca
+      armazenada: um percentual gravado numa coluna fica velho no instante em que uma nota muda, e ninguém percebe.
+    </p>
+    <div class="card-grid">
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">students</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>std_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>user_usr_id</code><span class="type">uuid nullable, único</span></li>
+          <li><span class="key-tag"></span><code>std_name</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>std_document</code><span class="type">string nullable (CPF)</span></li>
+          <li><span class="key-tag"></span><code>std_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>std_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>std_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          Separada de <code>users</code> pelo mesmo motivo que <code>patients</code> é separada no FibroMais: a identidade
+          <b>acadêmica</b> não é a identidade de <b>login</b>. <code>user_usr_id</code> nullable permite a coordenação importar uma
+          turma inteira antes de qualquer pessoa criar conta — e a conta, quando nasce, se cola ao registro existente pelo CPF.
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">registrations</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>reg_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>student_std_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>course_crs_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>curriculum_cur_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entry_term_trm_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag uk">UK</span><code>reg_number</code><span class="type">string — o RA, por entity</span></li>
+          <li><span class="key-tag"></span><code>reg_status</code><span class="type">enum — active | locked | graduated | dismissed</span></li>
+          <li><span class="key-tag"></span><code>reg_graduated_at</code><span class="type">date nullable</span></li>
+          <li><span class="key-tag"></span><code>reg_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>reg_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>reg_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          <b>O agregado central do 5.1.</b> Um aluno pode ter <b>mais de um vínculo</b> (mudou de curso, fez segunda graduação) — e cada
+          vínculo tem a <b>sua</b> matriz. Por isso <code>curriculum_cur_id</code> mora aqui e não em <code>students</code>: é uma FOTO
+          congelada da matriz vigente no ingresso, e <b>nunca</b> se atualiza quando o colegiado publica matriz nova. Mesmo espírito da
+          <code>units_unt_id</code> congelada dos <code>enrollments</code> do FibroMais. Sem esse congelamento, a barra de progresso de
+          todo mundo mudaria sozinha no dia de uma reforma curricular.
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">subject_enrollments</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>sen_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>registration_reg_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>subject_sbj_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>term_trm_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>offering_ofr_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag"></span><code>sen_status</code><span class="type">enum — 6 valores</span></li>
+          <li><span class="key-tag"></span><code>sen_grade</code><span class="type">decimal(5,2) nullable</span></li>
+          <li><span class="key-tag"></span><code>sen_attendance</code><span class="type">smallint nullable (%)</span></li>
+          <li><span class="key-tag"></span><code>sen_hours_earned</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>sen_source</code><span class="type">enum — transcript | request | manual</span></li>
+          <li><span class="key-tag uk">UK</span><code>(registration, subject, term)</code><span class="type">índice único</span></li>
+          <li><span class="key-tag"></span><code>sen_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>sen_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>sen_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          <b>A tabela mais importante do sistema</b> — dela saem as duas coisas: a progressão (5.1) e quem tem direito de ver o quê (5.2).
+          <code>sen_status</code>: <code>enrolled</code> · <code>approved</code> · <code>failed_grade</code> ·
+          <code>failed_absence</code> · <code>withdrawn</code> · <code>exempted</code>. Separar reprovação por nota de reprovação por falta
+          não é preciosismo: são causas diferentes, e a coordenação trata cada uma de um jeito.
+          <code>offering_ofr_id</code> é <b>nullable</b> porque o histórico importado traz disciplinas de 2019 cuja turma ninguém cadastrou —
+          sem a turma a progressão funciona igual, só o "meus colegas daquele semestre" não. A UK impede matricular duas vezes na mesma
+          disciplina no mesmo semestre, mas <b>permite</b> cursar de novo em semestre diferente: é assim que reprovação vira a linha extra.
+          <code>sen_hours_earned</code> é congelada da disciplina no momento da aprovação — a carga da disciplina pode mudar depois.
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">enrollment_requests</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>erq_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>registration_reg_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag"></span><code>erq_kind</code><span class="type">enum — transcript | enrollment_request</span></li>
+          <li><span class="key-tag"></span><code>erq_file_path</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>erq_status</code><span class="type">enum — 5 valores</span></li>
+          <li><span class="key-tag"></span><code>erq_extraction</code><span class="type">json nullable</span></li>
+          <li><span class="key-tag"></span><code>erq_confidence</code><span class="type">decimal(4,3) nullable</span></li>
+          <li><span class="key-tag"></span><code>erq_failure_reason</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>erq_parsed_at</code><span class="type">timestamp nullable</span></li>
+          <li><span class="key-tag"></span><code>erq_confirmed_at</code><span class="type">timestamp nullable</span></li>
+          <li><span class="key-tag"></span><code>erq_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>erq_updated_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          O documento que o aluno sobe. <code>erq_status</code>: <code>uploaded</code> → <code>processing</code> →
+          <code>parsed</code> → <code>confirmed</code>, com <code>failed</code> como estado final de recusa.
+          <b>O leitor de IA nunca escreve matrícula direto</b>: ele preenche <code>erq_extraction</code>, o aluno revisa na tela de
+          conferência, e só a confirmação cria <code>subject_enrollments</code>. Isso transforma um erro de OCR em uma correção de
+          30 segundos, em vez de um histórico corrompido — e é o que torna aceitável usar IA num dado sensível.
+          <code>registration_reg_id</code> é nullable porque o documento pode chegar <b>antes</b> do vínculo existir:
+          é do próprio documento que se descobre o curso e o RA. <code>erq_file_path</code> fica fora do diff de auditoria
+          (<code>$hidden</code> do observer).
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">complementary_activities</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>cac_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>registration_reg_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>complementary_category_ccg_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>cac_title</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>cac_hours_claimed</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>cac_hours_granted</code><span class="type">integer nullable</span></li>
+          <li><span class="key-tag"></span><code>cac_certificate_path</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>cac_issued_at</code><span class="type">date nullable</span></li>
+          <li><span class="key-tag"></span><code>cac_status</code><span class="type">enum — draft | submitted | approved | rejected</span></li>
+          <li><span class="key-tag">FK</span><code>reviewer_usr_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag"></span><code>cac_review_notes</code><span class="type">text nullable</span></li>
+          <li><span class="key-tag"></span><code>cac_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>cac_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>cac_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          Duas colunas de hora, e a diferença entre elas é a feature: <code>cac_hours_claimed</code> é o que o certificado diz,
+          <code>cac_hours_granted</code> é o que sobrou depois do teto da categoria. O aluno vê as duas, e é ver as duas que resolve
+          a frustração clássica — "eu tinha 60 horas de evento e só contaram 40" vira informação do primeiro dia, não surpresa do último.
+          A validação pela coordenação (<code>cac_status</code> além de <code>draft</code>, <code>reviewer_usr_id</code>) está modelada e é
+          <span class="status-pill planned">◇ planejado</span>: hoje o aluno declara e o contador anda, com a ressalva na tela.
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- LIFEOS -->
+  <section class="module">
+    <div class="module-head"><h2>lifeos</h2><span class="module-tag">o caderno do aluno · 7 tabelas</span></div>
+    <p class="module-intro">
+      Herdado em <b>forma</b>, não em código, do LifeOS do Psyches Archive (que é HTML estático + Edge Functions, mono-usuário por
+      construção — nada dele é portável). O que atravessa é a divisão em nota, tarefa, evento, projeto e movimentação.
+      O que é <b>novo</b> é uma coluna: <code>*_visibility</code>. Ela é a totalidade do desafio 5.2 — o mesmo registro que organiza
+      uma pessoa vira, com um enum, o acervo de uma disciplina inteira.
+    </p>
+    <div class="card-grid">
+
+      <article class="tcard mvp wide">
+        <div class="tcard-head"><span class="tcard-name">notes</span><span class="status-pill mvp">⚑ MVP · o coração do 5.2</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>nte_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>author_usr_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>nte_title</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>nte_content_md</code><span class="type">text nullable — markdown</span></li>
+          <li><span class="key-tag"></span><code>nte_kind</code><span class="type">enum — summary | exam | exercise | material | tip</span></li>
+          <li><span class="key-tag"></span><code>nte_visibility</code><span class="type">enum — private | offering | subject | course | institution</span></li>
+          <li><span class="key-tag">FK</span><code>subject_sbj_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>offering_ofr_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>term_trm_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag"></span><code>nte_published_at</code><span class="type">timestamp nullable</span></li>
+          <li><span class="key-tag"></span><code>nte_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>nte_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>nte_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          <b>Os cinco níveis de <code>nte_visibility</code>, e a linha entre o segundo e o terceiro:</b>
+          <code>private</code> (só o autor) · <code>offering</code> (a turma <i>daquele</i> semestre) ·
+          <code>subject</code> (<b>qualquer pessoa que já tenha se matriculado naquela disciplina, em qualquer semestre, de qualquer curso</b>) ·
+          <code>course</code> (o curso inteiro) · <code>institution</code> (a universidade).
+          É a passagem de <code>offering</code> para <code>subject</code> que cria o banco de veteranos: a nota deixa de pertencer a uma turma
+          e passa a pertencer à disciplina, então ela <b>sobrevive à turma que a escreveu</b>. Um calouro que se matricula em 2027 recebe o que
+          um veterano escreveu em 2024, sem os dois se conhecerem e sem ninguém precisar "compartilhar" nada.
+          <code>term_trm_id</code> guarda <b>quando</b> foi escrita — é o que permite a interface dizer "resumo de 2024/1, professor X",
+          informação que muda completamente o valor da nota pra quem lê.
+          <b>Sem <code>subject_sbj_id</code>, toda visibilidade acima de <code>private</code> é inválida</b> — sem disciplina não há a quem mostrar.
+          Ver <a href="features/acervo-compartilhado.html">o desenho completo da regra</a>.
+        </div>
+      </article>
+
+      <article class="tcard mvp">
+        <div class="tcard-head"><span class="tcard-name">tasks</span><span class="status-pill mvp">⚑ MVP</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>tsk_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>owner_usr_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>tsk_title</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>tsk_description_md</code><span class="type">text nullable</span></li>
+          <li><span class="key-tag"></span><code>tsk_status</code><span class="type">enum — todo | doing | done</span></li>
+          <li><span class="key-tag"></span><code>tsk_kind</code><span class="type">enum — exam | assignment | reading | personal</span></li>
+          <li><span class="key-tag"></span><code>tsk_due_at</code><span class="type">timestamp nullable</span></li>
+          <li><span class="key-tag"></span><code>tsk_visibility</code><span class="type">enum — igual a notes</span></li>
+          <li><span class="key-tag">FK</span><code>subject_sbj_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>offering_ofr_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>project_prj_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>origin_tsk_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag"></span><code>tsk_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>tsk_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>tsk_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          Uma pessoa cadastra "Prova 2 — 14/10" na oferta e a turma inteira enxerga. <b><code>origin_tsk_id</code> resolve o problema
+          difícil:</b> quando alguém "pega" uma tarefa compartilhada, o sistema <b>copia</b> apontando pra origem, em vez de todo mundo
+          compartilhar uma linha só. Sem isso, o primeiro que marcasse como feita marcaria pra turma toda. Uma coluna em vez de uma tabela
+          de adoções — e a origem continua rastreável pra propagar "o professor adiou a prova".
+          <code>project_prj_id</code> é a herança direta do LifeOS (<code>on delete restrict</code> lá; aqui nullable, porque tarefa de
+          disciplina não tem projeto).
+        </div>
+      </article>
+
+      <article class="tcard stretch">
+        <div class="tcard-head"><span class="tcard-name">events</span><span class="status-pill stretch">◎ esticada</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>evt_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>owner_usr_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag"></span><code>evt_title</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>evt_starts_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>evt_ends_at</code><span class="type">timestamp nullable</span></li>
+          <li><span class="key-tag"></span><code>evt_kind</code><span class="type">enum — class | exam | deadline | activity | personal</span></li>
+          <li><span class="key-tag"></span><code>evt_location</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>evt_visibility</code><span class="type">enum — igual a notes</span></li>
+          <li><span class="key-tag">FK</span><code>offering_ofr_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>subject_sbj_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag"></span><code>evt_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>evt_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>evt_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          Esticada com o melhor retorno visual da lista: as aulas <b>não são cadastradas</b>, são derivadas do <code>ofr_schedule</code> das
+          ofertas em que o aluno está matriculado. O calendário se monta sozinho na tela no instante em que ele confirma a importação —
+          efeito grande, custo de uma função. <code>owner_usr_id</code> nullable justamente pra isso: aula não tem dono, tem oferta.
+        </div>
+      </article>
+
+      <article class="tcard stretch">
+        <div class="tcard-head"><span class="tcard-name">note_votes</span><span class="status-pill stretch">◎ esticada</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>ntv_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>note_nte_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>user_usr_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>ntv_value</code><span class="type">smallint — +1 | −1</span></li>
+          <li><span class="key-tag uk">UK</span><code>(note, user)</code><span class="type">índice único</span></li>
+          <li><span class="key-tag"></span><code>ntv_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>ntv_updated_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          A curadoria que impede o acervo de virar lixão. Um acervo de 5 anos sem ordenação é pior que acervo nenhum:
+          o calouro abre 40 notas e fecha a aba. Barato (uma tabela, uma UK, um <code>ORDER BY</code>) e é o que dá credibilidade
+          à promessa do 5.2 quando o jurado perguntar "e se as anotações forem ruins?".
+        </div>
+      </article>
+
+      <article class="tcard planned">
+        <div class="tcard-head"><span class="tcard-name">note_attachments</span><span class="status-pill planned">◇ planejado</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>nta_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>note_nte_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>nta_path</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>nta_mime</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>nta_size</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>nta_created_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          Prova antiga em PDF, slide, foto do quadro. Fora do escopo de hoje por um motivo de <b>produto</b>, não de tempo:
+          anexo é onde mora o risco de direito autoral e de prova vazada, e essa é uma pendência aberta do dono do produto.
+          Markdown puro não tem esse problema.
+        </div>
+      </article>
+
+      <article class="tcard planned">
+        <div class="tcard-head"><span class="tcard-name">projects</span><span class="status-pill planned">◇ planejado</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>prj_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>owner_usr_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>prj_name</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>prj_emoji</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>prj_status</code><span class="type">enum — not_started | in_progress | done | paused</span></li>
+          <li><span class="key-tag"></span><code>prj_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>prj_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>prj_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          Herdada do LifeOS, com um caminho de crescimento que casa direto com o 5.2 quando o produto passar do hackathon:
+          um projeto com visibilidade pública vira "iniciativa procurando colaborador" — o bullet <i>divulgar ideias que precisam
+          de colaboradores</i> do desafio. Hoje seria escopo demais.
+        </div>
+      </article>
+
+      <article class="tcard planned">
+        <div class="tcard-head"><span class="tcard-name">transactions</span><span class="status-pill planned">◇ planejado · ativável</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>trx_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>owner_usr_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag"></span><code>trx_description</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>trx_amount</code><span class="type">decimal(12,2)</span></li>
+          <li><span class="key-tag"></span><code>trx_direction</code><span class="type">enum — in | out</span></li>
+          <li><span class="key-tag"></span><code>trx_method</code><span class="type">enum — crédito | débito | pix | vale | boleto</span></li>
+          <li><span class="key-tag"></span><code>trx_category</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>trx_occurred_at</code><span class="type">date</span></li>
+          <li><span class="key-tag"></span><code>trx_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>trx_updated_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>trx_deleted_at</code><span class="type">timestamp nullable</span></li>
+        </ul>
+        <div class="tcard-note">
+          Vem do LifeOS e fica <b>desligada</b> — o pedido explícito foi não poluir a imagem do produto. É a única tabela do sistema
+          cuja existência depende de o aluno ligar em <code>usr_enabled_modules</code>. Desenhada agora porque decidir o enum de
+          <code>trx_method</code> depois de o produto existir custa migration; decidir hoje custa cinco minutos.
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- INSIGHTS -->
+  <section class="module">
+    <div class="module-head"><h2>insights</h2><span class="module-tag">a camada institucional · 0 tabelas</span></div>
+    <p class="module-intro">
+      Um módulo sem tabela nenhuma, de propósito. Ele responde perguntas de coordenação — disciplina-gargalo, taxa de reprovação por
+      oferta, coorte que está atrasando, alunos perto do prazo de integralização — e <b>toda</b> essa informação já existe em
+      <code>journey</code> e <code>catalog</code>. Dar tabelas próprias a ele significaria duplicar dado e inventar um problema de
+      sincronização que ninguém tem. Ele lê por <b>read model</b> declarado no <code>core</code>, nunca por Eloquent atravessando a fronteira —
+      é o caso de uso que justifica o padrão existir. Só agregados: <b>nenhum endpoint devolve aluno nomeado.</b>
+      Ver <a href="features/painel-da-coordenacao.html">o painel da coordenação</a>.
+    </p>
+  </section>
+
+  <div class="section-rule"><span class="label">Convenções que valem para todas as tabelas</span></div>
+  <table>
+    <thead><tr><th>Convenção</th><th>Regra</th><th>Por quê</th></tr></thead>
+    <tbody>
+      <tr><td>Prefixo</td><td>3 letras em <b>toda</b> coluna (<code>sbj_</code>, <code>reg_</code>…)</td><td>Coluna rastreável à tabela em join, log e diff de auditoria; zero colisão de nome.</td></tr>
+      <tr><td>PK</td><td>UUID, <code>HasUuids</code>, <code>$incrementing = false</code></td><td>Id gerado na aplicação (job referencia antes do INSERT), não enumerável em API pública.</td></tr>
+      <tr><td>FK</td><td><code>{tabela_singular}_{pk_origem}</code></td><td><code>curriculum_cur_id</code>, <code>subject_sbj_id</code>. Sem exceção — o ArchTest não cobre isso, a revisão cobre.</td></tr>
+      <tr><td>Tempo</td><td><code>{prefixo}_created_at</code> / <code>_updated_at</code> / <code>_deleted_at</code></td><td>Constantes no model. <code>SoftDeletes</code> em tudo transacional — nada de domínio some fisicamente.</td></tr>
+      <tr><td>Tenant</td><td><code>entity_ent_id</code> + trait <code>Entityable</code></td><td>Filtro automático pelo <code>EntityScope</code>. Exceção: <code>audit_logs</code> (sem FK) e catálogos globais.</td></tr>
+      <tr><td>Enum</td><td>Enum PHP nos <code>casts()</code>, nunca string solta</td><td>Conjunto fechado validado pelo tipo; <code>canTransitionTo()</code> onde há máquina de estados.</td></tr>
+      <tr><td>Auditoria</td><td><code>#[ObservedBy]</code> + observer estendendo <code>AuditObserver</code></td><td>Regra de ouro nº 8. Caminho de arquivo e conteúdo longo fora do diff via <code>$hidden</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout grifo">
+    <b>Se você está implementando às 4 da manhã e algo aqui não fecha:</b> o desenho perde para a realidade, mas não em silêncio.
+    Mude o código e <b>vire o card desta página junto</b> — quinze segundos agora contra uma hora de arqueologia amanhã, quando
+    ninguém lembrar por que a coluna ficou diferente.
+  </div>
+
+</div>
+
+<div class="dgm-lightbox" id="dgm-lightbox">
+  <div class="dgm-lightbox-bar">
+    <span id="dgm-lightbox-title"></span>
+    <div class="dgm-lightbox-controls">
+      <button type="button" id="dgm-zoom-out" aria-label="Reduzir">−</button>
+      <button type="button" id="dgm-zoom-reset" aria-label="Restaurar tamanho">100%</button>
+      <button type="button" id="dgm-zoom-in" aria-label="Ampliar">+</button>
+      <button type="button" id="dgm-close" aria-label="Fechar">✕</button>
+    </div>
+  </div>
+  <div class="dgm-lightbox-stage" id="dgm-stage"></div>
+  <p class="dgm-lightbox-hint">arraste para mover · scroll para zoom · esc para fechar</p>
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — 24 tabelas, 6 módulos, nenhuma linha de código
+  <span class="sig">Desenhado antes da primeira migration, que é o único momento em que mudar uma decisão ainda é de graça.</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  if (window.mermaid) { mermaid.initialize({ startOnLoad: true, theme: 'base', securityLevel: 'loose' }); }
+</script>
+<script>
+(function () {
+  var lightbox = document.getElementById('dgm-lightbox');
+  var stage = document.getElementById('dgm-stage');
+  var titleEl = document.getElementById('dgm-lightbox-title');
+  if (!lightbox || !stage) return;
+
+  var scale = 1, dragging = false, lastX = 0, lastY = 0;
+
+  function applyScale() {
+    var svg = stage.querySelector('svg');
+    if (!svg) return;
+    svg.style.transformOrigin = 'top left';
+    svg.style.transform = 'scale(' + scale + ')';
+    document.getElementById('dgm-zoom-reset').textContent = Math.round(scale * 100) + '%';
+  }
+
+  function zoomBy(delta) {
+    scale = Math.min(4, Math.max(0.3, scale + delta));
+    applyScale();
+  }
+
+  function openLightbox(sourceId, title) {
+    var source = document.getElementById(sourceId);
+    var svg = source && source.querySelector('svg');
+    // Sem SVG renderizado (CDN do mermaid bloqueado/offline) o lightbox não
+    // tem o que mostrar — não abre, em vez de abrir uma caixa preta vazia.
+    if (!svg) return;
+    titleEl.textContent = title || '';
+    stage.innerHTML = '';
+    stage.appendChild(svg.cloneNode(true));
+    scale = 1;
+    applyScale();
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function () {
+      stage.scrollLeft = (stage.scrollWidth - stage.clientWidth) / 2;
+      stage.scrollTop = 0;
+    });
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('[data-dgm-expand]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      openLightbox(btn.getAttribute('data-dgm-expand'), btn.getAttribute('data-dgm-title'));
+    });
+  });
+
+  document.getElementById('dgm-close').addEventListener('click', closeLightbox);
+  document.getElementById('dgm-zoom-in').addEventListener('click', function () { zoomBy(0.25); });
+  document.getElementById('dgm-zoom-out').addEventListener('click', function () { zoomBy(-0.25); });
+  document.getElementById('dgm-zoom-reset').addEventListener('click', function () { scale = 1; applyScale(); });
+
+  lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+  });
+
+  stage.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    zoomBy(e.deltaY < 0 ? 0.18 : -0.18);
+  }, { passive: false });
+
+  stage.addEventListener('mousedown', function (e) {
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    stage.classList.add('dragging');
+  });
+  window.addEventListener('mousemove', function (e) {
+    if (!dragging) return;
+    stage.scrollLeft -= (e.clientX - lastX);
+    stage.scrollTop -= (e.clientY - lastY);
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  window.addEventListener('mouseup', function () {
+    dragging = false; stage.classList.remove('dragging');
+  });
+})();
+</script>
+<script src="assets/site-chrome.js" defer></script>
+</body>
+</html>

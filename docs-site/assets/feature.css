@@ -1,0 +1,94 @@
+/*
+ * CampusOS · docs-site — estilos compartilhados por TODA página em
+ * docs-site/features/*.html. Carregar DEPOIS de site.css:
+ *   <link rel="stylesheet" href="../assets/site.css">
+ *   <link rel="stylesheet" href="../assets/feature.css">
+ *
+ * Diferença deliberada em relação ao FibroMais, que repetia este bloco
+ * dentro do <style> de cada página de feature: com cinco páginas escritas
+ * na mesma madrugada, a repetição garantiria cinco variações acidentais do
+ * mesmo componente até o fim da noite. O que é específico de uma página
+ * continua no <style> dela.
+ */
+
+.wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.75rem 5rem; font-size: 16px; }
+
+header.page { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 0.5rem; }
+header.page .eyebrow {
+  font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--brand-700); font-weight: 600;
+}
+header.page h1 { font-size: clamp(2rem, 5vw, 2.6rem); margin: 0.35rem 0 0.7rem; letter-spacing: -0.02em; text-wrap: balance; }
+header.page .lede { max-width: 66ch; color: var(--ink-soft); font-size: 1.04rem; margin: 0 0 1.1rem; }
+header.page .lede strong { color: var(--ink); }
+header.page .meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; font-family: var(--font-mono); font-size: 0.76rem; color: var(--ink-faint); }
+header.page .meta-row b { color: var(--ink-soft); font-weight: 600; }
+
+.switch-bar { display: flex; justify-content: flex-start; padding: 1.1rem 0 0.4rem; }
+
+/* ── as fases ──────────────────────────────────────────
+   Cada fase é uma seção numerada. O número fica num disco à esquerda do
+   título; a régua vertical que desce dele liga uma fase à seguinte, pra
+   deixar claro que a ordem importa (é um fluxo, não uma lista de features). */
+section.step { position: relative; padding: 2.25rem 0 0.5rem; }
+section.step + section.step { border-top: 1px solid var(--border); }
+.step-head { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.9rem; }
+.step-num {
+  flex-shrink: 0; width: 2.1rem; height: 2.1rem; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700;
+  background: var(--brand-600); color: #fff;
+}
+section.step.is-final .step-num { background: var(--leaf-600); }
+.step-head h2 { margin: 0; font-size: 1.45rem; line-height: 1.2; letter-spacing: -0.01em; }
+
+section.step p { color: var(--ink-soft); max-width: 68ch; }
+section.step > ul, section.step > ol { color: var(--ink-soft); max-width: 68ch; padding-left: 1.2rem; }
+section.step li { margin-bottom: 0.35rem; }
+section.step li b { color: var(--ink); font-weight: 600; }
+
+/* regra numerada — o formato de docs/dominio/ trazido pro HTML */
+.rules { list-style: none; margin: 1.1rem 0; padding: 0; counter-reset: rule; }
+.rules li {
+  counter-increment: rule; position: relative; padding: 0.55rem 0 0.55rem 2.6rem;
+  border-bottom: 1px dotted var(--border); font-size: 0.93rem; color: var(--ink-soft); max-width: 72ch;
+}
+.rules li::before {
+  content: counter(rule); position: absolute; left: 0; top: 0.55rem;
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; color: var(--brand-700);
+  background: var(--brand-50); border: 1px solid var(--brand-200); border-radius: 3px;
+  width: 1.7rem; text-align: center; padding: 0.1rem 0;
+}
+.rules li b { color: var(--ink); }
+.rules li:last-child { border-bottom: none; }
+
+/* o par pergunta→resposta usado nas telas */
+.screen {
+  border: 1px solid var(--border); border-radius: 5px; background: var(--surface);
+  padding: 0.9rem 1.1rem; margin: 1rem 0;
+}
+.screen h4 { margin: 0 0 0.4rem; font-size: 0.98rem; }
+.screen p { margin: 0; font-size: 0.88rem; }
+
+/* linha de entrada/saída de endpoint */
+.io { display: grid; grid-template-columns: 4.2rem 1fr; gap: 0.7rem; margin: 0.55rem 0; align-items: start; }
+.io-k { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); padding-top: 0.2rem; }
+.io-v { font-size: 0.86rem; color: var(--ink-soft); }
+
+.method { font-family: var(--font-mono); font-weight: 700; font-size: 0.72rem; padding: 0.1rem 0.36rem; border-radius: 3px; margin-right: 0.35rem; }
+.method.get { background: var(--leaf-100); color: var(--leaf-700); }
+.method.post { background: var(--amber-100); color: var(--amber-700); }
+.method.patch { background: var(--brand-100); color: var(--brand-700); }
+.method.delete { background: var(--rust-100); color: var(--rust-700); }
+
+.fig { border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); padding: 1.2rem; margin: 1.4rem 0; }
+.fig figcaption { font-size: 0.79rem; color: var(--ink-faint); margin-top: 0.7rem; line-height: 1.6; }
+.fig pre.mermaid { background: transparent; color: inherit; padding: 0; overflow-x: auto; }
+
+@media (max-width: 560px) {
+  .wrap { padding: 1.5rem 1.1rem 4rem; font-size: 15.5px; }
+  .step-head { gap: 0.6rem; }
+  .step-num { width: 1.8rem; height: 1.8rem; font-size: 0.8rem; }
+  .step-head h2 { font-size: 1.2rem; }
+  .io { grid-template-columns: 1fr; gap: 0.2rem; }
+}

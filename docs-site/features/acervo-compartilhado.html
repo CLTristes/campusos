@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O acervo do veterano · CampusOS</title>
+<meta name="description" content="O desafio 5.2 do HackLab — cinco níveis de visibilidade numa coluna, e a regra que faz a anotação de um veterano de 2024 chegar ao calouro de 2027.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/feature.css">
+<style>
+  /* escada de visibilidade — cinco degraus, com a linha grossa entre o 2º e
+     o 3º, que é onde o produto acontece. */
+  .vis-ladder { margin: 1.4rem 0; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; background: var(--surface); }
+  .vis { display: grid; grid-template-columns: 8.5rem 1fr; gap: 1rem; padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--border); }
+  .vis:last-child { border-bottom: none; }
+  .vis-k { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--brand-700); }
+  .vis-k small { display: block; font-weight: 400; color: var(--ink-faint); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.15rem; }
+  .vis-b { font-size: 0.87rem; color: var(--ink-soft); }
+  .vis-b b { color: var(--ink); }
+  .vis.threshold { border-top: 3px solid var(--amber-500); background: var(--amber-50); }
+  .threshold-note {
+    background: var(--amber-100); padding: 0.55rem 1.1rem; font-family: var(--font-mono);
+    font-size: 0.71rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--amber-700); font-weight: 700;
+    border-bottom: 1px solid var(--amber-200);
+  }
+
+  /* a linha do tempo da disciplina */
+  .timeline { margin: 1.6rem 0; padding: 1.3rem 1.2rem 1rem; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); }
+  .tl-track { display: flex; gap: 0; align-items: stretch; overflow-x: auto; padding-bottom: 0.4rem; }
+  .tl-col { flex: 1; min-width: 116px; text-align: center; position: relative; padding: 0 0.3rem; }
+  .tl-col::after { content: ''; position: absolute; left: 0; right: 0; top: 2.1rem; height: 2px; background: var(--border-strong); z-index: 0; }
+  .tl-col:first-child::after { left: 50%; }
+  .tl-col:last-child::after { right: 50%; }
+  .tl-term { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--ink-soft); margin-bottom: 0.45rem; }
+  .tl-dot { position: relative; z-index: 1; width: 1rem; height: 1rem; border-radius: 50%; margin: 0 auto 0.5rem; background: var(--surface); border: 2px solid var(--brand-500); }
+  .tl-col.now .tl-dot { background: var(--amber-400); border-color: var(--amber-600); width: 1.25rem; height: 1.25rem; margin-top: -0.12rem; }
+  .tl-who { font-size: 0.74rem; color: var(--ink-faint); line-height: 1.45; }
+  .tl-who b { display: block; color: var(--ink); font-size: 0.8rem; }
+  .tl-notes { margin-top: 0.4rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--leaf-700); }
+  .tl-arrow { margin-top: 1rem; text-align: center; font-size: 0.85rem; color: var(--brand-700); font-family: var(--font-serif); font-style: italic; }
+
+  .perm-table td:first-child { font-family: var(--font-mono); font-size: 0.8rem; }
+</style>
+</head>
+<body data-view="business">
+
+<header class="site-nav">
+  <a class="brand" href="../index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="../index.html">docs-site</a><span class="sep">/</span>features/acervo-compartilhado.html</span>
+</header>
+
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">Desafio 5.2 · integração e colaboração</div>
+    <h1>O acervo do veterano</h1>
+    <p class="lede">
+      Toda turma produz conhecimento — resumos, listas resolvidas, o aviso de que a prova cobra o capítulo 4 e não o 5.
+      Toda turma <strong>perde esse conhecimento</strong> quando acaba, e a turma seguinte recomeça do zero.
+      O 5.2 pede para aproximar calouros e veteranos. Esta página mostra que isso cabe em <strong>uma coluna de banco</strong> —
+      desde que essa coluna esteja no lugar certo.
+    </p>
+    <div class="meta-row">
+      <span><b>Módulo:</b> lifeos</span>
+      <span><b>Tabelas:</b> notes, tasks, note_votes</span>
+      <span><b>Blocos:</b> B5, B6</span>
+      <span><b>Status:</b> <span class="status-pill mvp">⚑ MVP</span></span>
+    </div>
+    <div class="switch-bar">
+      <div class="view-switch" role="group" aria-label="Nível de detalhe">
+        <button type="button" data-view="business" aria-pressed="true">Regra de negócio</button>
+        <button type="button" data-view="code" aria-pressed="false">Código real</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="callout grifo view-business">
+    <b>A ideia em uma frase:</b> a anotação não pertence à turma, pertence à <b>disciplina</b> — então ela continua existindo
+    depois que a turma se dispersa, e encontra sozinha a próxima pessoa que se matricular.
+  </div>
+  <div class="callout grifo view-code">
+    <b>Em uma frase:</b> <code>notes.subject_sbj_id</code> + <code>nte_visibility = subject</code> + um global scope que cruza com
+    <code>subject_enrollments</code> <b>sem filtrar por <code>term</code></b>. O 5.2 inteiro é a ausência desse filtro.
+  </div>
+
+  <!-- FASE 0 -->
+  <section class="step" id="fase-0">
+    <div class="step-head"><span class="step-num">0</span><h2>O problema, em concreto</h2></div>
+    <div class="view-business">
+      <p>
+        Em 2024/1, quarenta pessoas cursaram Cálculo 2 com o mesmo professor. Dessas, umas dez escreveram resumos decentes,
+        três montaram uma lista de exercícios resolvidos, e todas descobriram — do jeito difícil — que a P2 cobra séries
+        e quase nada de integrais impróprias.
+      </p>
+      <p>
+        Em 2027/1, quarenta pessoas novas se matriculam na mesma disciplina, com o mesmo professor e a mesma ementa.
+        Elas vão descobrir a mesma coisa do mesmo jeito difícil. O conhecimento de 2024 existe: está num grupo de WhatsApp
+        arquivado, num Drive que ninguém compartilhou, em três notebooks diferentes.
+      </p>
+      <div class="callout warn">
+        <b>Por que as soluções óbvias não funcionam:</b> um grupo de WhatsApp morre com a turma e não é pesquisável.
+        Um Drive compartilhado exige alguém que organize e alguém que passe o link adiante — as duas coisas dependem de um
+        veterano lembrar do calouro, que é exatamente o que não acontece. <b>A troca precisa ser automática, não voluntária.</b>
+        O veterano publica uma vez, para ninguém em particular; o sistema faz a entrega, anos depois.
+      </div>
+    </div>
+    <div class="view-code">
+      <p>
+        O vínculo que torna a entrega automática já existe no sistema por outro motivo:
+        <code>subject_enrollments</code> registra que fulano cursou <code>sbj_id = X</code> em <code>trm_id = Y</code>.
+        Consultar essa tabela <b>por disciplina, ignorando o semestre</b>, devolve <i>todo mundo que já cursou aquilo</i> —
+        veteranos e calouros no mesmo conjunto. O 5.2 é um <code>WHERE</code> que alguém esqueceu de escrever, de propósito.
+      </p>
+      <div class="callout">
+        <b>Consequência de arquitetura:</b> é por isso que os dois desafios são um produto só. A tabela que responde
+        "quanto falta pra eu me formar" é a mesma que responde "a quem esta anotação pertence". Construir os dois separados
+        significaria manter duas cópias de <code>subject_enrollments</code>.
+      </div>
+    </div>
+  </section>
+
+  <!-- FASE 1 -->
+  <section class="step" id="fase-1">
+    <div class="step-head"><span class="step-num">1</span><h2>Cinco visibilidades, e a linha que importa</h2></div>
+    <div class="view-business">
+      <p>Uma anotação nasce privada. O autor escolhe até onde ela vai:</p>
+      <div class="vis-ladder">
+        <div class="vis">
+          <div class="vis-k">privada<small>padrão</small></div>
+          <div class="vis-b">Só o autor. É o caderno pessoal — a maior parte das anotações fica aqui, e tudo bem.</div>
+        </div>
+        <div class="vis">
+          <div class="vis-k">turma<small>offering</small></div>
+          <div class="vis-b">As pessoas matriculadas <b>naquela turma, naquele semestre</b>. É a colaboração do presente: o grupo de estudo, o combinado da semana.</div>
+        </div>
+        <div class="threshold-note">↓ aqui a anotação para de pertencer a pessoas e passa a pertencer à disciplina ↓</div>
+        <div class="vis threshold">
+          <div class="vis-k">disciplina<small>subject</small></div>
+          <div class="vis-b"><b>Qualquer pessoa que já tenha se matriculado naquela disciplina — em qualquer semestre, de qualquer curso.</b> É o acervo do veterano. A anotação sobrevive à turma que a escreveu e é entregue a quem ainda nem entrou na universidade.</div>
+        </div>
+        <div class="vis">
+          <div class="vis-k">curso<small>course</small></div>
+          <div class="vis-b">Todo mundo do curso. Para o que não é de uma disciplina: como funciona o estágio, qual professor orienta o quê, o que a coordenação nunca explicou direito.</div>
+        </div>
+        <div class="vis">
+          <div class="vis-k">instituição<small>institution</small></div>
+          <div class="vis-b">A universidade inteira. Para o que atravessa cursos: matrícula, biblioteca, assistência estudantil, como pedir aproveitamento.</div>
+        </div>
+      </div>
+      <div class="callout good">
+        <b>A escada é uma escolha de produto, não de engenharia.</b> Um sistema com só "privado e público" força o aluno a escolher entre
+        esconder tudo ou expor tudo — e, na dúvida, ele esconde. Cinco degraus tornam a decisão fácil de tomar em dois segundos,
+        que é o tempo que a pessoa vai dedicar a ela.
+      </div>
+    </div>
+    <div class="view-code">
+      <div class="code-path"><span>app-modules/lifeos/src/Enums/Visibility.php</span><span class="status-pill mvp">⚑ B5</span></div>
+      <pre><code>enum Visibility: string
+{
+    case Private     = 'private';
+    case Offering    = 'offering';
+    case Subject     = 'subject';
+    case Course      = 'course';
+    case Institution = 'institution';
+
+    /** Exige subject_sbj_id preenchido? Sem disciplina não há a quem mostrar. */
+    public function requiresSubject(): bool
+    {
+        return in_array($this, [self::Offering, self::Subject], true);
+    }
+
+    /** Atravessa semestres? A pergunta que define o desafio 5.2. */
+    public function crossesTerms(): bool
+    {
+        return in_array($this, [self::Subject, self::Course, self::Institution], true);
+    }
+}</code></pre>
+      <p>
+        O mesmo enum serve <code>notes</code>, <code>tasks</code> e <code>events</code> — três tabelas, um vocabulário.
+        Copiar um enum "quase igual" por tabela é como o LifeOS original acabou com <code>Em Andamento</code> em Tarefas
+        e <code>Em Progresso</code> em Projetos: divergência que ninguém decidiu, e que depois ninguém pode consertar.
+      </p>
+    </div>
+  </section>
+
+  <!-- FASE 2 -->
+  <section class="step" id="fase-2">
+    <div class="step-head"><span class="step-num">2</span><h2>A herança — como 2024 chega em 2027</h2></div>
+    <div class="view-business">
+      <div class="timeline">
+        <div class="tl-track">
+          <div class="tl-col">
+            <div class="tl-term">2024/1</div><div class="tl-dot"></div>
+            <div class="tl-who"><b>Turma S71</b>40 alunos</div>
+            <div class="tl-notes">+12 notas</div>
+          </div>
+          <div class="tl-col">
+            <div class="tl-term">2025/1</div><div class="tl-dot"></div>
+            <div class="tl-who"><b>Turma S71</b>38 alunos</div>
+            <div class="tl-notes">+9 notas</div>
+          </div>
+          <div class="tl-col">
+            <div class="tl-term">2026/1</div><div class="tl-dot"></div>
+            <div class="tl-who"><b>Turma S72</b>41 alunos</div>
+            <div class="tl-notes">+14 notas</div>
+          </div>
+          <div class="tl-col now">
+            <div class="tl-term">2027/1</div><div class="tl-dot"></div>
+            <div class="tl-who"><b>Calouro</b>dia 1</div>
+            <div class="tl-notes" style="color:var(--amber-700)">recebe 35</div>
+          </div>
+        </div>
+        <p class="tl-arrow">Cálculo 2 · MA72B — o acervo não é de ninguém, é da disciplina</p>
+      </div>
+      <ol class="rules">
+        <li>O acervo é <b>cumulativo</b>: cada turma soma, nenhuma substitui. Em três anos a disciplina tem 35 anotações, e em dez tem centenas.</li>
+        <li>A entrega é <b>automática e imediata</b>. No instante em que o calouro confirma a importação do requerimento, o acervo aparece — ninguém precisa aceitar pedido, entrar em grupo ou pedir link a um desconhecido.</li>
+        <li>A anotação carrega <b>quando</b> foi escrita. "Resumo da P2 — 2024/1, prof. Silva" vale muito mais que "Resumo da P2", porque quem lê sabe se ainda se aplica.</li>
+        <li>O <b>calouro também é veterano</b> de alguém. Ele consome em 2027 e publica em 2027, para quem entrar em 2030. A reciprocidade não precisa ser pedida — ela é a consequência de todo mundo estar na mesma escada.</li>
+      </ol>
+      <div class="callout good">
+        <b>A pergunta do jurado vai ser "e se ninguém publicar?".</b> A resposta honesta: o sistema não depende de altruísmo.
+        O aluno escreve a anotação <b>para si mesmo</b>, porque precisa dela para estudar — o organizador pessoal é o motivo
+        de escrever. Publicar é um clique a mais numa coisa que já existe. É por isso que o organizador pessoal (5.1) e o
+        acervo (5.2) precisam ser o mesmo produto: separados, o acervo nasceria vazio.
+      </div>
+    </div>
+    <div class="view-code">
+      <div class="code-path"><span>app-modules/lifeos/src/Scopes/NoteVisibilityScope.php</span><span class="status-pill mvp">⚑ B5 · o coração do 5.2</span></div>
+      <pre><code>// Global scope aplicado a Note. Uma nota é visível se QUALQUER uma valer:
+//
+//   author_usr_id = usuário atual                          (sempre)
+//   nte_visibility = institution                           (mesmo tenant)
+//   nte_visibility = course       AND o usuário tem vínculo nesse curso
+//   nte_visibility = subject      AND o usuário JÁ CURSOU OU CURSA a
+//                                     disciplina -- EM QUALQUER TERMO
+//   nte_visibility = offering     AND o usuário cursou AQUELA oferta
+//
+// A linha de baixo é o desafio 5.2 inteiro. Repare no que NÃO está nela:
+// nenhuma condição sobre term_trm_id.
+$q-&gt;orWhere(fn ($n) =&gt; $n
+    -&gt;where('nte_visibility', Visibility::Subject)
+    -&gt;whereIn('subject_sbj_id', $this-&gt;subjectIdsEverEnrolledBy($user)));</code></pre>
+      <pre><code>/** Toda disciplina que o usuário já cursou, em qualquer semestre,
+ *  por qualquer um dos seus vínculos. Uma query, cacheável na request. */
+private function subjectIdsEverEnrolledBy(User $user): array
+{
+    return $this-&gt;enrollments
+        -&gt;whereIn('registration_reg_id', $user-&gt;registrationIds())
+        -&gt;pluck('subject_sbj_id')
+        -&gt;unique()
+        -&gt;all();
+}</code></pre>
+      <div class="callout warn">
+        <b>O teste que vale mais que a tela</b> — escreva-o antes de qualquer controller, e ele é a prova do 5.2 na banca:
+        <pre style="margin-top:0.6rem"><code>it('entrega a nota do veterano de 2024/1 ao calouro de 2027/1', function () {
+    $subject  = Subject::factory()-&gt;create();
+    $veterano = studentEnrolledIn($subject, term: '2024/1');
+    $calouro  = studentEnrolledIn($subject, term: '2027/1');
+
+    $nota = Note::factory()-&gt;for($veterano-&gt;user)-&gt;create([
+        'subject_sbj_id' =&gt; $subject-&gt;sbj_id,
+        'nte_visibility' =&gt; Visibility::Subject,
+    ]);
+
+    expect(Note::visibleTo($calouro-&gt;user)-&gt;pluck('nte_id'))
+        -&gt;toContain($nota-&gt;nte_id);
+});</code></pre>
+      </div>
+      <p>
+        <b>Cuidado com <code>journey</code> × <code>lifeos</code>:</b> ler <code>subject_enrollments</code> direto de dentro do
+        <code>lifeos</code> fura a fronteira e o ArchTest quebra o CI. O caminho correto é um contrato no <code>core</code> —
+        <code>EnrolledSubjectsProvider</code>, com <code>subjectIdsFor(string $userId): array</code> — implementado no
+        <code>journey</code> e bindado no provider dele. São dez linhas a mais e é a diferença entre um monólito modular
+        e um monólito com pastas.
+      </p>
+    </div>
+  </section>
+
+  <!-- FASE 3 -->
+  <section class="step" id="fase-3">
+    <div class="step-head"><span class="step-num">3</span><h2>Tarefas da turma — uma pessoa cadastra, quarenta recebem</h2></div>
+    <div class="view-business">
+      <p>
+        Mesma escada de visibilidade, aplicada a prazos. Alguém cadastra <i>"Entrega do trabalho — 28/10, valor 30"</i> na turma;
+        quem estuda ali vê na própria agenda e decide se adota.
+      </p>
+      <ol class="rules">
+        <li>Adotar <b>copia</b> a tarefa para o aluno. Cada um marca como feita quando faz, sem mexer na dos outros — o erro óbvio seria todo mundo compartilhar a mesma linha, e o primeiro a concluir concluiria pela turma inteira.</li>
+        <li>A cópia <b>lembra a origem</b>. Se o professor adia a entrega e quem publicou corrige a data, todo mundo que adotou pode ser avisado.</li>
+        <li>Tarefa da turma é sempre <b>colaboração, nunca autoridade</b>. Quem cadastrou é um colega, não a coordenação — a interface precisa dizer quem cadastrou, e a data continua sendo responsabilidade de cada um.</li>
+      </ol>
+      <div class="callout">
+        <b>É a feature que mais gera cabeça balançando na plateia</b>, porque todo mundo na sala já foi a pessoa que perdeu um
+        prazo que a turma toda sabia. Custa uma hora (bloco B6) e cabe em 20 segundos de demo.
+      </div>
+    </div>
+    <div class="view-code">
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/agenda · <span class="method post">POST</span>/api/v1/tasks/{id}/adopt</span><span class="status-pill mvp">⚑ B6</span></div>
+      <pre><code>// AdoptTaskAction — replica, não compartilha.
+$copy = Task::create([
+    'owner_usr_id'  =&gt; $user-&gt;usr_id,
+    'origin_tsk_id' =&gt; $origin-&gt;tsk_id,       // rastreia a fonte
+    'tsk_visibility'=&gt; Visibility::Private,   // a cópia é minha
+    'tsk_status'    =&gt; TaskStatus::Todo,      // sempre recomeça
+] + $origin-&gt;only(['tsk_title','tsk_description_md','tsk_kind',
+                   'tsk_due_at','subject_sbj_id','offering_ofr_id']));</code></pre>
+      <p>
+        <code>GET /me/agenda</code> devolve, ordenado por prazo: as tarefas próprias, mais as compartilhadas das ofertas
+        em que o aluno está matriculado <b>no termo corrente</b> e que ele ainda não adotou (marcadas com
+        <code>"adopted": false</code>). Aqui o filtro por termo <b>existe</b>, ao contrário do acervo de notas —
+        prazo de turma passada é ruído, anotação de turma passada é o produto.
+      </p>
+      <div class="callout"><b>Guarda de idempotência:</b> índice único <code>(owner_usr_id, origin_tsk_id)</code>. Duplo clique não gera duas cópias.</div>
+    </div>
+  </section>
+
+  <!-- FASE 4 -->
+  <section class="step" id="fase-4">
+    <div class="step-head"><span class="step-num">4</span><h2>Curadoria — o que impede o acervo de virar lixão</h2></div>
+    <div class="view-business">
+      <p>
+        Um acervo de cinco anos sem ordenação é pior que acervo nenhum: o calouro abre quarenta anotações, não sabe qual
+        prestar atenção, e fecha a aba. Três coisas baratas resolvem:
+      </p>
+      <ol class="rules">
+        <li><b>Voto útil.</b> Um por pessoa por anotação. A ordenação padrão do acervo é por utilidade, com desempate pela data — o que é bom sobe, o que é velho e bom continua em cima.</li>
+        <li><b>Recência visível.</b> Semestre e professor aparecem sempre. Uma anotação de 2019 pode ser excelente ou inútil, e só quem lê sabe decidir — mas só decide se a informação estiver lá.</li>
+        <li><b>Tipo declarado.</b> Resumo, prova antiga, lista resolvida, material, dica. Cinco valores, filtráveis. O calouro que quer a lista de exercícios não deveria precisar ler resumos.</li>
+      </ol>
+      <div class="callout warn">
+        <b>Denúncia e remoção, não moderação prévia.</b> Fila de aprovação mata a feature — ninguém publica se a anotação
+        demora dois dias para aparecer. O caminho é publicar direto, com botão de denúncia e poder de remoção para a coordenação.
+        <b>Esta é uma pendência aberta do dono do produto</b> (ver <a href="../index.html">o índice</a>) — o palpite acima vale até o Felipe decidir.
+      </div>
+    </div>
+    <div class="view-code">
+      <div class="code-path"><span>note_votes · <span class="method post">POST</span>/api/v1/notes/{id}/vote</span><span class="status-pill stretch">◎ esticada</span></div>
+      <pre><code>// UK(note_nte_id, user_usr_id) — um voto por pessoa. Re-votar faz UPDATE.
+// Ordenação do acervo: SUM(ntv_value) DESC, nte_published_at DESC.
+//
+// Contagem desnormalizada em notes.nte_score? NÃO, ainda não:
+// dezenas de votos por nota resolvem no agregado sem esforço. Uma coluna
+// de contagem é uma segunda fonte de verdade que só se paga com volume.</code></pre>
+      <p>
+        Só quem <b>enxerga</b> a anotação pode votar nela — o mesmo scope da Fase 2 filtra a rota de voto,
+        e isso sai de graça por ser um global scope e não um <code>if</code> no controller.
+      </p>
+    </div>
+  </section>
+
+  <!-- FASE 5 -->
+  <section class="step" id="fase-5">
+    <div class="step-head"><span class="step-num">5</span><h2>Privacidade — as regras que não se negociam</h2></div>
+    <div class="view-business">
+      <ol class="rules">
+        <li><b>Privado é o padrão.</b> Publicar é sempre ato deliberado. Nenhuma anotação muda de visibilidade sozinha, por nenhum motivo.</li>
+        <li><b>Despublicar sempre funciona.</b> Baixar a visibilidade de volta para privada tira a anotação do acervo na hora, sem pedir nada a ninguém.</li>
+        <li><b>Nada atravessa instituição.</b> Toda leitura é filtrada pelo tenant antes de qualquer outra regra. Uma anotação da UTFPR nunca aparece para outra universidade, nem por bug de escopo — é o <code>EntityScope</code> do template, e ele vem antes de tudo.</li>
+        <li><b>Autoria é visível.</b> Anotação pública mostra quem escreveu e quando. Acervo anônimo não cria pertencimento — que é literalmente o último bullet do desafio 5.2 — e piora a qualidade do que se publica.</li>
+        <li><b>Nota nunca é pública.</b> Nota de prova e situação de matrícula são do aluno e da coordenação. O acervo compartilha <b>conhecimento</b>, jamais desempenho.</li>
+      </ol>
+      <div class="callout warn">
+        <b>A regra 5 é a mais fácil de furar sem perceber.</b> Um endpoint de "colegas da turma" que devolva
+        <code>sen_status</code> junto com o nome vaza quem reprovou para a turma inteira. Projeção mínima em toda resposta
+        que liste pessoas: nome e o que mais for estritamente necessário — nada de <code>SELECT *</code> virando Resource.
+      </div>
+    </div>
+    <div class="view-code">
+      <p>Traduzindo cada regra para onde ela vive no código — e onde o teste correspondente precisa existir:</p>
+      <table class="perm-table">
+        <thead><tr><th>Regra</th><th>Onde é imposta</th><th>Teste</th></tr></thead>
+        <tbody>
+          <tr><td>privado é padrão</td><td><code>default('private')</code> na migration + no DTO</td><td>nota criada sem visibilidade é privada</td></tr>
+          <tr><td>despublicar</td><td><code>UpdateNoteVisibilityAction</code>, só o autor</td><td>terceiro recebe 403</td></tr>
+          <tr><td>tenant</td><td><code>Entityable</code> + <code>EntityScope</code> (core)</td><td>nota de outra entity nunca aparece</td></tr>
+          <tr><td>autoria</td><td><code>NoteResource</code> devolve <code>author.name</code></td><td>—</td></tr>
+          <tr><td>nota nunca pública</td><td><code>ClassmateResource</code> não expõe <code>sen_status</code>/<code>sen_grade</code></td><td>resposta não contém a chave</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <b>Padrão herdado do FibroMais:</b> campo sensível sai do Resource <b>e</b> do diff de auditoria (<code>$hidden</code> do observer),
+        com teste para os dois. Um só dos dois é vazamento com passo extra.
+      </div>
+    </div>
+  </section>
+
+  <!-- RESUMO -->
+  <section class="step is-final" id="resumo">
+    <div class="step-head"><span class="step-num">✓</span><h2>O desafio 5.2, bullet por bullet</h2></div>
+    <table>
+      <thead><tr><th>O que o desafio pede</th><th>Como o CampusOS entrega</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Aproximar calouros e veteranos</td><td>Visibilidade <code>subject</code> — a entrega é automática na matrícula</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Promover a troca de conhecimentos</td><td>O acervo cumulativo por disciplina</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Conectar estudantes de períodos diferentes</td><td>Mesma regra — a disciplina é o ponto de encontro, não o período</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Encontrar grupos de estudo</td><td>Visibilidade <code>offering</code> + tarefas da turma</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Conectar estudantes de cursos diferentes</td><td><code>subjects</code> é global na instituição — Cálculo 1 é a mesma para Engenharia e Química</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Fortalecer o pertencimento</td><td>Autoria visível; o calouro que recebe em 2027 publica para 2030</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Divulgar ideias que precisam de colaboradores</td><td><code>projects</code> com visibilidade pública</td><td><span class="status-pill planned">◇ planejado</span></td></tr>
+        <tr><td>Formar equipes para competições e eventos</td><td>Extensão natural de <code>projects</code></td><td><span class="status-pill planned">◇ planejado</span></td></tr>
+        <tr><td>Encontrar pessoas com habilidades complementares</td><td>Fora de escopo — exigiria perfil e busca de pessoas, que é outro produto</td><td><span class="status-pill planned">◇ fora</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout good">
+      <b>Seis de nove no MVP, sem construir rede social nenhuma.</b> Os três que faltam são justamente os que exigiriam
+      perfil, busca e feed. A diferença entre "cobrimos o 5.2" e "cobrimos parte do 5.2" é honestidade de pitch —
+      e dizer na banca qual parte ficou de fora vale mais que fingir que não ficou.
+    </div>
+  </section>
+
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — desafio 5.2, o acervo que atravessa turmas
+  <span class="sig">O veterano escreve para ninguém em particular. O sistema entrega, três anos depois.</span>
+</footer>
+
+<script src="../assets/site-chrome.js" defer></script>
+<script src="../assets/feature-view.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Do requerimento à barra de progresso · CampusOS</title>
+<meta name="description" content="O fluxo completo do desafio 5.1 — importar o documento acadêmico, reconstituir o histórico, calcular a progressão da graduação, destravar pré-requisitos e simular reprovação.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/feature.css">
+<style>
+  /* específico desta página: a barra de progresso desenhada em HTML, pra
+     documentar exatamente quais faixas o endpoint precisa devolver. */
+  .progress-demo { border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); padding: 1.3rem 1.4rem; margin: 1.4rem 0; }
+  .pg-title { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+  .pg-title h4 { margin: 0; font-size: 1.05rem; }
+  .pg-title span { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-faint); }
+  .pg-row { margin-bottom: 0.85rem; }
+  .pg-row:last-child { margin-bottom: 0; }
+  .pg-lbl { display: flex; justify-content: space-between; font-size: 0.79rem; color: var(--ink-soft); margin-bottom: 0.25rem; }
+  .pg-lbl b { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink); }
+  .pg-bar { height: 0.62rem; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+  .pg-fill { height: 100%; border-radius: 99px; }
+  .pg-fill.ok { background: linear-gradient(90deg, var(--leaf-500), var(--leaf-600)); }
+  .pg-fill.mid { background: linear-gradient(90deg, var(--amber-400), var(--amber-500)); }
+  .pg-fill.low { background: linear-gradient(90deg, var(--rust-400), var(--rust-500)); }
+
+  .unlock { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.3rem 0; }
+  .unlock > div { border: 1px solid var(--border); border-radius: 5px; padding: 0.9rem 1.05rem; background: var(--surface); }
+  .unlock h4 { margin: 0 0 0.6rem; font-size: 0.95rem; display: flex; align-items: center; gap: 0.45rem; }
+  .unlock ul { margin: 0; padding-left: 1.1rem; font-size: 0.85rem; color: var(--ink-soft); }
+  .unlock li { margin-bottom: 0.3rem; }
+  .unlock .yes h4 { color: var(--leaf-700); }
+  .unlock .no h4 { color: var(--rust-700); }
+  .unlock .no li small { display: block; color: var(--rust-600); font-size: 0.76rem; }
+  @media (max-width: 640px) { .unlock { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body data-view="business">
+
+<header class="site-nav">
+  <a class="brand" href="../index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="../index.html">docs-site</a><span class="sep">/</span>features/matricula-e-progressao.html</span>
+</header>
+
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">Desafio 5.1 · jornada acadêmica</div>
+    <h1>Do requerimento à barra de progresso</h1>
+    <p class="lede">
+      O desafio 5.1 pede nove coisas. <strong>Oito delas são a mesma coisa</strong> — saber, com precisão, o que este aluno
+      já cursou, sob qual matriz, e o que a matriz ainda exige. Esta página é o fluxo que produz esse conhecimento:
+      do documento que o aluno fotografa até a frase <i>"faltam 1.340 horas e você se forma em 2028/2, a menos que reprove em Cálculo 2."</i>
+    </p>
+    <div class="meta-row">
+      <span><b>Módulos:</b> catalog + journey</span>
+      <span><b>Tabelas:</b> 8 + 5</span>
+      <span><b>Blocos do plano:</b> B2, B3, B4</span>
+      <span><b>Status:</b> <span class="status-pill mvp">⚑ MVP</span></span>
+    </div>
+    <div class="switch-bar">
+      <div class="view-switch" role="group" aria-label="Nível de detalhe">
+        <button type="button" data-view="business" aria-pressed="true">Regra de negócio</button>
+        <button type="button" data-view="code" aria-pressed="false">Código real</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="callout grifo view-business">
+    <b>A ideia em uma frase:</b> o sistema não pergunta ao aluno o que ele já cursou — ele lê o documento que a universidade
+    já emitiu. Todo o resto do desafio 5.1 é consequência aritmética disso.
+  </div>
+
+  <div class="callout grifo view-code">
+    <b>Em uma frase:</b> <code>catalog</code> possui os dados mestres (imutáveis, semeados), <code>journey</code> possui os fatos
+    do aluno, e a progressão é <b>read model calculado</b> — nunca coluna. Toda escrita passa por uma Action;
+    o HTTP é adaptador fino.
+  </div>
+
+  <!-- FASE 0 -->
+  <section class="step" id="fase-0">
+    <div class="step-head"><span class="step-num">0</span><h2>Os dados mestres — a matriz como dado, não como código</h2></div>
+
+    <div class="view-business">
+      <p>
+        Antes de qualquer aluno existir, o sistema precisa saber o que é o curso. Isso são cinco coisas, e nenhuma delas
+        é opinião do sistema — todas vêm de documento oficial do colegiado:
+      </p>
+      <ol class="rules">
+        <li>O <b>curso</b>, por campus. "Engenharia de Software em Dois Vizinhos" é um registro; a homônima em outro campus é outro, com matriz própria.</li>
+        <li>A <b>matriz curricular</b>, versionada pelo ano de vigência. Contém as cinco exigências de hora que definem o que "formar" significa: obrigatória, optativa, complementar, estágio e TCC.</li>
+        <li>As <b>disciplinas</b>, com código e carga horária. São globais na instituição — a mesma Cálculo 1 serve a todos os cursos que a oferecem.</li>
+        <li>O <b>lugar de cada disciplina na matriz</b>: em que período sugerido, e se é obrigatória, optativa ou eletiva.</li>
+        <li>Os <b>pré-requisitos</b>, que pertencem à matriz e não à disciplina — a mesma Cálculo 2 pode exigir coisas diferentes em cursos diferentes.</li>
+      </ol>
+      <div class="callout">
+        <b>Por que isto importa mais do que parece:</b> com a matriz virada dado, o CampusOS funciona em qualquer curso de qualquer
+        universidade no dia seguinte, sem uma linha de código nova. Se a grade estivesse escrita no código — que é o atalho tentador
+        às 4 da manhã — o produto seria um sistema para um curso só, e todo o argumento de escala do pitch cairia na primeira pergunta do jurado.
+      </div>
+      <p><b>Quem alimenta:</b> hoje, um seeder a partir da grade exportada. Amanhã, uma tela de coordenação ou a mesma leitura por IA usada no documento do aluno.</p>
+    </div>
+
+    <div class="view-code">
+      <div class="code-path"><span>app-modules/catalog/database/seeders/CurriculumSeeder.php</span><span class="status-pill mvp">⚑ B2</span></div>
+      <p>Sete tabelas, semeadas nesta ordem (a ordem importa — cada uma depende da anterior):</p>
+      <pre><code>courses          → 1 registro (curso × campus)
+curricula        → 1 registro ativo, com as 5 exigências de hora
+subjects         → N disciplinas globais da instituição
+curriculum_subjects → a ponte: subject × curriculum + período + natureza
+prerequisites    → arestas do grafo, apontando para curriculum_subjects
+terms            → do ingresso mais antigo até +5 anos
+offerings        → turmas do semestre corrente (só o necessário pra demo)</code></pre>
+      <div class="callout warn">
+        <b>Armadilha de tempo:</b> transcrever matriz é digitação, não programação, e consome muito mais que a estimativa.
+        Prepare a grade como CSV e escreva o seeder para ler o CSV — 20 minutos de parser contra 90 de array literal,
+        e o CSV ainda sobrevive a um erro de transcrição sem precisar reescrever PHP.
+      </div>
+      <pre><code>// app-modules/catalog/src/Models/Curriculum.php
+final class Curriculum extends Model
+{
+    use Entityable, HasFactory, HasUuids, SoftDeletes;
+
+    protected $table = 'curricula';
+    protected $primaryKey = 'cur_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    public const CREATED_AT = 'cur_created_at';
+    public const UPDATED_AT = 'cur_updated_at';
+    public const DELETED_AT = 'cur_deleted_at';
+
+    /** Total exigido = soma das naturezas. NUNCA uma coluna própria:
+     *  dois números para a mesma verdade sempre acabam discordando. */
+    public function totalRequiredHours(): int
+    {
+        return $this->cur_mandatory_hours
+            + $this->cur_elective_hours
+            + $this->cur_complementary_hours
+            + $this->cur_internship_hours
+            + $this->cur_capstone_hours;
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- FASE 1 -->
+  <section class="step" id="fase-1">
+    <div class="step-head"><span class="step-num">1</span><h2>O vínculo — quem é este aluno, e sob qual matriz</h2></div>
+
+    <div class="view-business">
+      <p>
+        Um aluno não "pertence a um curso": ele tem um <b>vínculo</b> com um curso, sob uma matriz específica, a partir de um
+        semestre de ingresso. A distinção não é acadêmica — ela resolve dois casos reais que quebram qualquer modelo mais simples:
+      </p>
+      <ol class="rules">
+        <li>Quem <b>muda de curso</b> tem dois vínculos. O antigo encerrado, o novo ativo, cada um com sua contagem de progresso e suas disciplinas aproveitadas.</li>
+        <li>Quem ingressou em 2021 se forma pela <b>matriz de 2021</b>, mesmo que o colegiado publique matriz nova em 2024. O vínculo congela a matriz no ingresso e <b>nunca</b> a atualiza sozinho.</li>
+      </ol>
+      <div class="callout">
+        <b>O que aconteceria sem esse congelamento:</b> no dia em que uma reforma curricular entrasse no sistema, a barra de progresso
+        de todos os alunos da instituição mudaria de valor ao mesmo tempo, sem ninguém ter feito nada. É o tipo de bug que só aparece
+        um ano depois e destrói a confiança no número.
+      </div>
+    </div>
+
+    <div class="view-code">
+      <div class="code-path"><span>app-modules/journey/src/Actions/CreateRegistrationAction.php</span><span class="status-pill mvp">⚑ B3</span></div>
+      <div class="io"><span class="io-k">entrada</span><span class="io-v"><code>student_id</code>, <code>course_id</code>, <code>entry_term</code> — a matriz NÃO vem do cliente</span></div>
+      <div class="io"><span class="io-k">regra</span><span class="io-v">a matriz é resolvida no servidor: a ativa do curso cuja <code>cur_effective_from</code> é a mais recente <b>não posterior</b> ao termo de ingresso</span></div>
+      <div class="io"><span class="io-k">saída</span><span class="io-v"><code>Registration</code> com <code>curriculum_cur_id</code> congelado</span></div>
+      <pre><code>// A matriz vem do servidor, nunca do request — deixar o cliente escolher
+// a matriz é deixar o cliente escolher o próprio critério de formatura.
+$curriculum = $this->curricula
+    -&gt;where('course_crs_id', $input-&gt;courseId)
+    -&gt;where('cur_effective_from', '&lt;=', $entryTerm-&gt;trm_starts_at)
+    -&gt;orderByDesc('cur_effective_from')
+    -&gt;firstOrFail();</code></pre>
+      <div class="callout"><b>Mesma postura do FibroMais:</b> <code>enrollments.units_unt_id</code> lá é uma FOTO da unidade no momento da criação, que nunca é reescopada retroativamente. Aqui é <code>registrations.curriculum_cur_id</code>. O padrão é o mesmo: <b>o que já foi decidido não se recalcula quando o mundo muda.</b></div>
+    </div>
+  </section>
+
+  <!-- FASE 2 -->
+  <section class="step" id="fase-2">
+    <div class="step-head"><span class="step-num">2</span><h2>O documento — o aluno fotografa, a IA lê, o aluno confirma</h2></div>
+
+    <div class="view-business">
+      <p>
+        Nenhuma integração com sistema acadêmico. O aluno sobe o documento que a universidade já emitiu para ele —
+        e por isso o produto funciona em qualquer instituição sem negociar acesso a nada.
+      </p>
+      <div class="callout warn">
+        <b>Requerimento de matrícula × histórico escolar — a diferença decide o produto.</b><br>
+        O <b>requerimento</b> lista as disciplinas de <i>um</i> semestre. Ele diz onde o aluno está, mas não como chegou até ali:
+        dele sozinho <b>não sai barra de progresso nenhuma</b>.<br>
+        O <b>histórico escolar</b> lista tudo que já foi cursado, com nota e status. Dele a graduação inteira se reconstitui num upload.<br>
+        <b>Decisão do desenho:</b> aceitar os dois. O histórico é a importação rica (a primeira, a que enche a barra); o requerimento é a
+        atualização de cada semestre novo. É a mesma tela, a mesma Action, mudando só o tipo do documento.
+      </div>
+      <p>O fluxo tem quatro tempos, e o terceiro é o que torna aceitável usar IA num dado sensível:</p>
+      <ol class="rules">
+        <li><b>Sobe.</b> Foto ou PDF. A resposta é imediata — "recebemos, estamos lendo" — porque ler leva alguns segundos e ninguém deve ficar olhando para uma tela travada.</li>
+        <li><b>Lê.</b> Em segundo plano, a IA extrai curso, RA, semestre e a lista de disciplinas com código, nome, turma e situação.</li>
+        <li><b>Confere.</b> O aluno vê o que foi lido, <b>lado a lado com o documento</b>, e corrige o que estiver errado. Nada foi gravado ainda.</li>
+        <li><b>Confirma.</b> Só aqui a matrícula existe. Um erro de leitura vira uma correção de 30 segundos, em vez de um histórico corrompido que ninguém percebe.</li>
+      </ol>
+      <div class="callout good">
+        <b>Por que a conferência não é burocracia:</b> ela é o que permite confiar na IA sem confiar cegamente. E, de brinde,
+        é a mesma tela que funciona quando a IA falha — com os campos vazios, ela vira o cadastro manual. É por isso que o
+        <a href="../plano-de-ataque.html">ponto de corte 2</a> custa cinco minutos: a saída de emergência já está construída.
+      </div>
+    </div>
+
+    <div class="view-code">
+      <div class="code-path"><span><span class="method post">POST</span>/api/v1/me/academic-documents → 202</span><span class="status-pill mvp">⚑ B4</span></div>
+      <p>Regra de ouro nº 7: operação demorada responde <b>202 + Job em fila nomeada</b>, nunca segura o request.</p>
+      <pre><code>// app-modules/journey/src/Actions/UploadAcademicDocumentAction.php
+$request = EnrollmentRequest::create([
+    'registration_reg_id' =&gt; $input-&gt;registrationId,   // nullable
+    'erq_kind'            =&gt; $input-&gt;kind,             // transcript | enrollment_request
+    'erq_file_path'       =&gt; $path,
+    'erq_status'          =&gt; RequestStatus::Uploaded,
+]);
+
+ParseAcademicDocumentJob::dispatch($request-&gt;erq_id)-&gt;onQueue('imports');
+
+return $request;  // controller devolve 202 + Location do recurso</code></pre>
+
+      <div class="code-path"><span>app-modules/core/src/Contracts/AcademicDocumentExtractor.php</span><span class="status-pill mvp">⚑ B4</span></div>
+      <p>Contrato no <code>core</code>, implementação em <code>integrations</code> — <code>journey</code> não conhece a Anthropic.</p>
+      <pre><code>interface AcademicDocumentExtractor
+{
+    /** @throws ExtractorUnavailableException erro de transporte — o Job reprocessa */
+    public function extract(string $absolutePath, string $mimeType): ExtractionResult;
+}</code></pre>
+
+      <div class="code-path"><span>app-modules/integrations/src/Extractors/ClaudeDocumentExtractor.php</span><span class="status-pill mvp">⚑ B4</span></div>
+      <p>
+        SDK oficial <code>anthropic-ai/sdk</code>, modelo <code>claude-opus-5</code>, com <b>structured outputs</b> —
+        o schema é declarado, então o retorno não precisa de parser tolerante nem de <i>"responda só JSON, por favor"</i> no prompt.
+      </p>
+      <pre><code>use Anthropic\Client;
+
+final class ClaudeDocumentExtractor implements AcademicDocumentExtractor
+{
+    public function __construct(private Client $claude) {}
+
+    public function extract(string $path, string $mime): ExtractionResult
+    {
+        $isPdf = $mime === 'application/pdf';
+
+        $message = $this-&gt;claude-&gt;messages-&gt;create(
+            model: 'claude-opus-5',
+            maxTokens: 16000,
+            system: self::SYSTEM,
+            messages: [[
+                'role' =&gt; 'user',
+                'content' =&gt; [
+                    // o bloco do documento vem ANTES do texto
+                    $isPdf
+                        ? ['type' =&gt; 'document', 'source' =&gt; [
+                              'type' =&gt; 'base64',
+                              'media_type' =&gt; 'application/pdf',
+                              'data' =&gt; base64_encode(file_get_contents($path)),
+                          ]]
+                        : ['type' =&gt; 'image', 'source' =&gt; [
+                              'type' =&gt; 'base64',
+                              'media_type' =&gt; $mime,
+                              'data' =&gt; base64_encode(file_get_contents($path)),
+                          ]],
+                    ['type' =&gt; 'text', 'text' =&gt; self::INSTRUCTION],
+                ],
+            ]],
+            outputConfig: ['format' =&gt; AcademicDocument::class],
+        );
+
+        return ExtractionResult::fromModel($message-&gt;parsedOutput());
+    }
+}</code></pre>
+      <p>O schema é uma classe PHP — os tipos saem das próprias anotações, sem JSON Schema escrito à mão:</p>
+      <pre><code>use Anthropic\Lib\Contracts\StructuredOutputModel;
+use Anthropic\Lib\Concerns\StructuredOutputModelTrait;
+use Anthropic\Lib\Attributes\Constrained;
+
+final class AcademicDocument implements StructuredOutputModel
+{
+    use StructuredOutputModelTrait;
+
+    #[Constrained(description: 'Nome do curso exatamente como impresso')]
+    public string $course;
+
+    #[Constrained(description: 'Registro acadêmico / matrícula do aluno')]
+    public string $registrationNumber;
+
+    /** @var AcademicDocumentLine[] */
+    public array $lines;          // código, nome, ano, período, turma, situação, nota
+    public ?string $curriculumCode = null;   // nullable = campo opcional
+}</code></pre>
+      <div class="callout warn">
+        <b>Três regras que o Job precisa respeitar (regra de ouro nº 7):</b><br>
+        1. <code>TenantContext::runAs()</code> como <b>primeira linha</b> — worker não tem sessão HTTP, e sem isso o <code>EntityScope</code> não filtra nada.<br>
+        2. Erro de <b>transporte</b> (timeout, 5xx, rate limit) <b>lança</b> e a fila reprocessa — nunca capture.
+        Recusa de <b>negócio</b> (documento ilegível, não é documento acadêmico) vira <code>erq_status = failed</code> com motivo: estado final, sem retry.<br>
+        3. Guard de idempotência no topo: se <code>erq_status</code> já é <code>parsed</code> ou <code>confirmed</code>, o Job retorna sem fazer nada. Fila reentrega.
+      </div>
+
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/academic-documents/{id} · <span class="method post">POST</span>.../confirm</span><span class="status-pill mvp">⚑ B4</span></div>
+      <p>
+        O <code>GET</code> devolve <code>erq_status</code> + <code>erq_extraction</code> — é o que a tela de conferência consome,
+        e o que o front usa em <i>polling</i> enquanto o status for <code>processing</code>.
+        <b>Só o <code>confirm</code> escreve matrícula</b>, recebendo as linhas já corrigidas pelo aluno:
+        <code>ConfirmAcademicDocumentAction</code> abre transação, resolve cada linha para uma <code>Subject</code> por
+        <code>sbj_code</code>, e cria os <code>subject_enrollments</code> com <code>sen_source = transcript</code>.
+        Linha cujo código não existe no catálogo entra como <b>pendência</b> na resposta, não como erro fatal — histórico
+        real tem disciplina extinta, e derrubar a importação inteira por causa de uma linha de 2019 é o pior dos mundos.
+      </div>
+    </div>
+  </section>
+
+  <!-- FASE 3 -->
+  <section class="step" id="fase-3">
+    <div class="step-head"><span class="step-num">3</span><h2>O histórico — seis situações, e por que não são três</h2></div>
+
+    <div class="view-business">
+      <p>Cada linha do histórico é uma matrícula numa disciplina, num semestre, com uma situação:</p>
+      <ol class="rules">
+        <li><b>Cursando</b> — conta como carga <i>em andamento</i>, nunca como cumprida. A barra mostra as duas faixas separadas, porque tratar em-curso como cumprido é mentir para o aluno no pior momento possível.</li>
+        <li><b>Aprovado</b> — a carga horária entra no cumprido, congelada no valor que a disciplina tinha naquele momento.</li>
+        <li><b>Reprovado por nota</b> — a disciplina volta para as pendentes, e a cadeia de pré-requisitos que ela alimenta trava.</li>
+        <li><b>Reprovado por falta</b> — mesmo efeito no progresso, causa diferente. Separar as duas não é preciosismo: é o que permite à coordenação distinguir dificuldade de conteúdo de problema de permanência, que é exatamente o que o desafio 5.4 chamaria de evasão.</li>
+        <li><b>Trancado</b> — não conta e não reprova.</li>
+        <li><b>Dispensado / aproveitado</b> — conta como cumprido sem nota. É o caso de quem transferiu de curso, e sem ele o modelo não representa metade dos alunos veteranos.</li>
+      </ol>
+      <p>
+        <b>A regra que faz reprovação funcionar:</b> o par único é <i>vínculo + disciplina + semestre</i>. Cursar de novo
+        em <b>outro</b> semestre é permitido e gera uma linha nova — é exatamente assim que uma reprovação aparece no
+        histórico, duas linhas da mesma disciplina, e é assim que a contagem de tentativas sai de graça.
+      </p>
+    </div>
+
+    <div class="view-code">
+      <div class="code-path"><span>app-modules/journey/src/Enums/EnrollmentStatus.php</span><span class="status-pill mvp">⚑ B3</span></div>
+      <pre><code>enum EnrollmentStatus: string
+{
+    case Enrolled      = 'enrolled';
+    case Approved      = 'approved';
+    case FailedGrade   = 'failed_grade';
+    case FailedAbsence = 'failed_absence';
+    case Withdrawn     = 'withdrawn';
+    case Exempted      = 'exempted';
+
+    /** Conta para integralização? O ÚNICO lugar do sistema que decide isso. */
+    public function countsAsCompleted(): bool
+    {
+        return in_array($this, [self::Approved, self::Exempted], true);
+    }
+
+    public function isInProgress(): bool { return $this === self::Enrolled; }
+
+    public function blocksPrerequisiteChain(): bool
+    {
+        return in_array($this, [self::FailedGrade, self::FailedAbsence], true);
+    }
+}</code></pre>
+      <div class="callout">
+        <b>Centralizar a pergunta "isto conta?" no enum</b> é o que impede a mesma regra de ser reescrita — levemente diferente —
+        no read model de progresso, no de pré-requisitos e no painel da coordenação. Três cópias de uma regra de negócio é como
+        um sistema acadêmico passa a mostrar três números diferentes para a mesma pergunta.
+      </div>
+      <p>
+        Índice único <code>(registration_reg_id, subject_sbj_id, term_trm_id)</code>. <code>sen_hours_earned</code> é copiada
+        de <code>sbj_hours</code> na aprovação — a disciplina pode mudar de carga depois, e o que já foi integralizado não muda junto.
+      </p>
+    </div>
+  </section>
+
+  <!-- FASE 4 -->
+  <section class="step" id="fase-4">
+    <div class="step-head"><span class="step-num">4</span><h2>A progressão — um endpoint que desenha uma tela inteira</h2></div>
+
+    <div class="view-business">
+      <p>
+        A barra de progresso não é uma barra. São cinco, porque <b>horas não são intercambiáveis</b>: 200 horas sobrando de
+        optativa não substituem 200 horas de estágio que faltam. É precisamente essa confusão que faz o aluno descobrir no
+        último semestre que não vai se formar.
+      </p>
+
+      <div class="progress-demo">
+        <div class="pg-title">
+          <h4>Engenharia de Software · matriz 2023/1</h4>
+          <span>2.860 / 4.200 h · 68%</span>
+        </div>
+        <div class="pg-row">
+          <div class="pg-lbl"><span>Obrigatórias</span><b>2.420 / 3.000 h</b></div>
+          <div class="pg-bar"><div class="pg-fill ok" style="width:81%"></div></div>
+        </div>
+        <div class="pg-row">
+          <div class="pg-lbl"><span>Optativas</span><b>240 / 360 h</b></div>
+          <div class="pg-bar"><div class="pg-fill mid" style="width:67%"></div></div>
+        </div>
+        <div class="pg-row">
+          <div class="pg-lbl"><span>Complementares</span><b>120 / 240 h</b></div>
+          <div class="pg-bar"><div class="pg-fill mid" style="width:50%"></div></div>
+        </div>
+        <div class="pg-row">
+          <div class="pg-lbl"><span>Estágio obrigatório</span><b>0 / 400 h</b></div>
+          <div class="pg-bar"><div class="pg-fill low" style="width:0%"></div></div>
+        </div>
+        <div class="pg-row">
+          <div class="pg-lbl"><span>TCC</span><b>80 / 200 h</b></div>
+          <div class="pg-bar"><div class="pg-fill low" style="width:40%"></div></div>
+        </div>
+      </div>
+      <p style="font-size:0.86rem;color:var(--ink-faint);max-width:70ch;">
+        Um aluno "68% formado" com <b>zero</b> das 400 horas de estágio. O número consolidado esconde a verdade; as cinco faixas a contam.
+        Esta é a tela da demo — dê a ela o dobro do capricho das outras.
+      </p>
+
+      <p>Além das faixas, o mesmo cálculo responde:</p>
+      <ul>
+        <li><b>O que falta</b>, disciplina a disciplina, agrupado pelo período sugerido da matriz.</li>
+        <li><b>Previsão de formatura</b>: horas restantes divididas pelo ritmo real do aluno (média de horas aprovadas por semestre cursado), não pelo ritmo ideal da matriz. O ideal engana; o real é o que o aluno precisa ouvir.</li>
+        <li><b>Alerta de prazo</b>: quantos semestres faltam para o limite de integralização da matriz. É o aviso de jubilamento que a universidade raramente dá a tempo.</li>
+      </ul>
+    </div>
+
+    <div class="view-code">
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/progress</span><span class="status-pill mvp">⚑ B3 · o endpoint mais importante</span></div>
+      <pre><code>{
+  "registration": { "number": "2043210", "course": "Engenharia de Software",
+                    "curriculum": "2023/1", "entry_term": "2023/1",
+                    "current_term": 6, "status": "active" },
+  "overall": { "completed_hours": 2860, "required_hours": 4200,
+               "in_progress_hours": 300, "percentage": 68.1 },
+  "tracks": [
+    { "kind": "mandatory",     "completed": 2420, "required": 3000, "in_progress": 300 },
+    { "kind": "elective",      "completed":  240, "required":  360, "in_progress": 0 },
+    { "kind": "complementary", "completed":  120, "required":  240, "in_progress": 0 },
+    { "kind": "internship",    "completed":    0, "required":  400, "in_progress": 0 },
+    { "kind": "capstone",      "completed":   80, "required":  200, "in_progress": 0 }
+  ],
+  "pending_subjects": [ { "code": "ES52C", "name": "...", "term": 7, "hours": 60,
+                          "nature": "mandatory", "blocked_by": [] } ],
+  "forecast": { "avg_hours_per_term": 402, "remaining_terms": 4,
+                "expected_graduation": "2028/2",
+                "terms_until_deadline": 8, "at_risk": false }
+}</code></pre>
+      <div class="code-path"><span>app-modules/journey/src/ReadModels/ProgressReadModel.php</span></div>
+      <pre><code>// Calculado, nunca armazenado. Um percentual em coluna fica velho no
+// instante em que uma nota muda, e ninguém percebe.
+//
+// Custo: 3 queries (matrícula do vínculo + disciplinas da matriz +
+// atividades complementares aprovadas), somadas em memória. Numa graduação
+// são ~60 linhas de histórico — otimizar isso agora é otimizar o nada.
+// Cache só quando o painel da coordenação varrer a instituição inteira.</code></pre>
+      <div class="callout warn">
+        <b>Armadilha aritmética:</b> horas cumpridas de uma natureza que <b>ultrapassam</b> a exigência não escorrem para outra natureza,
+        e o total consolidado não pode somar o excedente — senão um aluno com 400 horas extras de optativa aparece "formado" com
+        o estágio zerado. Cada faixa satura no próprio teto; o total é a soma das faixas <b>saturadas</b>.
+        <b>É o teste unitário mais importante do módulo</b> — escreva-o antes do endpoint.
+      </div>
+    </div>
+  </section>
+
+  <!-- FASE 5 -->
+  <section class="step" id="fase-5">
+    <div class="step-head"><span class="step-num">5</span><h2>O que libera e o que trava</h2></div>
+
+    <div class="view-business">
+      <p>
+        Com histórico e pré-requisitos no mesmo lugar, a pergunta <i>"o que eu posso pegar no próximo semestre?"</i> deixa de exigir
+        que o aluno cruze dois PDFs na mão — que é literalmente o bullet <i>"compreensão dos pré-requisitos"</i> do desafio.
+      </p>
+      <div class="unlock">
+        <div class="yes">
+          <h4>✓ Liberadas para 2026/2</h4>
+          <ul>
+            <li>ES52C — Engenharia de Software II</li>
+            <li>ES51B — Banco de Dados II</li>
+            <li>MA71C — Estatística</li>
+          </ul>
+        </div>
+        <div class="no">
+          <h4>✕ Travadas</h4>
+          <ul>
+            <li>ES62A — Compiladores <small>falta Linguagens Formais (reprovado 2026/1)</small></li>
+            <li>TC70T — TCC I <small>faltam 320h para o mínimo de 2.400h</small></li>
+          </ul>
+        </div>
+      </div>
+      <p>
+        O <b>motivo</b> ao lado de cada trava é a feature, não a lista em si. "Travada" sozinha é a mesma frustração de hoje,
+        com outra interface; "travada porque falta X" é uma instrução do que fazer.
+      </p>
+    </div>
+
+    <div class="view-code">
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/next-term</span><span class="status-pill mvp">⚑ B3/B8</span></div>
+      <pre><code>// app-modules/journey/src/ReadModels/EligibilityReadModel.php
+// Para cada curriculum_subject ainda não cumprido:
+//   prerequisite  → a exigida está cumprida? (EnrollmentStatus::countsAsCompleted)
+//   corequisite   → cumprida OU cursando no mesmo termo
+//   minimum_hours → horas cumpridas >= prq_min_hours
+// Devolve { eligible: bool, blocked_by: [{ type, subject, reason }] }.
+//
+// Grafo pequeno (dezenas de arestas por matriz): resolve em memória, em
+// uma passada, sem recursão e sem CTE. Se um dia virar milhares, aí sim.</code></pre>
+      <div class="callout"><b>Ciclo em pré-requisito existe na vida real</b> (erro de cadastro no colegiado). Proteja a travessia com um conjunto de visitados — descobrir isso via <i>stack overflow</i> em produção é caro; via <code>if</code>, é grátis.</div>
+    </div>
+  </section>
+
+  <!-- FASE 6 -->
+  <section class="step" id="fase-6">
+    <div class="step-head"><span class="step-num">6</span><h2>E se eu reprovar? — a pergunta que ninguém responde</h2></div>
+
+    <div class="view-business">
+      <p>
+        O último bullet do desafio: <i>"visualização de possíveis impactos causados por reprovações ou atrasos"</i>.
+        Hoje, o aluno só descobre o custo de uma reprovação depois de reprovar — e o custo raramente é uma disciplina:
+        é a cadeia inteira que ela destrava.
+      </p>
+      <div class="callout good">
+        <b>Reprovar em Cálculo 2 em 2026/1 adiaria sua formatura em 1 semestre.</b><br>
+        Ela é pré-requisito de <b>Cálculo 3</b> e <b>Física 2</b>, que são pré-requisito de <b>Fenômenos de Transporte</b>.
+        Com a reprovação, a primeira oportunidade de cursar Fenômenos cai de 2027/1 para 2027/2.
+      </div>
+      <p>
+        É puro cálculo sobre dado que já existe — nenhuma tabela nova. Por isso é a <b>primeira</b> das esticadas do
+        <a href="../plano-de-ataque.html">plano de ataque</a>: o melhor retorno de pitch por minuto de código da noite inteira.
+      </p>
+    </div>
+
+    <div class="view-code">
+      <div class="code-path"><span><span class="method post">POST</span>/api/v1/me/simulate</span><span class="status-pill stretch">◎ B8 · a primeira esticada</span></div>
+      <pre><code>// entrada: { "fail": ["MA72B"] }  — e se eu reprovar nestas?
+//
+// 1. clonar o histórico em memória, marcando as citadas como FailedGrade
+// 2. rodar a mesma EligibilityReadModel sobre o histórico clonado
+// 3. diff contra o cenário real: quais disciplinas mudaram de termo
+//    de primeira oportunidade, e quanto a previsão de formatura andou
+//
+// Sem escrita no banco. Sem Action. É read model puro rodando duas vezes —
+// e é por isso que ele é barato: a lógica de elegibilidade já existe.</code></pre>
+      <div class="callout">
+        <b>O desenho que torna isto barato:</b> a elegibilidade nunca lê o banco direto, ela recebe uma coleção de matrículas.
+        Escrever assim na Fase 5 custa zero e transforma a simulação em "chamar a mesma função com outro argumento".
+        Escrever acoplado ao banco custa, na Fase 6, um refactor às 13h da tarde.
+      </div>
+    </div>
+  </section>
+
+  <!-- RESUMO -->
+  <section class="step is-final" id="resumo">
+    <div class="step-head"><span class="step-num">✓</span><h2>O desafio 5.1, bullet por bullet</h2></div>
+    <table>
+      <thead><tr><th>O que o desafio pede</th><th>Onde é resolvido</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Acompanhamento do progresso no curso</td><td>Fase 4 — <code>GET /me/progress</code>, cinco faixas</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Identificação de disciplinas concluídas e pendentes</td><td>Fases 3 e 4 — <code>pending_subjects</code></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Compreensão dos pré-requisitos</td><td>Fase 5 — travada <b>com o motivo</b></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Planejamento dos próximos períodos</td><td>Fase 5 — <code>GET /me/next-term</code></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Organização de documentos acadêmicos</td><td>Fase 2 + <a href="horas-e-certificados.html">certificados</a></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Acompanhamento de atividades complementares</td><td><a href="horas-e-certificados.html">Horas e certificados</a></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Conhecimento dos prazos e requisitos para formação</td><td>Fase 4 — <code>forecast.terms_until_deadline</code></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Impactos de reprovações ou atrasos</td><td>Fase 6 — simulação</td><td><span class="status-pill stretch">◎ esticada</span></td></tr>
+        <tr><td>Orientações acadêmicas claras e centralizadas</td><td><a href="acervo-compartilhado.html">Acervo</a> + <a href="copiloto-mcp.html">copiloto</a></td><td><span class="status-pill mvp">⚑ MVP</span> + <span class="status-pill stretch">◎</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout good">
+      <b>Oito de nove no MVP</b>, e o nono é a primeira esticada. A cobertura do desafio não é acidente de escopo:
+      ela é consequência de ter modelado a matriz como dado e o histórico como fato — feito isso, cada bullet vira uma consulta.
+    </div>
+  </section>
+
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — desafio 5.1, do documento à previsão de formatura
+  <span class="sig">Se o código divergir desta página, vire o card junto. Quinze segundos agora, uma hora de arqueologia depois.</span>
+</footer>
+
+<script src="../assets/site-chrome.js" defer></script>
+<script src="../assets/feature-view.js" defer></script>
+</body>
+</html>

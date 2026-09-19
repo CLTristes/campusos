@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horas complementares e certificados · CampusOS</title>
+<meta name="description" content="O teto por categoria, o certificado guardado e a conta que todo universitário descobre errada no último semestre — feita certo desde o primeiro.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/feature.css">
+<style>
+  .cap-table td.num { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+  .cap-table td.lost { color: var(--rust-600); font-weight: 600; }
+  .cap-table tfoot td { border-top: 2px solid var(--border-strong); font-weight: 700; background: var(--surface-2); }
+  .cap-table tfoot td.num { color: var(--leaf-700); }
+</style>
+</head>
+<body data-view="business">
+
+<header class="site-nav">
+  <a class="brand" href="../index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="../index.html">docs-site</a><span class="sep">/</span>features/horas-e-certificados.html</span>
+</header>
+
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">Desafio 5.1 · atividades complementares</div>
+    <h1>Horas complementares e certificados</h1>
+    <p class="lede">
+      Duas coisas que a universidade exige e não ajuda a controlar: guardar os certificados por cinco anos, e saber
+      quantas horas eles de fato valem. <strong>Quase ninguém sabe que existe teto por categoria</strong> — e descobrir isso
+      no último semestre, faltando 40 horas, é uma das experiências mais evitáveis da graduação.
+    </p>
+    <div class="meta-row">
+      <span><b>Módulos:</b> catalog + journey</span>
+      <span><b>Tabelas:</b> complementary_categories, complementary_activities</span>
+      <span><b>Bloco:</b> B7</span>
+      <span><b>Status:</b> <span class="status-pill mvp">⚑ MVP</span></span>
+    </div>
+    <div class="switch-bar">
+      <div class="view-switch" role="group" aria-label="Nível de detalhe">
+        <button type="button" data-view="business" aria-pressed="true">Regra de negócio</button>
+        <button type="button" data-view="code" aria-pressed="false">Código real</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- FASE 1 -->
+  <section class="step" id="fase-1">
+    <div class="step-head"><span class="step-num">1</span><h2>O teto por categoria — a regra invisível</h2></div>
+    <div class="view-business">
+      <p>
+        A resolução de atividades complementares de qualquer curso faz duas coisas: exige um total de horas, e limita
+        quanto de cada tipo pode contar. A segunda parte é a que ninguém lê.
+      </p>
+      <table class="cap-table">
+        <thead><tr><th>Categoria</th><th class="num">Teto</th><th class="num">Declarado</th><th class="num">Conta</th><th class="num">Perdido</th></tr></thead>
+        <tbody>
+          <tr><td>Participação em eventos</td><td class="num">40 h</td><td class="num">86 h</td><td class="num">40 h</td><td class="num lost">−46 h</td></tr>
+          <tr><td>Monitoria</td><td class="num">80 h</td><td class="num">64 h</td><td class="num">64 h</td><td class="num">—</td></tr>
+          <tr><td>Projeto de extensão</td><td class="num">80 h</td><td class="num">0 h</td><td class="num">0 h</td><td class="num">—</td></tr>
+          <tr><td>Iniciação científica</td><td class="num">100 h</td><td class="num">0 h</td><td class="num">0 h</td><td class="num">—</td></tr>
+          <tr><td>Estágio não obrigatório</td><td class="num">60 h</td><td class="num">60 h</td><td class="num">60 h</td><td class="num">—</td></tr>
+          <tr><td>Cursos e certificações</td><td class="num">60 h</td><td class="num">18 h</td><td class="num">18 h</td><td class="num">—</td></tr>
+        </tbody>
+        <tfoot><tr><td>Exigido: 240 h</td><td class="num">—</td><td class="num">228 h</td><td class="num">182 h</td><td class="num lost">−46 h</td></tr></tfoot>
+      </table>
+      <div class="callout warn">
+        <b>Leia a última linha.</b> O aluno acumulou 228 horas e acha que faltam 12. Na verdade contam 182, e faltam <b>58</b> —
+        e as 46 horas perdidas foram gastas em eventos que já tinham estourado o teto meses atrás. Nenhum sistema avisou,
+        porque nenhum sistema sabia. <b>Este é o bug de vida real que a feature conserta</b>, e é o que ela deve dizer na tela.
+      </div>
+      <ol class="rules">
+        <li>O teto é da <b>matriz</b>, não do aluno. Categorias e limites vêm da resolução do colegiado e são dados semeados junto com a grade.</li>
+        <li>Cada atividade guarda <b>duas horas</b>: o que o certificado declara, e o que sobrou depois do teto. As duas aparecem ao aluno, sempre.</li>
+        <li>O excedente de uma categoria <b>não escorre</b> para outra. Cem horas de monitoria não compensam a falta de extensão — a regra é da resolução, e o sistema só a torna visível.</li>
+        <li>O aviso é <b>preventivo</b>: ao cadastrar uma atividade que estoura o teto, a tela diz na hora quantas horas não vão contar. É a diferença entre um sistema que informa e um que só registra.</li>
+      </ol>
+    </div>
+    <div class="view-code">
+      <div class="code-path"><span>app-modules/catalog — complementary_categories (semeada com a matriz)</span><span class="status-pill mvp">⚑ B2/B7</span></div>
+      <pre><code>// A categoria pertence ao catalog (regra de matriz), não ao journey
+// (fato de aluno). É a mesma razão de prerequisites viver no catalog.
+ccg_name        string     'Participação em eventos'
+ccg_max_hours   integer    40
+ccg_conversion_note text    'até 10h por evento; exige certificado'</code></pre>
+      <div class="code-path"><span>app-modules/journey/src/ReadModels/ComplementaryHoursReadModel.php</span></div>
+      <pre><code>// Por categoria: min(SUM(horas aprovadas), ccg_max_hours).
+// O total é a soma dos MÍNIMOS -- nunca a soma bruta.
+$granted = $byCategory-&gt;map(fn ($rows, $ccgId) =&gt; min(
+    $rows-&gt;sum('cac_hours_claimed'),
+    $categories[$ccgId]-&gt;ccg_max_hours,
+));
+
+// Alimenta a faixa "complementary" do ProgressReadModel — uma fonte só.
+// Recalcular horas complementares dentro do endpoint de progresso é como
+// nascem dois números diferentes para a mesma pergunta.</code></pre>
+      <div class="callout warn">
+        <b>Armadilha:</b> <code>cac_hours_granted</code> por linha é ambíguo quando o teto corta no meio de um conjunto
+        (três certificados de 20h com teto de 50 — quem perde as 10?). Guarde o total concedido <b>por categoria</b> no read model
+        e mostre o teto na interface; não tente dividir a perda entre as linhas. Ninguém pergunta "qual certificado perdeu",
+        todo mundo pergunta "quanto conta no fim".
+      </div>
+    </div>
+  </section>
+
+  <!-- FASE 2 -->
+  <section class="step" id="fase-2">
+    <div class="step-head"><span class="step-num">2</span><h2>O certificado — guardar é metade do problema</h2></div>
+    <div class="view-business">
+      <p>
+        O outro bullet do desafio 5.1 é <i>"organização de documentos acadêmicos"</i>. Na prática: o PDF do certificado do evento
+        de 2023 está no e-mail, no Drive antigo, ou não está em lugar nenhum — e a coordenação vai pedir o original.
+      </p>
+      <ol class="rules">
+        <li>O arquivo fica junto da atividade, não solto numa pasta de documentos. Guardar é fácil; <b>reencontrar</b> é o problema, e o índice é a atividade.</li>
+        <li>O caminho do arquivo fica fora do diff de auditoria. O que se audita é a decisão sobre as horas, não onde o byte está.</li>
+        <li><b>Extração automática do certificado</b> — título, instituição, carga horária e data lidos pela mesma IA da importação de histórico — é <span class="status-pill planned">◇ planejado</span>. O contrato já existe e serve aos dois casos; é só mais um tipo de documento.</li>
+      </ol>
+    </div>
+    <div class="view-code">
+      <div class="code-path"><span><span class="method post">POST</span>/api/v1/me/complementary-activities</span><span class="status-pill mvp">⚑ B7</span></div>
+      <div class="io"><span class="io-k">entrada</span><span class="io-v">multipart — <code>category_id</code>, <code>title</code>, <code>hours_claimed</code>, <code>issued_at</code>, <code>certificate</code></span></div>
+      <div class="io"><span class="io-k">saída</span><span class="io-v">201 com a atividade <b>e o resumo da categoria já recalculado</b> — o front não precisa de segunda chamada pra atualizar a barra</span></div>
+      <div class="io"><span class="io-k">aviso</span><span class="io-v"><code>capped: true</code> + <code>hours_not_counted: 46</code> quando estoura o teto</span></div>
+      <pre><code>// Observer: cac_certificate_path entra no $hidden do AuditObserver.
+// O que a trilha precisa registrar é a decisão de horas, não o caminho
+// de um arquivo que pode ser movido por um deploy.</code></pre>
+    </div>
+  </section>
+
+  <!-- FASE 3 -->
+  <section class="step" id="fase-3">
+    <div class="step-head"><span class="step-num">3</span><h2>A validação da coordenação</h2></div>
+    <div class="view-business">
+      <p>
+        Na universidade real, horas complementares não são autodeclaradas: a coordenação confere o certificado e homologa.
+        O modelo já prevê isso — estado da atividade, quem revisou, parecer.
+      </p>
+      <div class="callout grifo">
+        <b>Decisão de escopo para hoje:</b> o aluno declara e o contador anda, <b>com a ressalva visível na tela</b>
+        ("valores declarados, sujeitos a homologação"). A fila de revisão da coordenação fica
+        <span class="status-pill planned">◇ planejado</span>.<br>
+        <b>Por quê:</b> o desafio pede ao <i>estudante</i> acompanhar suas atividades complementares — e acompanhar é
+        justamente saber o número antes de a coordenação dizer. Construir a fila de revisão consumiria o bloco inteiro
+        para entregar valor a um ator que não é o do desafio. A ressalva na tela é honestidade; esconder que o número
+        é declaratório seria o problema.
+      </div>
+      <p>Quando entrar, é um ciclo de quatro estados — rascunho, enviado, aprovado, rejeitado — com as horas homologadas podendo divergir das declaradas, e o parecer explicando a diferença.</p>
+    </div>
+    <div class="view-code">
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/staff/complementary-activities · <span class="method post">.../{id}/review</span></span><span class="status-pill planned">◇ planejado</span></div>
+      <pre><code>enum ActivityStatus: string {
+    case Draft = 'draft'; case Submitted = 'submitted';
+    case Approved = 'approved'; case Rejected = 'rejected';
+
+    public function countsTowardHours(): bool
+    {
+        // HOJE: Draft e Submitted também contam (declaratório, com ressalva).
+        // COM a fila: só Approved. Um ponto único de troca -- é para isso
+        // que a pergunta mora no enum, e não espalhada em três read models.
+        return $this !== self::Rejected;
+    }
+}</code></pre>
+      <div class="callout">
+        <b>RBAC:</b> a rota de revisão exige papel <code>coordinator</code> com escopo do próprio curso.
+        Um coordenador nunca homologa atividade de curso alheio — mesmo padrão de recorte que o FibroMais aplica por unidade.
+      </div>
+    </div>
+  </section>
+
+  <section class="step is-final" id="resumo">
+    <div class="step-head"><span class="step-num">✓</span><h2>Resumo</h2></div>
+    <table>
+      <thead><tr><th>Entrega</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Categorias com teto, semeadas da resolução do curso</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Cadastro de atividade + upload do certificado</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Contador respeitando o teto, com aviso preventivo</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Horas entrando na mesma barra de progresso</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Leitura automática do certificado por IA</td><td><span class="status-pill planned">◇ planejado</span></td></tr>
+        <tr><td>Fila de homologação da coordenação</td><td><span class="status-pill planned">◇ planejado</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <b>Pendência do dono do produto:</b> as categorias e os tetos precisam vir da resolução real do curso.
+      Sem ela o seed é fictício — funciona para a demo, mas perde a força de "é a minha grade de verdade",
+      que é justamente o que diferencia esta apresentação.
+    </div>
+  </section>
+
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — atividades complementares e o teto que ninguém conta
+  <span class="sig">228 horas declaradas, 182 contadas. A diferença é a feature.</span>
+</footer>
+
+<script src="../assets/site-chrome.js" defer></script>
+<script src="../assets/feature-view.js" defer></script>
+</body>
+</html>

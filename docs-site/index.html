@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusOS · Mapa do Sistema</title>
+<meta name="description" content="Documentação viva do CampusOS — a graduação inteira num lugar, mais o acervo que cada veterano deixa pro calouro. Desenho completo antes da primeira linha de código.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 1.75rem; }
+
+  .masthead {
+    text-align: center;
+    padding: 4rem 1.5rem 2.5rem;
+    border-bottom: 3px double var(--border-strong);
+  }
+  .masthead .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1.1rem;
+  }
+  .masthead .kicker::before,
+  .masthead .kicker::after { content: '✦ '; color: var(--amber-500); }
+  .masthead h1 {
+    font-size: clamp(2.4rem, 6.4vw, 3.9rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    margin: 0 0 0.85rem;
+    text-wrap: balance;
+  }
+  .masthead h1 .accent {
+    font-style: italic;
+    background: linear-gradient(100deg, var(--brand-700), var(--amber-600));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .masthead p {
+    max-width: 54ch;
+    margin: 0 auto;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+
+  .dateline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.9rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .dateline b { color: var(--brand-700); font-weight: 700; }
+  .dateline .clock { color: var(--rust-600); font-weight: 700; }
+
+  /* ── os dois desafios, lado a lado ────────────────────
+     O bloco que abre a página não é o produto, é o PROBLEMA — é a
+     primeira coisa que o jurado quer ver, e a primeira coisa que a dupla
+     esquece às 4h da manhã. */
+  .challenges { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem; }
+  .chl {
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    background: var(--surface);
+    padding: 1.1rem 1.2rem 1.2rem;
+    position: relative;
+  }
+  .chl.primary { border-top: 3px solid var(--amber-500); }
+  .chl.secondary { border-top: 3px solid var(--brand-500); }
+  .chl-num { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; }
+  .chl.primary .chl-num { color: var(--amber-700); }
+  .chl.secondary .chl-num { color: var(--brand-700); }
+  .chl h3 { font-size: 1.12rem; margin: 0.3rem 0 0.5rem; line-height: 1.25; }
+  .chl p { font-size: 0.86rem; color: var(--ink-soft); margin: 0 0 0.75rem; }
+  .chl ul { margin: 0; padding-left: 1.05rem; font-size: 0.82rem; color: var(--ink-soft); }
+  .chl li { margin-bottom: 0.22rem; }
+  .chl li b { color: var(--ink); font-weight: 600; }
+
+  .answer {
+    margin-top: 1.1rem;
+    border: 1px dashed var(--border-strong);
+    border-radius: 5px;
+    background: var(--amber-50);
+    padding: 1rem 1.2rem;
+    font-size: 0.94rem;
+    color: var(--ink-soft);
+  }
+  .answer b { color: var(--ink); }
+  .answer .lbl { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber-700); display: block; margin-bottom: 0.4rem; font-weight: 700; }
+
+  /* ── legenda de status ──────────────────────────────── */
+  .statuskey { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem; margin: 1.25rem 0 0; }
+  .statuskey div { border: 1px solid var(--border); border-radius: 4px; padding: 0.6rem 0.75rem; background: var(--surface); }
+  .statuskey p { margin: 0.4rem 0 0; font-size: 0.78rem; color: var(--ink-soft); line-height: 1.5; }
+
+  .section-rule:first-of-type { margin-top: 2.5rem; }
+
+  .scope-out { margin-top: 1.25rem; padding: 1.25rem 1.4rem; border: 1px dashed var(--border-strong); border-radius: 5px; background: var(--surface); }
+  .scope-out ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .scope-out li { font-size: 0.88rem; color: var(--ink-soft); display: flex; gap: 0.6rem; }
+  .scope-out li::before { content: '✕'; color: var(--rust-500); flex-shrink: 0; font-family: var(--font-mono); font-size: 0.8rem; padding-top: 0.15rem; }
+  .scope-out li b { color: var(--ink); }
+
+  .pend { margin-top: 1.25rem; padding: 1.25rem 1.4rem; border: 1px solid var(--rust-500); border-left-width: 3px; border-radius: 5px; background: var(--rust-50); }
+  .pend ol { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.65rem; }
+  .pend li { font-size: 0.88rem; color: var(--ink-soft); }
+  .pend li b { color: var(--ink); }
+
+  footer.site-footer .sig {
+    display: block;
+    margin-top: 0.4rem;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  @media (max-width: 720px) {
+    .challenges { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .masthead { padding: 3rem 1.25rem 2rem; }
+    .wrap { padding: 0 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs">docs-site/index.html</span>
+</header>
+
+<div class="masthead">
+  <div class="kicker">desenho anterior ao código · hacklab utfpr 2026</div>
+  <h1>Sua graduação inteira — e a <span class="accent">memória de quem já passou</span> por ela</h1>
+  <p>Progresso do curso, pré-requisitos, horas complementares e certificados de um lado. Do outro, o acervo que cada veterano deixa pro calouro que entra na mesma disciplina. Um sistema, dois desafios.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="dateline">
+    <span>v0.0.0 · <b>desenho</b> · 0 linhas de código</span>
+    <span>escrito 2026-09-19 01:45 · <span class="clock">entrega hoje 16:00</span></span>
+  </div>
+
+  <div class="section-rule"><span class="label">O problema</span></div>
+
+  <div class="challenges">
+    <div class="chl primary">
+      <div class="chl-num">5.1 · desafio principal</div>
+      <h3>Jornada acadêmica e planejamento da graduação</h3>
+      <p>O estudante não consegue enxergar a própria trajetória: o que falta, o que trava, quando termina.</p>
+      <ul>
+        <li><b>Progresso</b> no curso</li>
+        <li><b>Concluídas × pendentes</b></li>
+        <li><b>Pré-requisitos</b> e o que eles liberam</li>
+        <li>Planejamento dos <b>próximos períodos</b></li>
+        <li><b>Documentos</b> acadêmicos</li>
+        <li><b>Atividades complementares</b></li>
+        <li>Impacto de <b>reprovações e atrasos</b></li>
+      </ul>
+    </div>
+    <div class="chl secondary">
+      <div class="chl-num">5.2 · cobertura</div>
+      <h3>Integração e colaboração na comunidade acadêmica</h3>
+      <p>O conhecimento de quem já cursou a disciplina evapora quando a turma acaba.</p>
+      <ul>
+        <li><b>Aproximar calouros e veteranos</b></li>
+        <li>Promover a <b>troca de conhecimentos</b></li>
+        <li>Encontrar <b>grupos de estudo</b></li>
+        <li>Conectar estudantes de <b>períodos diferentes</b></li>
+        <li>Divulgar <b>iniciativas</b> de estudantes</li>
+        <li>Fortalecer o <b>pertencimento</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="answer">
+    <span class="lbl">Por que um sistema só resolve os dois</span>
+    A <b>matrícula é a chave de ambos.</b> No momento em que o aluno importa o requerimento e o sistema sabe que ele está em <i>Cálculo 2, turma S71, 2026/1</i>, duas coisas acontecem de graça: a barra de progresso da graduação anda (5.1), e o aluno passa a enxergar tudo que qualquer veterano já deixou público <b>naquela mesma disciplina, em qualquer semestre</b> (5.2). Sem a matrícula não há progresso; sem a matrícula não há a quem mostrar o acervo. É o mesmo dado sustentando os dois desafios — e é por isso que separá-los em dois produtos seria construir duas vezes a mesma coisa.
+  </div>
+
+  <div class="statuskey">
+    <div>
+      <span class="status-pill built">✅ em código</span>
+      <p>Migration, model e teste existem. Enquanto o hackathon não começa a codar, nada tem esta marca.</p>
+    </div>
+    <div>
+      <span class="status-pill mvp">⚑ MVP · hoje</span>
+      <p>Compromisso da madrugada. Sem isto, a demo das 16:00 não fecha.</p>
+    </div>
+    <div>
+      <span class="status-pill stretch">◎ esticada</span>
+      <p>Entra se sobrar tempo. Melhora muito o pitch, mas a demo sobrevive sem.</p>
+    </div>
+    <div>
+      <span class="status-pill planned">◇ planejado</span>
+      <p>Decisão de produto já tomada, fora do escopo de hoje. Vale citar na apresentação como roadmap.</p>
+    </div>
+  </div>
+
+  <div class="section-rule"><span class="label">Comece por aqui</span></div>
+  <div class="cards-field">
+    <div class="cards">
+
+      <a class="card card--rust" href="plano-de-ataque.html">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Hackathon · madrugada</span>
+            <h3 class="card-title">Plano de ataque</h3>
+            <p class="card-desc">A ordem exata de implementação das 01:45 às 16:00, com o que cortar quando atrasar, a divisão da dupla e o roteiro de demo de 5 minutos. É a única página com hora marcada — leia antes de abrir a IDE.</p>
+            <span class="card-tags"><span class="tag">7 blocos</span><span class="tag">pontos de corte</span><span class="tag">roteiro de demo</span></span>
+          </span>
+          <span class="card-arrow">abrir →</span>
+        </span>
+      </a>
+
+      <a class="card card--brand" href="banco-de-dados.html">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Banco de dados</span>
+            <h3 class="card-title">Modelo de dados (DER)</h3>
+            <p class="card-desc">As 24 tabelas do sistema, agrupadas pelos 6 módulos que as possuem — do catálogo acadêmico (curso, matriz, disciplina, pré-requisito, oferta) à camada colaborativa (nota, tarefa, evento) — com colunas, chaves e o porquê de cada decisão de modelagem.</p>
+            <span class="card-tags"><span class="tag">24 tabelas</span><span class="tag">6 módulos</span><span class="tag">ER navegável</span><span class="tag">multi-tenant</span></span>
+          </span>
+          <span class="card-arrow">abrir →</span>
+        </span>
+      </a>
+
+      <a class="card card--amber" href="identidade-visual.html">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Design</span>
+            <h3 class="card-title">Identidade visual</h3>
+            <p class="card-desc">A metáfora do caderno: tinta azul, marca-texto âmbar e as duas cores de correção. Paleta completa, tipografia e os tokens prontos pra colar no front — pra dupla não perder 40 minutos escolhendo cor às 3 da manhã.</p>
+            <span class="card-tags"><span class="tag">paleta</span><span class="tag">tipografia</span><span class="tag">tokens CSS</span></span>
+          </span>
+          <span class="card-arrow">abrir →</span>
+        </span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="section-rule"><span class="label">Como o sistema funciona</span></div>
+  <div class="cards-field">
+    <div class="cards">
+
+      <a class="card card--amber" href="features/matricula-e-progressao.html">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Desafio 5.1 · o coração</span>
+            <h3 class="card-title">Do requerimento à barra de progresso</h3>
+            <p class="card-desc">O aluno fotografa o requerimento de matrícula, uma IA lê, ele confirma — e a partir daí o sistema sabe tudo: quanto falta pra formar, o que está travado por pré-requisito, o que reprovar em Cálculo 2 custa em semestres. Em duas leituras: regra de negócio ou código real, você escolhe.</p>
+            <span class="card-tags"><span class="tag">⚑ MVP</span><span class="tag">OCR por IA</span><span class="tag">202+Job</span><span class="tag">simulação</span></span>
+          </span>
+          <span class="card-arrow">ler o fluxo →</span>
+        </span>
+      </a>
+
+      <a class="card card--brand" href="features/acervo-compartilhado.html">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Desafio 5.2 · a rede</span>
+            <h3 class="card-title">O acervo do veterano</h3>
+            <p class="card-desc">Cinco níveis de visibilidade numa coluna só, e a regra que faz a mágica: uma nota marcada como <i>da disciplina</i> atravessa semestres. O veterano de 2024/1 escreve; o calouro de 2027/1 recebe, no dia em que se matricula. Mais as tarefas da turma, que só uma pessoa precisa cadastrar.</p>
+            <span class="card-tags"><span class="tag">⚑ MVP</span><span class="tag">5 visibilidades</span><span class="tag">herança de acervo</span></span>
+          </span>
+          <span class="card-arrow">ler o desenho →</span>
+        </span>
+      </a>
+
+      <a class="card card--leaf" href="features/horas-e-certificados.html">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Desafio 5.1 · integralização</span>
+            <h3 class="card-title">Horas complementares e certificados</h3>
+            <p class="card-desc">O aluno joga o certificado no sistema, escolhe a categoria e o contador anda — respeitando o teto por categoria que a resolução do curso define. A conta que todo mundo faz errado no último semestre, feita certo desde o primeiro.</p>
+            <span class="card-tags"><span class="tag">⚑ MVP</span><span class="tag">teto por categoria</span><span class="tag">validação da coordenação</span></span>
+          </span>
+          <span class="card-arrow">ler o desenho →</span>
+        </span>
+      </a>
+
+      <a class="card card--brand" href="features/copiloto-mcp.html">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Diferencial de pitch</span>
+            <h3 class="card-title">O copiloto — CampusOS dentro do Claude</h3>
+            <p class="card-desc">Um servidor MCP sobre as mesmas Actions do domínio: o aluno conecta o CampusOS no Claude e pergunta "o que eu preciso estudar pra prova de Cálculo 2?" — a IA lê o acervo dos veteranos, as tarefas da turma e a progressão dele. Barato de construir porque a arquitetura modular já separou canal de regra.</p>
+            <span class="card-tags"><span class="tag">◎ esticada</span><span class="tag">laravel/mcp</span><span class="tag">7 tools</span></span>
+          </span>
+          <span class="card-arrow">ler o desenho →</span>
+        </span>
+      </a>
+
+      <a class="card card--ink" href="features/painel-da-coordenacao.html">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Camada institucional</span>
+            <h3 class="card-title">Painel da coordenação</h3>
+            <p class="card-desc">O que o desafio 5.1 pede e ninguém lembra de construir: a visão de quem coordena. Disciplinas-gargalo, taxa de reprovação, coorte que está atrasando, alunos em risco de jubilamento — em agregados anônimos, nunca aluno a aluno.</p>
+            <span class="card-tags"><span class="tag">◎ esticada</span><span class="tag">agregados anônimos</span><span class="tag">RBAC</span></span>
+          </span>
+          <span class="card-arrow">ler o desenho →</span>
+        </span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="section-rule"><span class="label">Endpoints operacionais</span></div>
+  <div class="cards-field">
+    <div class="cards">
+
+      <a class="card card--brand" href="/docs/api" target="_blank" rel="noopener">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">API</span>
+            <h3 class="card-title">Documentação interativa</h3>
+            <p class="card-desc">Todos os endpoints gerados a partir do código (Scribe), testáveis no navegador. Vale instalar cedo: é o que o colega do front vai abrir em vez de te perguntar no WhatsApp.</p>
+            <span class="card-tags"><span class="tag">/docs/api</span><span class="tag">openapi.yaml</span><span class="tag">◎ esticada</span></span>
+          </span>
+          <span class="card-arrow">abrir →</span>
+        </span>
+      </a>
+
+      <a class="card card--leaf" href="/up" target="_blank" rel="noopener">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Infra</span>
+            <h3 class="card-title">Health check</h3>
+            <p class="card-desc">O endpoint padrão do Laravel — responde 200 quando a aplicação está de pé. Já vem no template, nada a fazer.</p>
+            <span class="card-tags"><span class="tag">/up</span><span class="tag">200 OK</span></span>
+          </span>
+          <span class="card-arrow">abrir →</span>
+        </span>
+      </a>
+
+      <a class="card card--ink" href="/data-console" target="_blank" rel="noopener">
+        <span class="card-accent" aria-hidden="true"></span>
+        <span class="card-body">
+          <span>
+            <span class="card-category">Dados</span>
+            <h3 class="card-title">Console de dados (Filament)</h3>
+            <p class="card-desc">CRUD sobre os dados reais de todos os módulos, pra acompanhar a demo sem abrir o psql. Num hackathon vale mais que no FibroMais: é com ele que você conserta um dado errado 3 minutos antes de apresentar.</p>
+            <span class="card-tags"><span class="tag">/data-console</span><span class="tag">◎ esticada</span></span>
+          </span>
+          <span class="card-arrow">abrir →</span>
+        </span>
+      </a>
+
+    </div>
+  </div>
+  <p style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); margin: 0.9rem 0 0;">
+    Os três links acima são caminhos do próprio Laravel (não deste site estático) — só resolvem se este docs-site estiver sendo visto no mesmo domínio da aplicação rodando.
+  </p>
+
+  <div class="section-rule"><span class="label">O que NÃO vamos fazer</span></div>
+  <div class="scope-out">
+    <ul>
+      <li><b>Integrar com o sistema acadêmico da UTFPR.</b> Não há API pública, e negociar acesso não cabe numa madrugada. O aluno traz o próprio documento — o que, aliás, é a única forma de o produto funcionar em qualquer universidade no dia seguinte.</li>
+      <li><b>Chat, feed social, curtidas, perfil público.</b> O 5.2 é sobre <i>troca de conhecimento</i>, não sobre mais uma rede social. O acervo é a rede; a nota é o post.</li>
+      <li><b>Finanças pessoais.</b> Herdada do LifeOS e desenhada no DER (<code>transactions</code>), mas desligada: não é o desafio, e polui a tela do aluno. Fica como módulo ativável — ver o card de identidade visual sobre não sujar a imagem do produto.</li>
+      <li><b>Serviços de campus</b> (RU, transporte, chamados de infraestrutura). É o desafio 5.4, e este projeto não concorre nele. Citar como roadmap é honesto; fingir que faz, não.</li>
+      <li><b>Mobile nativo.</b> A API é a mesma; a demo é web responsiva.</li>
+    </ul>
+  </div>
+
+  <div class="section-rule"><span class="label">⚠️ Pendências do dono do produto</span></div>
+  <div class="pend">
+    <p style="margin:0 0 0.9rem; font-size:0.88rem; color:var(--ink-soft);">Perguntas cuja resposta muda o código. Seguindo a regra de ouro nº 1 do template, <b>nenhuma delas foi resolvida por conta própria</b> — cada uma tem um palpite marcado como tal, que vale até o Felipe decidir.</p>
+    <ol>
+      <li><b>Requerimento de matrícula ou histórico escolar?</b> O requerimento só tem o semestre atual — dele o sistema não consegue desenhar a barra de progresso "desde o primeiro período", que é literalmente o que o 5.1 pede. O <b>histórico escolar</b> tem toda disciplina cursada com nota e status, e reconstitui a graduação inteira num upload. <i>Palpite: aceitar os dois, tratando o histórico como a importação rica e o requerimento como a atualização do semestre.</i> Ver <a href="features/matricula-e-progressao.html">Fase 2</a>.</li>
+      <li><b>Qual matriz vai ser semeada?</b> Precisa do PDF/planilha da matriz real (código, nome, carga horária e período sugerido de cada disciplina, mais a tabela de pré-requisitos). Sem ela, o seed é fictício e a demo perde a força de "é a minha grade de verdade".</li>
+      <li><b>Nota e frequência:</b> escala 0–10 ou 0–100? Média de aprovação? Frequência mínima (75%)? O enum de status da matrícula (<code>aprovado</code>/<code>reprovado por nota</code>/<code>reprovado por falta</code>) depende disso.</li>
+      <li><b>Como o aluno prova que é aluno?</b> E-mail institucional com código de verificação é o caminho certo e custa ~40 min. <i>Palpite pro hackathon: cadastro livre com domínio de e-mail validado contra a instituição, verificação por e-mail marcada como ◎ esticada.</i></li>
+      <li><b>Anotação pública precisa de moderação?</b> Material com direito autoral e prova vazada são risco real num acervo aberto. <i>Palpite: publicar direto, com denúncia e remoção pela coordenação — moderação prévia mata a feature.</i></li>
+      <li><b>Front-end:</b> quem da dupla faz, e com o quê? A resposta decide se vale gastar 30 min instalando o Scribe pra gerar a doc de API, ou se vocês combinam contrato no grito.</li>
+    </ol>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — desenho de produto anterior ao código, no padrão do template modular
+  <span class="sig">Escrito em 19/09/2026, 01:45, antes da primeira migration. Se o código divergir desta página, um dos dois é bug — decida qual.</span>
+</footer>
+
+<script src="assets/site-chrome.js" defer></script>
+</body>
+</html>

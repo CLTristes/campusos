@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Identidade Visual · CampusOS</title>
+<meta name="description" content="A metáfora do caderno — tinta, marca-texto e as duas cores de correção. Paleta, tipografia e tokens prontos para o front do CampusOS.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1.75rem 5rem; }
+  header.page { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 0.5rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber-700); font-weight: 600; }
+  h1 { font-size: 2.5rem; margin: 0.35rem 0 0.7rem; letter-spacing: -0.02em; }
+  h2 { font-size: 1.55rem; margin: 2.5rem 0 0.4rem; }
+  .lede { max-width: 66ch; color: var(--ink-soft); font-size: 1.04rem; margin: 0; }
+  p { color: var(--ink-soft); max-width: 68ch; }
+
+  .ramp { display: grid; grid-template-columns: repeat(auto-fit, minmax(66px, 1fr)); gap: 0; border-radius: 5px; overflow: hidden; border: 1px solid var(--border-strong); margin: 0.75rem 0 0.4rem; }
+  .sw { padding: 1.5rem 0.4rem 0.5rem; text-align: center; font-family: var(--font-mono); font-size: 0.62rem; line-height: 1.5; }
+  .sw b { display: block; font-size: 0.68rem; font-weight: 700; }
+  .ramp-note { font-size: 0.83rem; color: var(--ink-soft); margin: 0 0 1.5rem; max-width: 70ch; }
+  .ramp-note b { color: var(--ink); }
+
+  .roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.8rem; margin: 1.1rem 0 1.5rem; }
+  .role { border: 1px solid var(--border); border-radius: 5px; padding: 0.85rem 1rem; background: var(--surface); }
+  .role .chip { display: inline-block; width: 100%; height: 0.55rem; border-radius: 99px; margin-bottom: 0.55rem; }
+  .role h4 { margin: 0 0 0.3rem; font-size: 0.97rem; }
+  .role p { margin: 0; font-size: 0.82rem; }
+
+  .type-demo { border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); padding: 1.4rem 1.5rem; margin: 1rem 0 0.5rem; }
+  .type-demo .lbl { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.4rem; }
+  .type-demo .spec { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); margin-top: 0.35rem; }
+  .type-demo + .type-demo { margin-top: 0.8rem; }
+  .t-serif { font-family: var(--font-serif); font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; color: var(--ink); }
+  .t-sans { font-family: var(--font-sans); font-size: 1rem; color: var(--ink-soft); line-height: 1.65; }
+  .t-mono { font-family: var(--font-mono); font-size: 0.9rem; color: var(--ink); }
+
+  .dont { border: 1px solid var(--rust-500); border-left-width: 3px; border-radius: 5px; background: var(--rust-50); padding: 1.1rem 1.3rem; margin: 1.2rem 0; }
+  .dont ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+  .dont li { font-size: 0.88rem; color: var(--ink-soft); display: flex; gap: 0.6rem; }
+  .dont li::before { content: '✕'; color: var(--rust-500); font-family: var(--font-mono); font-size: 0.8rem; flex-shrink: 0; padding-top: 0.12rem; }
+  .dont li b { color: var(--ink); }
+  @media (max-width: 560px) { .wrap { padding: 1.5rem 1.1rem 4rem; } h1 { font-size: 1.85rem; } }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="index.html">docs-site</a><span class="sep">/</span>identidade-visual.html</span>
+</header>
+
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">CampusOS · design</div>
+    <h1>Identidade visual</h1>
+    <p class="lede">
+      A metáfora é <strong>o caderno</strong> — o objeto que o produto substitui. Papel levemente quente, tinta azul de caneta,
+      marca-texto âmbar e as duas cores de correção de professor. Nenhuma cor aqui é decorativa: cada uma <strong>já significa
+      alguma coisa no domínio</strong> antes de significar alguma coisa na interface, e é isso que faz a tela ser lida sem legenda.
+    </p>
+  </header>
+
+  <h2>Tinta — a marca</h2>
+  <p>Azul de caneta esferográfica. Marca, links, ações primárias, estados neutros de destaque.</p>
+  <div class="ramp">
+    <div class="sw" style="background:#f3f5fd;color:#243063"><b>50</b>f3f5fd</div>
+    <div class="sw" style="background:#e6ebfb;color:#243063"><b>100</b>e6ebfb</div>
+    <div class="sw" style="background:#cbd6f6;color:#243063"><b>200</b>cbd6f6</div>
+    <div class="sw" style="background:#a6b9ee;color:#243063"><b>300</b>a6b9ee</div>
+    <div class="sw" style="background:#7b94e2;color:#fff"><b>400</b>7b94e2</div>
+    <div class="sw" style="background:#5570d2;color:#fff"><b>500</b>5570d2</div>
+    <div class="sw" style="background:#3d55be;color:#fff"><b>600</b>3d55be</div>
+    <div class="sw" style="background:#31429d;color:#fff"><b>700</b>31429d</div>
+    <div class="sw" style="background:#2a377e;color:#fff"><b>800</b>2a377e</div>
+    <div class="sw" style="background:#243063;color:#fff"><b>900</b>243063</div>
+  </div>
+  <p class="ramp-note"><b>600</b> é a marca. <b>700</b> é o texto de link (contraste em papel). <b>50/100</b> são fundos de destaque. Acima de 400, texto branco.</p>
+
+  <h2>Marca-texto — o que está grifado para hoje</h2>
+  <p>Âmbar. Destaque, chamada de atenção, e o estado <code>⚑ MVP</code> em toda esta documentação.</p>
+  <div class="ramp">
+    <div class="sw" style="background:#fdf8ec;color:#875613"><b>50</b>fdf8ec</div>
+    <div class="sw" style="background:#fbf0d4;color:#875613"><b>100</b>fbf0d4</div>
+    <div class="sw" style="background:#f6dfa4;color:#875613"><b>200</b>f6dfa4</div>
+    <div class="sw" style="background:#efc86a;color:#875613"><b>300</b>efc86a</div>
+    <div class="sw" style="background:#e5ae3a;color:#3a2a06"><b>400</b>e5ae3a</div>
+    <div class="sw" style="background:#d1911c;color:#fff"><b>500</b>d1911c</div>
+    <div class="sw" style="background:#ac7113;color:#fff"><b>600</b>ac7113</div>
+    <div class="sw" style="background:#875613;color:#fff"><b>700</b>875613</div>
+  </div>
+  <p class="ramp-note"><b>Âmbar nunca é texto pequeno sobre papel</b> — 400 e 500 não passam contraste em corpo de texto. Use como fundo (100/200) com tinta 700 por cima, ou como faixa/borda.</p>
+
+  <h2>Correção — verde e vermelho</h2>
+  <p>As duas canetas do professor. No CampusOS elas mantêm exatamente o significado que já têm em qualquer prova corrigida.</p>
+  <div class="ramp">
+    <div class="sw" style="background:#f1f8f3;color:#14432a"><b>50</b>f1f8f3</div>
+    <div class="sw" style="background:#e2f1e8;color:#14432a"><b>100</b>e2f1e8</div>
+    <div class="sw" style="background:#c1e2cf;color:#14432a"><b>200</b>c1e2cf</div>
+    <div class="sw" style="background:#6bb88d;color:#0d3020"><b>400</b>6bb88d</div>
+    <div class="sw" style="background:#419a68;color:#fff"><b>500</b>419a68</div>
+    <div class="sw" style="background:#2f8253;color:#fff"><b>600</b>2f8253</div>
+    <div class="sw" style="background:#246842;color:#fff"><b>700</b>246842</div>
+    <div class="sw" style="background:#14432a;color:#fff"><b>900</b>14432a</div>
+  </div>
+  <div class="ramp">
+    <div class="sw" style="background:#fdf3f0;color:#8b3522"><b>50</b>fdf3f0</div>
+    <div class="sw" style="background:#fbe4dd;color:#8b3522"><b>100</b>fbe4dd</div>
+    <div class="sw" style="background:#dd7f65;color:#3d1509"><b>400</b>dd7f65</div>
+    <div class="sw" style="background:#c9563a;color:#fff"><b>500</b>c9563a</div>
+    <div class="sw" style="background:#ac432c;color:#fff"><b>600</b>ac432c</div>
+    <div class="sw" style="background:#8b3522;color:#fff"><b>700</b>8b3522</div>
+  </div>
+
+  <h2>O que cada cor significa no produto</h2>
+  <div class="roles">
+    <div class="role"><span class="chip" style="background:#3d55be"></span><h4>Tinta</h4><p>Marca, navegação, ação primária. O que o aluno <b>escreve</b>: nota, tarefa, anotação.</p></div>
+    <div class="role"><span class="chip" style="background:#e5ae3a"></span><h4>Marca-texto</h4><p>Atenção e prazo. Disciplina em curso, entrega chegando, horas que não vão contar.</p></div>
+    <div class="role"><span class="chip" style="background:#2f8253"></span><h4>Correção verde</h4><p>Aprovado, hora cumprida, pré-requisito satisfeito, disciplina liberada.</p></div>
+    <div class="role"><span class="chip" style="background:#c9563a"></span><h4>Correção vermelha</h4><p>Reprovado, travado, pendente, prazo de integralização em risco.</p></div>
+  </div>
+  <div class="callout grifo">
+    <b>A regra que mantém a tela legível:</b> na barra de progresso, a cor da faixa vem da <b>proporção</b>, não do tipo de hora —
+    verde quando a faixa está perto de fechar, âmbar no meio, vermelho quando mal começou. O aluno lê o estado da graduação
+    de longe, sem precisar interpretar cinco legendas.
+  </div>
+
+  <h2>Tipografia</h2>
+  <div class="type-demo">
+    <div class="lbl">Títulos · Newsreader</div>
+    <div class="t-serif">Faltam 1.340 horas para você se formar</div>
+    <div class="spec">Newsreader 600 · letter-spacing −0.02em · Google Fonts · fallback: Georgia, serif</div>
+  </div>
+  <div class="type-demo">
+    <div class="lbl">Texto · Instrument Sans</div>
+    <div class="t-sans">Cálculo 2 está travando Cálculo 3 e Física 2. Reprovar nela em 2026/1 adiaria sua formatura em um semestre — a primeira oportunidade de cursar Fenômenos de Transporte cairia de 2027/1 para 2027/2.</div>
+    <div class="spec">Instrument Sans 400–700 · line-height 1.6 · fallback: -apple-system, Segoe UI, Roboto</div>
+  </div>
+  <div class="type-demo">
+    <div class="lbl">Dados · JetBrains Mono</div>
+    <div class="t-mono">MA72B · 2.860 / 4.200 h · 68% · turma S71 · 2026/1</div>
+    <div class="spec">JetBrains Mono 400–700 · todo número, código e rótulo técnico</div>
+  </div>
+  <p style="margin-top:1rem">
+    <b>A regra da serif:</b> Newsreader só em título e em frase de efeito. Nunca em corpo de texto longo, nunca em rótulo de
+    interface, nunca em número. Ela existe para dar peso editorial ao que o aluno precisa <b>sentir</b> — o número que falta,
+    a data da formatura — e perde esse efeito na hora em que aparece em toda parte.
+  </p>
+  <p>
+    <b>E a mono:</b> todo número é mono. Carga horária, percentual, código de disciplina, semestre. Números proporcionais em
+    tabela desalinham as colunas e fazem a tela parecer amadora — é a correção mais barata de aparência que existe.
+  </p>
+
+  <h2>Tokens — cole isto no front</h2>
+  <p>É literalmente o topo de <code>docs-site/assets/site.css</code>. A dupla não deve escolher cor nenhuma às 3 da manhã.</p>
+  <pre><code>:root {
+  /* tinta — marca, links, ação primária */
+  --brand-50:#f3f5fd; --brand-100:#e6ebfb; --brand-200:#cbd6f6; --brand-300:#a6b9ee;
+  --brand-400:#7b94e2; --brand-500:#5570d2; --brand-600:#3d55be; --brand-700:#31429d;
+  --brand-800:#2a377e; --brand-900:#243063;
+
+  /* marca-texto — atenção, prazo, MVP */
+  --amber-50:#fdf8ec; --amber-100:#fbf0d4; --amber-200:#f6dfa4; --amber-300:#efc86a;
+  --amber-400:#e5ae3a; --amber-500:#d1911c; --amber-600:#ac7113; --amber-700:#875613;
+
+  /* correção verde — aprovado, cumprido, liberado */
+  --leaf-50:#f1f8f3; --leaf-100:#e2f1e8; --leaf-200:#c1e2cf; --leaf-400:#6bb88d;
+  --leaf-500:#419a68; --leaf-600:#2f8253; --leaf-700:#246842; --leaf-900:#14432a;
+
+  /* correção vermelha — reprovado, travado, em risco */
+  --rust-50:#fdf3f0; --rust-100:#fbe4dd; --rust-400:#dd7f65;
+  --rust-500:#c9563a; --rust-600:#ac432c; --rust-700:#8b3522;
+
+  /* papel e tinta neutra */
+  --paper:#faf8f4; --surface:#ffffff; --surface-2:#f3efe6;
+  --ink:#1b2231; --ink-soft:#4b5468; --ink-faint:#808a9c;
+  --border:#e5e0d5; --border-strong:#d5cfc1; --focus:#3d55be;
+
+  --font-sans:'Instrument Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --font-serif:'Newsreader',Georgia,'Iowan Old Style',serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Consolas,monospace;
+}</code></pre>
+  <pre><code>&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&amp;family=Instrument+Sans:ital,wght@0,400..700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap"&gt;</code></pre>
+
+  <h2>Não poluir a imagem</h2>
+  <p>
+    O pedido foi explícito: o produto não pode parecer um canivete suíço. Um organizador de vida com dez áreas na tela inicial
+    comunica "mais uma coisa para manter", que é exatamente o oposto do que um estudante sobrecarregado quer ver.
+  </p>
+  <div class="dont">
+    <ul>
+      <li><b>A tela inicial é a graduação.</b> Barra de progresso, o que falta, o que vence. Nada mais disputa esse espaço.</li>
+      <li><b>Finanças nasce desligada.</b> Vive em <code>usr_enabled_modules</code> e só aparece se o aluno ligar. Módulo herdado do LifeOS não entra por inércia.</li>
+      <li><b>Sem gamificação.</b> Ponto, medalha, ofensiva. O aluno já é avaliado o suficiente; transformar a graduação em jogo é desrespeitoso com quem está atrasado.</li>
+      <li><b>Sem feed.</b> O acervo é buscado dentro da disciplina, no momento em que se precisa dele. Feed cria obrigação de acompanhar, e obrigação nova é o que menos falta na vida de quem estuda.</li>
+      <li><b>Sem badge de contagem não lida.</b> Nenhum número vermelho no ícone. O sistema avisa de prazo; não cria ansiedade por conta própria.</li>
+    </ul>
+  </div>
+  <div class="callout good">
+    <b>O teste de uma tela nova:</b> ela ajuda o aluno a responder "quanto falta" ou "o que eu faço agora"?
+    Se não, ela mora atrás de um clique — e se ninguém sentir falta dela, ela não precisava existir.
+  </div>
+
+  <h2>O ícone</h2>
+  <p>
+    Quadrado de cantos arredondados com gradiente tinta → marca-texto, a 135°. É o <code>&lt;link rel="icon"&gt;</code> de toda
+    página deste site, em SVG inline — sem arquivo, sem requisição. Serve de favicon e de marca na barra de navegação,
+    e o gradiente sozinho já carrega as duas cores centrais da identidade.
+  </p>
+  <div style="display:flex;align-items:center;gap:1.4rem;margin:1rem 0 0;">
+    <div style="width:4.5rem;height:4.5rem;border-radius:1.1rem;background:linear-gradient(135deg,#3d55be,#e5ae3a)"></div>
+    <div style="width:2.2rem;height:2.2rem;border-radius:0.55rem;background:linear-gradient(135deg,#3d55be,#e5ae3a)"></div>
+    <div style="width:1.3rem;height:1.3rem;border-radius:0.35rem;background:linear-gradient(135deg,#3d55be,#e5ae3a)"></div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — identidade visual
+  <span class="sig">Tinta, marca-texto e as duas canetas de correção. Nada que já não estivesse no caderno.</span>
+</footer>
+
+<script src="assets/site-chrome.js" defer></script>
+</body>
+</html>

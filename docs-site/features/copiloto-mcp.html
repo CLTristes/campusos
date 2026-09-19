@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O copiloto · CampusOS</title>
+<meta name="description" content="Um servidor MCP sobre as mesmas Actions do domínio — o CampusOS conectado ao Claude, lendo o acervo dos veteranos e a progressão do aluno.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/feature.css">
+<style>
+  .chat { border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); padding: 1.1rem 1.2rem; margin: 1.4rem 0; }
+  .msg { margin-bottom: 0.9rem; }
+  .msg:last-child { margin-bottom: 0; }
+  .msg-who { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.3rem; font-weight: 700; }
+  .msg.user .msg-body { background: var(--brand-50); border-left: 3px solid var(--brand-500); }
+  .msg.ai .msg-body { background: var(--surface-2); border-left: 3px solid var(--amber-500); }
+  .msg-body { padding: 0.7rem 0.9rem; border-radius: 0 4px 4px 0; font-size: 0.9rem; color: var(--ink-soft); }
+  .msg-body b { color: var(--ink); }
+  .toolcall { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); margin: 0.4rem 0 0.4rem 0.2rem; }
+  .toolcall span { color: var(--leaf-700); }
+  .tools-table td:first-child { font-family: var(--font-mono); font-size: 0.79rem; white-space: nowrap; }
+</style>
+</head>
+<body data-view="business">
+
+<header class="site-nav">
+  <a class="brand" href="../index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="../index.html">docs-site</a><span class="sep">/</span>features/copiloto-mcp.html</span>
+</header>
+
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">Diferencial de pitch · canal MCP</div>
+    <h1>O copiloto — CampusOS dentro do Claude</h1>
+    <p class="lede">
+      O aluno conecta o CampusOS ao Claude e pergunta em português o que precisa estudar. A IA lê a progressão dele,
+      as tarefas da turma e o acervo que os veteranos deixaram naquela disciplina — e responde com <strong>o contexto real
+      da graduação daquela pessoa</strong>, não com generalidade de internet.
+    </p>
+    <div class="meta-row">
+      <span><b>Canal:</b> MCP (não é módulo)</span>
+      <span><b>Tabelas novas:</b> nenhuma</span>
+      <span><b>Bloco:</b> B8 · terceira esticada</span>
+      <span><b>Status:</b> <span class="status-pill stretch">◎ esticada</span></span>
+    </div>
+    <div class="switch-bar">
+      <div class="view-switch" role="group" aria-label="Nível de detalhe">
+        <button type="button" data-view="business" aria-pressed="true">Regra de negócio</button>
+        <button type="button" data-view="code" aria-pressed="false">Código real</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="step" id="fase-1">
+    <div class="step-head"><span class="step-num">1</span><h2>Por que isto é barato — e por que só aqui</h2></div>
+    <div class="view-business">
+      <p>
+        A regra de ouro nº 3 do template diz que toda lógica vive em <b>Actions</b> dentro do módulo dono, e que os canais —
+        REST, MCP, linha de comando — são <b>adaptadores finos</b> sobre as mesmas Actions.
+      </p>
+      <p>
+        Na maioria dos projetos essa frase é ideologia de arquiteto. Aqui ela vira dinheiro na mesa: como cada regra já está
+        numa Action, expor o sistema a uma IA é escrever uma camada de tradução, não reimplementar o produto.
+        <b>Num projeto com a lógica dentro dos controllers, esta página seria impossível de entregar numa madrugada</b> — seria
+        reescrever tudo. É o argumento mais concreto que a dupla tem para defender a escolha de arquitetura na banca.
+      </p>
+      <div class="callout grifo">
+        <b>O contexto que torna a resposta boa não é o modelo, é o acervo.</b> Qualquer IA explica séries de Taylor.
+        Só esta sabe que <i>na prova do prof. Silva, em 2024/1, caiu quase só série</i> — porque três veteranos escreveram isso,
+        e o aluno está matriculado naquela disciplina. O CampusOS não compete com a IA; ele é a memória que faltava a ela.
+      </div>
+    </div>
+    <div class="view-code">
+      <div class="code-path"><span>routes/mcp.php + app/Mcp/ — no app host, não em módulo</span><span class="status-pill stretch">◎ B8</span></div>
+      <p>
+        <b>MCP não é um módulo de domínio</b> e não deve virar um. Ele não possui tabela, não tem regra de negócio própria e não
+        é um <i>bounded context</i> — é um canal, como o HTTP. Mora no app host (<code>app/Mcp/</code>), junto do
+        middleware de borda, e cada tool é uma classe que chama uma Action de módulo.
+      </p>
+      <pre><code>// Forma de toda tool — nada além de tradução:
+final class MyProgress
+{
+    public function __construct(private GetProgressAction $action) {}
+
+    public function handle(array $input): array
+    {
+        // o contexto de tenant/usuário já foi resolvido na autenticação
+        // do canal -- a tool não decide quem é ninguém.
+        return $this-&gt;action-&gt;execute(new GetProgressInput(...$input))-&gt;toArray();
+    }
+}</code></pre>
+      <div class="callout warn">
+        <b>Se uma tool precisar de um <code>if</code> de regra de negócio, pare.</b> Isso é sinal de que a regra não existe na Action —
+        e a versão REST da mesma funcionalidade vai acabar com a regra escrita de novo, ligeiramente diferente. Empurre para a Action
+        e chame de lá. É a fronteira que o ArchTest não consegue verificar sozinho, e a que mais se fura sob pressão de horário.
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="fase-2">
+    <div class="step-head"><span class="step-num">2</span><h2>As sete tools</h2></div>
+    <div class="view-business">
+      <table class="tools-table">
+        <thead><tr><th>Tool</th><th>Responde</th><th>Escreve?</th></tr></thead>
+        <tbody>
+          <tr><td>minha_progressao</td><td>Quanto falta, por faixa de hora, com previsão de formatura</td><td>não</td></tr>
+          <tr><td>disciplinas_liberadas</td><td>O que dá para pegar no próximo semestre, e o que trava cada uma</td><td>não</td></tr>
+          <tr><td>acervo_da_disciplina</td><td>As anotações públicas que o aluno tem direito de ver naquela disciplina</td><td>não</td></tr>
+          <tr><td>buscar_anotacoes</td><td>Busca no acervo inteiro a que ele tem acesso</td><td>não</td></tr>
+          <tr><td>minha_agenda</td><td>Tarefas próprias e da turma, por prazo</td><td>não</td></tr>
+          <tr><td>minhas_horas</td><td>Complementares por categoria, com teto e o que foi perdido</td><td>não</td></tr>
+          <tr><td>criar_anotacao</td><td>—</td><td><b>sim</b>, a única</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <b>Seis de leitura, uma de escrita.</b> É a mesma decisão tomada no LifeOS original do Psyches Archive, e pelo mesmo motivo:
+        leitura errada é ruído, escrita errada é dado corrompido em cima de histórico acadêmico. A tool de escrita é a de menor
+        consequência do sistema — e criar anotação é justamente o que se quer fazer no meio de uma conversa de estudo.
+        <b>Nenhuma tool toca matrícula, nota ou horas.</b>
+      </div>
+    </div>
+    <div class="view-code">
+      <p>
+        Cada tool declara nome, descrição e schema de entrada; o retorno é o mesmo DTO que o Resource HTTP serializa.
+        Duas regras não negociáveis, herdadas do canal REST:
+      </p>
+      <ol class="rules">
+        <li><b>O escopo de visibilidade é o mesmo.</b> <code>acervo_da_disciplina</code> passa pelo <code>NoteVisibilityScope</code> igual ao endpoint. Um canal que enxerga mais que o outro é um vazamento, e é o erro clássico de adicionar um canal novo depressa.</li>
+        <li><b>O tenant é restaurado explicitamente.</b> MCP não tem sessão HTTP — <code>TenantContext::runAs()</code> na autenticação do canal, exatamente como nos Jobs (regra de ouro nº 4).</li>
+      </ol>
+      <div class="code-path"><span>Autenticação do canal</span></div>
+      <p>
+        Token por usuário, trocável, com escopo de leitura — e a tool de escrita exigindo um escopo separado.
+        <b>Não</b> repita o atalho do LifeOS original, que cravou o token no código-fonte: lá era um sistema pessoal de um usuário só;
+        aqui são N alunos de N instituições, e um token compartilhado seria um vazamento cross-tenant com passo único.
+      </p>
+      <div class="callout warn">
+        <b>Antes de encarar este bloco às 13h da tarde:</b> ele é a terceira esticada por um motivo. O efeito no pitch é o maior da lista,
+        e o risco de consumir duas horas é igualmente o maior — configurar autenticação de um canal novo é onde o tempo some.
+        Só comece se B1–B7 fechou inteiro. Se começar e travar aos 40 minutos, abandone sem dó: o restante da demo não depende disto.
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="fase-3">
+    <div class="step-head"><span class="step-num">3</span><h2>Como isso soa na demo</h2></div>
+    <div class="view-business">
+      <div class="chat">
+        <div class="msg user">
+          <div class="msg-who">aluno</div>
+          <div class="msg-body">tenho prova de Cálculo 2 semana que vem. o que eu estudo?</div>
+        </div>
+        <div class="toolcall">→ <span>minha_agenda</span> · <span>acervo_da_disciplina</span>(MA72B)</div>
+        <div class="msg ai">
+          <div class="msg-who">claude · com o CampusOS conectado</div>
+          <div class="msg-body">
+            Sua P2 de Cálculo 2 é <b>dia 14/10</b> — está na agenda da turma S71, cadastrada pela Marina.<br><br>
+            Tem <b>35 anotações</b> de veteranos nessa disciplina. As três mais votadas dizem a mesma coisa:
+            a P2 do prof. Silva cobra <b>séries numéricas e de potências</b>, com pouca integral imprópria.
+            Um resumo de 2024/1 traz os critérios de convergência numa página; uma lista de 2026/1 tem 18 exercícios
+            resolvidos, quase todos de séries.<br><br>
+            Começaria pela lista — se travar em algum critério, o resumo cobre.
+          </div>
+        </div>
+      </div>
+      <p style="font-size:0.88rem;color:var(--ink-faint);max-width:70ch;">
+        Nenhuma frase dessa resposta veio de um modelo treinado na internet: prazo, autoria, semestre e conteúdo
+        saíram de tabelas do CampusOS. É o que faz a demonstração fechar — e é por isso que ela é o último tempo do
+        <a href="../plano-de-ataque.html">roteiro</a>, quando ela existe.
+      </p>
+    </div>
+    <div class="view-code">
+      <div class="callout grifo">
+        <b>Se o MCP não ficar pronto, isto ainda é pitch.</b> A arquitetura de Actions é verdade com ou sem o canal —
+        e "as regras já estão prontas para isso, é o próximo canal a plugar" é uma frase forte na banca,
+        contanto que seja dita como roadmap e não como entrega. <b>Nunca demonstre com tela de mentira.</b>
+        Um jurado que percebe vale menos que dez features faltando.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — o canal MCP sobre as Actions do domínio
+  <span class="sig">A IA não sabe o que caiu na prova de 2024. O acervo sabe.</span>
+</footer>
+
+<script src="../assets/site-chrome.js" defer></script>
+<script src="../assets/feature-view.js" defer></script>
+</body>
+</html>

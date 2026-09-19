@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano de ataque · CampusOS</title>
+<meta name="description" content="A ordem de implementação do CampusOS das 01:45 às 16:00 — blocos, pontos de corte, divisão da dupla e roteiro de demo.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .wrap { max-width: 940px; margin: 0 auto; padding: 2rem 1.75rem 5rem; }
+
+  header.page { border-bottom: 1px solid var(--border); padding-bottom: 1.75rem; margin-bottom: 1.5rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rust-600); font-weight: 600; }
+  h1 { font-size: 2.5rem; margin: 0.35rem 0 0.6rem; text-wrap: balance; letter-spacing: -0.02em; }
+  .lede { max-width: 68ch; color: var(--ink-soft); font-size: 1.02rem; margin: 0; }
+  .lede strong { color: var(--ink); }
+
+  /* ── a régua do tempo ─────────────────────────────────
+     Cada bloco é uma linha com a hora à esquerda num trilho vertical.
+     O trilho existe pra que, às 6h da manhã, dê pra saber se está
+     adiantado ou atrasado olhando UMA coluna — não lendo o texto. */
+  .track { position: relative; margin: 2rem 0 0; padding-left: 7.5rem; }
+  .track::before {
+    content: ''; position: absolute; left: 6.1rem; top: 0.4rem; bottom: 1rem;
+    width: 2px; background: var(--border-strong);
+  }
+  .blk { position: relative; margin-bottom: 1.6rem; }
+  .blk-time {
+    position: absolute; left: -7.5rem; top: 0; width: 5.6rem; text-align: right;
+    font-family: var(--font-mono); font-size: 0.76rem; font-weight: 700; color: var(--ink-soft); line-height: 1.5;
+  }
+  .blk-time small { display: block; font-weight: 400; color: var(--ink-faint); font-size: 0.68rem; letter-spacing: 0.04em; }
+  .blk::before {
+    content: ''; position: absolute; left: -1.46rem; top: 0.42rem;
+    width: 0.7rem; height: 0.7rem; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--brand-500);
+  }
+  .blk.critical::before { background: var(--amber-400); border-color: var(--amber-600); }
+  .blk.freeze::before { background: var(--rust-500); border-color: var(--rust-700); }
+
+  .blk-card { border: 1px solid var(--border); border-radius: 5px; background: var(--surface); padding: 0.95rem 1.15rem 1.05rem; }
+  .blk.critical .blk-card { border-left: 3px solid var(--amber-500); }
+  .blk.freeze .blk-card { border-left: 3px solid var(--rust-500); background: var(--rust-50); }
+  .blk-head { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.45rem; }
+  .blk-id { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; color: var(--brand-700); letter-spacing: 0.06em; }
+  .blk-card h3 { margin: 0; font-size: 1.1rem; line-height: 1.25; }
+  .blk-card > p { margin: 0 0 0.55rem; font-size: 0.87rem; color: var(--ink-soft); }
+  .blk-card ul { margin: 0.5rem 0 0; padding-left: 1.1rem; font-size: 0.84rem; color: var(--ink-soft); }
+  .blk-card li { margin-bottom: 0.25rem; }
+  .blk-card li code { font-size: 0.8em; }
+  .done-when {
+    margin-top: 0.7rem; font-size: 0.8rem; font-family: var(--font-mono);
+    color: var(--leaf-700); background: var(--leaf-50); border: 1px solid var(--leaf-200);
+    border-radius: 3px; padding: 0.4rem 0.6rem;
+  }
+  .done-when b { color: var(--leaf-900); }
+  .cutline {
+    margin-top: 0.7rem; font-size: 0.8rem;
+    color: var(--rust-700); background: var(--rust-50); border: 1px dashed var(--rust-400);
+    border-radius: 3px; padding: 0.45rem 0.65rem;
+  }
+  .cutline b { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+  .split > div { border: 1px solid var(--border); border-radius: 5px; padding: 1rem 1.15rem; background: var(--surface); }
+  .split h4 { margin: 0 0 0.5rem; font-size: 1rem; }
+  .split ol { margin: 0; padding-left: 1.1rem; font-size: 0.85rem; color: var(--ink-soft); }
+  .split li { margin-bottom: 0.35rem; }
+
+  .demo { counter-reset: beat; margin-top: 1rem; }
+  .beat { display: grid; grid-template-columns: 3.4rem 1fr; gap: 0.9rem; padding: 0.75rem 0; border-bottom: 1px dotted var(--border-strong); }
+  .beat:last-child { border-bottom: none; }
+  .beat-t { font-family: var(--font-mono); font-size: 0.76rem; font-weight: 700; color: var(--amber-700); padding-top: 0.15rem; }
+  .beat-b h4 { margin: 0 0 0.25rem; font-size: 0.98rem; }
+  .beat-b p { margin: 0; font-size: 0.85rem; color: var(--ink-soft); }
+  .beat-b .say { display: block; margin-top: 0.35rem; font-family: var(--font-serif); font-style: italic; color: var(--brand-800); font-size: 0.92rem; }
+
+  @media (max-width: 720px) {
+    .split { grid-template-columns: 1fr; }
+    h1 { font-size: 1.85rem; }
+    .track { padding-left: 0; }
+    .track::before { display: none; }
+    .blk::before { display: none; }
+    .blk-time { position: static; width: auto; text-align: left; margin-bottom: 0.3rem; }
+    .blk-time small { display: inline; margin-left: 0.5rem; }
+  }
+  @media (max-width: 560px) { .wrap { padding: 1.5rem 1.1rem 4rem; } }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="index.html">docs-site</a><span class="sep">/</span>plano-de-ataque.html</span>
+</header>
+
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">hackathon · 14 horas e 15 minutos</div>
+    <h1>Plano de ataque</h1>
+    <p class="lede">
+      São <strong>01:45</strong>. A entrega é <strong>hoje às 16:00</strong>. Isso são <strong>14h15</strong> de relógio, das quais
+      aproximadamente 13 são de código — o resto é a demo, e a demo não se improvisa.
+      Esta página existe por um motivo só: às 05:30 da manhã ninguém decide prioridade direito,
+      então a prioridade tem que já estar decidida.
+    </p>
+  </header>
+
+  <div class="callout warn">
+    <b>A regra que salva o hackathon: às 15:00 o código congela.</b> Não importa o que estiver faltando.
+    A última hora é ensaio de demo — três voltas cronometradas, com o notebook que vai ser usado na hora,
+    na rede que vai existir na hora. Projeto de hackathon não perde por falta de feature; perde por demo
+    que trava no minuto 2 e queima os 5 minutos inteiros.
+  </div>
+
+  <div class="section-rule"><span class="label">Os blocos</span></div>
+
+  <div class="track">
+
+    <div class="blk critical">
+      <div class="blk-time">01:45<small>1h00</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B0</span><h3>Fundação — prontuário express</h3></div>
+        <p>Transformar o template genérico no CampusOS. É o passo que dá vontade de pular e que, pulado, cobra juros a noite inteira.</p>
+        <ul>
+          <li>Renomear namespace <code>Modules\</code> → <code>CampusOs\</code> (<code>config/app-modules.php</code>, os <code>composer.json</code> de cada módulo, busca-e-troca no código, <code>ArchTest</code>).</li>
+          <li>Remover os módulos de exemplo <code>orders</code>/<code>payments</code>/<code>notifications</code> e os artefatos <code>[EXEMPLO]</code> do <code>core</code>.</li>
+          <li>Criar os 5 módulos com <code>php artisan make:module</code>: <code>catalog</code>, <code>journey</code>, <code>lifeos</code>, <code>insights</code>, <code>integrations</code>. Registrar cada um em <code>DOMAIN_MODULES</code> do ArchTest.</li>
+          <li>Subir o banco: <code>docker compose up -d</code>. Em dev, sqlite resolve e é mais rápido.</li>
+        </ul>
+        <div class="done-when"><b>Pronto quando:</b> <code>composer test</code> verde · <code>php artisan modules:list</code> mostra os 5 · <code>composer lint:check</code> verde.</div>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="blk-time">02:45<small>1h30</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B1</span><h3>tenancy — instituição, campus, usuário, login</h3></div>
+        <p>A <code>Entity</code> do template passa a significar <b>a instituição de ensino</b>. Não renomeie a tabela: <code>Entityable</code> e <code>EntityScope</code> do core dependem de <code>entity_ent_id</code>, e trocar isso custa uma hora que não existe.</p>
+        <ul>
+          <li>Migrations: <code>campuses</code>, <code>users</code> (com <code>usr_role</code> e <code>usr_registration_number</code>).</li>
+          <li><code>LoginAction</code> + Sanctum em <code>POST /api/v1/auth/login</code>; middleware <code>tenant.user</code>.</li>
+          <li>Seeder de dev: UTFPR + 1 campus + 1 aluno + 1 coordenador.</li>
+        </ul>
+        <div class="done-when"><b>Pronto quando:</b> login devolve token e uma rota autenticada responde com o tenant correto no <code>TenantContext</code>.</div>
+      </div>
+    </div>
+
+    <div class="blk critical">
+      <div class="blk-time">04:15<small>1h45</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B2</span><h3>catalog — o esqueleto acadêmico</h3></div>
+        <p>Curso, matriz, disciplina, pré-requisito, semestre e oferta. <b>Tudo depende disto</b> — é o bloco que não pode atrasar, e o único cujo trabalho pesado não é código, é dado.</p>
+        <ul>
+          <li>7 migrations + models: <code>courses</code>, <code>curricula</code>, <code>subjects</code>, <code>curriculum_subjects</code>, <code>prerequisites</code>, <code>terms</code>, <code>offerings</code>.</li>
+          <li><b>Seeder da matriz real</b> a partir da grade exportada. Reserve 40 dos 105 minutos só pra isso — transcrever matriz é mais lento do que parece.</li>
+          <li>Leitura pública: <code>GET /api/v1/courses</code>, <code>.../curricula/{id}</code> com as disciplinas por período.</li>
+        </ul>
+        <div class="cutline"><b>Ponto de corte 1 —</b> se às 06:00 a matriz não estiver semeada: semeie <b>só os 4 primeiros períodos</b> e os pré-requisitos que ligam esses quatro. A demo nunca sai do 4º período, e ninguém no júri vai auditar o 8º.</div>
+      </div>
+    </div>
+
+    <div class="blk critical">
+      <div class="blk-time">06:00<small>1h30</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B3</span><h3>journey — vínculo, histórico e a barra de progresso</h3></div>
+        <p>Aqui o desafio 5.1 fica de pé. Ao fim deste bloco o sistema já responde à pergunta central do hackathon: <i>quanto falta pra eu me formar?</i></p>
+        <ul>
+          <li>Migrations: <code>students</code>, <code>registrations</code>, <code>subject_enrollments</code>.</li>
+          <li><code>ProgressReadModel</code> — horas cumpridas × exigidas por natureza (obrigatória, optativa, complementar, estágio, TCC), disciplinas pendentes, previsão de formatura.</li>
+          <li><code>GET /api/v1/me/progress</code> — o endpoint que sozinho desenha a tela principal.</li>
+          <li>Testes: aluno com 3 aprovações e 1 reprovação tem a contagem certa; nenhum dado atravessa tenant.</li>
+        </ul>
+        <div class="done-when"><b>Pronto quando:</b> com dados semeados à mão, <code>/me/progress</code> devolve percentual, horas e lista de pendentes corretos.</div>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="blk-time">07:30<small>1h30</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B4</span><h3>journey — importar o documento com IA</h3></div>
+        <p>O momento "uau" da demo: o aluno sobe uma foto e a graduação dele aparece. Também é o bloco com mais risco técnico da noite, por depender de coisa fora da máquina.</p>
+        <ul>
+          <li><code>enrollment_requests</code> + upload → <b>202</b> + <code>ParseAcademicDocumentJob</code> na fila <code>imports</code>.</li>
+          <li>Contrato <code>AcademicDocumentExtractor</code> no <code>core</code>; implementação com Claude em <code>integrations</code> (visão + structured outputs).</li>
+          <li>Tela de conferência: o aluno revisa o que a IA leu e confirma — <b>só a confirmação grava matrícula</b>.</li>
+        </ul>
+        <div class="cutline"><b>Ponto de corte 2 —</b> se às 09:00 o OCR não estiver confiável: entregue o <b>cadastro manual</b> da matrícula (mesma tela de conferência, campos vazios) e apresente o OCR como roadmap. A barra de progresso é o que o 5.1 pede; o OCR é como ela se enche. Nunca troque o fim pelo meio.</div>
+      </div>
+    </div>
+
+    <div class="blk critical">
+      <div class="blk-time">09:00<small>1h30</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B5</span><h3>lifeos — notas e o acervo do veterano</h3></div>
+        <p>O desafio 5.2 inteiro mora numa coluna (<code>nte_visibility</code>) e numa query. Tecnicamente é o bloco mais barato da noite e narrativamente é o mais forte — não deixe escorregar pro fim.</p>
+        <ul>
+          <li><code>notes</code> com <code>nte_visibility</code> (5 níveis) + vínculo opcional a disciplina e oferta.</li>
+          <li><code>NoteVisibilityScope</code> — a regra que faz o calouro herdar o acervo. Um teste dedicado: <b>aluno de 2027/1 enxerga nota pública escrita em 2024/1 na mesma disciplina.</b></li>
+          <li><code>GET /api/v1/subjects/{id}/notes</code> — o acervo da disciplina.</li>
+        </ul>
+        <div class="done-when"><b>Pronto quando:</b> o teste de herança entre semestres passa. Ele é a prova do 5.2 — vale mais que a tela.</div>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="blk-time">10:30<small>1h00</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B6</span><h3>lifeos — tarefas da turma</h3></div>
+        <p>Uma pessoa cadastra "Prova 2 — 14/10" na oferta e a turma inteira recebe. Custa pouco e é a feature que mais gera cabeça balançando na plateia.</p>
+        <ul>
+          <li><code>tasks</code> com visibilidade + <code>tsk_origin_tsk_id</code> (adotar copia; cada um gerencia a própria).</li>
+          <li><code>GET /api/v1/me/agenda</code> — pendências próprias + compartilhadas da turma, em ordem de prazo.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="blk-time">11:30<small>1h00</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B7</span><h3>journey — horas complementares e certificados</h3></div>
+        <p>O bullet do 5.1 que os outros times vão esquecer, e que todo universitário sofre no último semestre.</p>
+        <ul>
+          <li><code>complementary_categories</code> (no catalog, com teto por categoria) + <code>complementary_activities</code>.</li>
+          <li>Upload do certificado + regra do teto: horas que passam do limite da categoria <b>não contam</b>, e a tela diz isso.</li>
+          <li>As horas entram no mesmo <code>ProgressReadModel</code> do B3 — sem segunda fonte de verdade.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="blk-time">12:30<small>30min</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">—</span><h3>Comer. De verdade.</h3></div>
+        <p>Décima primeira hora acordado. O custo de 30 minutos de almoço é menor que o custo de um bug introduzido às 13:40 por alguém que não comeu.</p>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="blk-time">13:00<small>1h00</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B8</span><h3>Esticadas — nesta ordem, e só nesta</h3></div>
+        <p>O que couber. A ordem abaixo é por <b>retorno no pitch dividido pelo custo</b>, já considerando que a essa hora ninguém está raciocinando bem.</p>
+        <ul>
+          <li><b>1. Pré-requisitos e simulação de reprovação</b> — o "se eu reprovar em Cálculo 2, formo um semestre depois". Puro cálculo sobre dado que já existe, nenhuma tabela nova, e é o bullet mais vistoso do 5.1.</li>
+          <li><b>2. Painel da coordenação</b> — duas queries agregadas. Mostra que o produto tem cliente institucional, não só aluno.</li>
+          <li><b>3. Copiloto MCP</b> — maior efeito no pitch, maior risco de consumir duas horas. Só encare se o B1–B7 fechou inteiro.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="blk freeze">
+      <div class="blk-time">14:00<small>1h00</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B9</span><h3>Congelamento e seed de demonstração</h3></div>
+        <p>Feature nova acabou. O que existe agora é o que vai ser apresentado. A hora inteira é pra fazer o que existe <b>parecer</b> um sistema em uso — e um sistema vazio parece um protótipo, por melhor que seja o código.</p>
+        <ul>
+          <li>Seed denso: <b>3 veteranos</b> com 8 a 12 notas publicadas em disciplinas dos primeiros períodos, <b>1 calouro</b> recém-matriculado, <b>1 aluno de 6º período</b> com histórico completo e 2 reprovações (é o usuário da demo — a barra dele conta uma história).</li>
+          <li>Tarefas de turma com prazos plausíveis nos próximos 15 dias.</li>
+          <li><code>composer test</code> + <code>composer lint:check</code> verdes. Commit. Tag.</li>
+        </ul>
+        <div class="done-when"><b>Pronto quando:</b> você faz login como o aluno do 6º período e a tela inicial já conta uma história sozinha, sem você narrar nada.</div>
+      </div>
+    </div>
+
+    <div class="blk freeze">
+      <div class="blk-time">15:00<small>1h00</small></div>
+      <div class="blk-card">
+        <div class="blk-head"><span class="blk-id">B10</span><h3>Ensaio — três voltas cronometradas</h3></div>
+        <p>Com o notebook da apresentação, no navegador da apresentação, com as abas já abertas. Se der pra testar na rede do evento, teste na rede do evento.</p>
+        <ul>
+          <li>Volta 1: livre, anotando onde travou.</li>
+          <li>Volta 2: cronometrada, corrigindo o que travou.</li>
+          <li>Volta 3: cronometrada, no tempo, sem olhar anotação.</li>
+          <li><b>Plano B gravado:</b> um vídeo de tela de 90 segundos do fluxo principal, no celular. Se a internet cair na hora, você não perde a apresentação.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-rule"><span class="label">A divisão da dupla</span></div>
+  <p style="font-size:0.9rem;color:var(--ink-soft);max-width:70ch;">
+    O backend vai na ordem dos blocos acima. O front não pode esperar o backend terminar pra começar —
+    então o contrato de cada endpoint é acordado <b>quando o bloco começa</b>, não quando termina.
+    Na prática: o front constrói a tela contra um JSON escrito à mão e troca pela URL real quando o bloco fecha.
+  </p>
+  <div class="split">
+    <div>
+      <h4>Backend (Felipe)</h4>
+      <ol>
+        <li>B0 fundação · B1 login</li>
+        <li>B2 catálogo + seed da matriz</li>
+        <li>B3 <code>GET /me/progress</code> — <b>entrega o JSON às 07:30</b></li>
+        <li>B4 importação (ou corte pro manual)</li>
+        <li>B5 acervo · B6 tarefas · B7 horas</li>
+        <li>B9 seed de demonstração</li>
+      </ol>
+    </div>
+    <div>
+      <h4>Front (dupla)</h4>
+      <ol>
+        <li>Enquanto B0–B2 rodam: <b>tela de progresso</b> contra JSON de mentira (é a tela da demo — merece o dobro de capricho das outras)</li>
+        <li>Tela de login (trivial, deixe pro fim)</li>
+        <li>Tela da disciplina com o acervo</li>
+        <li>Upload do documento + conferência</li>
+        <li>Certificados e horas</li>
+        <li>Às 14:00 para de codar e vira roteirista da demo</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section-rule"><span class="label">Roteiro da demo · 5 minutos</span></div>
+  <p style="font-size:0.9rem;color:var(--ink-soft);max-width:70ch;">
+    Abre no <b>problema</b>, não no produto. Ninguém se emociona com um CRUD; todo mundo na sala já sofreu
+    a planilha que o roteiro descreve no primeiro tempo.
+  </p>
+  <div class="demo">
+    <div class="beat">
+      <div class="beat-t">0:00</div>
+      <div class="beat-b">
+        <h4>A planilha</h4>
+        <p>Mostre uma planilha de verdade — a sua, a de um amigo — onde alguém controla à mão o que já cursou e quanto falta. Se tiver o print do requerimento de matrícula em PDF, melhor ainda.</p>
+        <span class="say">"Todo aluno desta universidade tem uma versão disto. Ela está errada, e a pessoa só descobre no último semestre."</span>
+      </div>
+    </div>
+    <div class="beat">
+      <div class="beat-t">0:30</div>
+      <div class="beat-b">
+        <h4>O upload</h4>
+        <p>Suba o documento acadêmico ao vivo. Enquanto o job roda, explique que o sistema não depende de integração com universidade nenhuma — o aluno traz o próprio documento, e por isso funciona em qualquer instituição amanhã.</p>
+      </div>
+    </div>
+    <div class="beat">
+      <div class="beat-t">1:30</div>
+      <div class="beat-b">
+        <h4>A barra nasce</h4>
+        <p>Confirme a leitura e deixe a tela de progresso aparecer. Aponte três números: percentual do curso, horas complementares faltando, previsão de formatura.</p>
+        <span class="say">"Isso é o desafio 5.1 inteiro numa tela."</span>
+      </div>
+    </div>
+    <div class="beat">
+      <div class="beat-t">2:15</div>
+      <div class="beat-b">
+        <h4>O que trava</h4>
+        <p>Abra as disciplinas do próximo período: as liberadas e as travadas, com o motivo. Então clique em simular reprovação em uma disciplina de cadeia longa e mostre o custo em semestres.</p>
+      </div>
+    </div>
+    <div class="beat">
+      <div class="beat-t">3:00</div>
+      <div class="beat-b">
+        <h4>A virada — o veterano</h4>
+        <p>Entre numa disciplina que o aluno acabou de se matricular. O acervo já está cheio, de gente que cursou em 2024. Publique uma nota ao vivo e explique quem vai recebê-la.</p>
+        <span class="say">"Ele não conhece nenhuma dessas pessoas. Elas cursaram isso há dois anos. É o desafio 5.2 — e não precisou de rede social nenhuma, só de saber quem está matriculado em quê."</span>
+      </div>
+    </div>
+    <div class="beat">
+      <div class="beat-t">4:00</div>
+      <div class="beat-b">
+        <h4>O fecho</h4>
+        <p>Certificado → horas andam (15s). Se o MCP ficou pronto, termine perguntando ao Claude, com o CampusOS conectado, o que estudar pra próxima prova — e deixe a resposta na tela enquanto agradece.</p>
+        <span class="say">"Um sistema, dois desafios, e um dado só sustentando os dois: a matrícula."</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-rule"><span class="label">Quando der errado</span></div>
+  <table>
+    <thead><tr><th>Sintoma</th><th>O que fazer, sem pensar</th></tr></thead>
+    <tbody>
+      <tr><td>Atrasou mais de 45 min num bloco</td><td>Corte o bloco no ponto em que está, marque o resto como <span class="status-pill planned">◇ planejado</span> no docs-site e siga. Bloco atrasado contamina todos os seguintes.</td></tr>
+      <tr><td>O OCR lê errado</td><td>Ponto de corte 2. A tela de conferência já existe — só vai vazia. Cinco minutos de trabalho contra uma hora de <i>prompt engineering</i> às 8 da manhã.</td></tr>
+      <tr><td>A suíte ficou vermelha e você não sabe por quê</td><td><code>git stash</code>, confirme que a <code>main</code> está verde, volte o stash em pedaços. Nunca depure em cima de duas mudanças ao mesmo tempo nesse estado de sono.</td></tr>
+      <tr><td>O front não acompanha</td><td>O backend vira o front pela demo: <code>/data-console</code> do Filament é feio, mas mostra dado real. Melhor que tela bonita sem dado.</td></tr>
+      <tr><td>São 14:30 e falta feature</td><td>Não falta. Acabou. Vá pro B9 — um sistema menor bem demonstrado ganha de um sistema maior que trava.</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — plano escrito às 01:45 de 19/09/2026
+  <span class="sig">Se você está lendo isto depois das 15:00 procurando o que codar: pare. Vá ensaiar.</span>
+</footer>
+
+<script src="assets/site-chrome.js" defer></script>
+</body>
+</html>

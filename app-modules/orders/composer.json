@@ -1,0 +1,24 @@
+{
+	"name": "modules/orders",
+	"description": "[EXEMPLO — REMOVÍVEL] Módulo de referência: demonstra o fluxo canônico completo (Action → 202 + Job → contrato → evento → auditoria). Remova ao iniciar um sistema real.",
+	"type": "library",
+	"version": "1.0",
+	"license": "proprietary",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"Modules\\Orders\\": "src/",
+			"Modules\\Orders\\Tests\\": "tests/",
+			"Modules\\Orders\\Database\\Factories\\": "database/factories/",
+			"Modules\\Orders\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"Modules\\Orders\\Providers\\OrdersServiceProvider"
+			]
+		}
+	}
+}

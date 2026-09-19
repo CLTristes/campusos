@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel da coordenação · CampusOS</title>
+<meta name="description" content="A camada institucional do CampusOS — disciplinas-gargalo, taxa de reprovação e coortes atrasadas, em agregados anônimos.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/feature.css">
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.8rem; margin: 1.4rem 0; }
+  .kpi { border: 1px solid var(--border); border-radius: 5px; background: var(--surface); padding: 0.9rem 1rem; }
+  .kpi .v { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 700; line-height: 1.1; color: var(--ink); }
+  .kpi .v.bad { color: var(--rust-600); }
+  .kpi .v.good { color: var(--leaf-700); }
+  .kpi .k { font-size: 0.76rem; color: var(--ink-faint); margin-top: 0.3rem; line-height: 1.45; }
+  .bars { margin: 1.3rem 0; }
+  .bar-row { display: grid; grid-template-columns: 11rem 1fr 3.2rem; gap: 0.7rem; align-items: center; margin-bottom: 0.5rem; font-size: 0.83rem; }
+  .bar-row .nm { color: var(--ink-soft); }
+  .bar-row .tr { height: 0.72rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 99px; overflow: hidden; }
+  .bar-row .fl { height: 100%; background: linear-gradient(90deg, var(--rust-400), var(--rust-500)); }
+  .bar-row .pc { font-family: var(--font-mono); font-size: 0.78rem; color: var(--rust-700); text-align: right; font-weight: 600; }
+  @media (max-width: 560px) { .bar-row { grid-template-columns: 7.5rem 1fr 2.8rem; font-size: 0.78rem; } }
+</style>
+</head>
+<body data-view="business">
+
+<header class="site-nav">
+  <a class="brand" href="../index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="../index.html">docs-site</a><span class="sep">/</span>features/painel-da-coordenacao.html</span>
+</header>
+
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">Camada institucional · módulo insights</div>
+    <h1>Painel da coordenação</h1>
+    <p class="lede">
+      O desafio 5.1 lista onde o problema ocorre: <i>coordenações de curso, secretaria acadêmica, departamentos, colegiados.</i>
+      <strong>Nenhum desses é o aluno.</strong> Um produto que só atende o estudante resolve metade do enunciado — e perde o
+      argumento de que existe alguém disposto a pagar por ele.
+    </p>
+    <div class="meta-row">
+      <span><b>Módulo:</b> insights · 0 tabelas</span>
+      <span><b>Bloco:</b> B8 · segunda esticada</span>
+      <span><b>Status:</b> <span class="status-pill stretch">◎ esticada</span></span>
+    </div>
+    <div class="switch-bar">
+      <div class="view-switch" role="group" aria-label="Nível de detalhe">
+        <button type="button" data-view="business" aria-pressed="true">Regra de negócio</button>
+        <button type="button" data-view="code" aria-pressed="false">Código real</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="step" id="fase-1">
+    <div class="step-head"><span class="step-num">1</span><h2>O que a coordenação não consegue ver hoje</h2></div>
+    <div class="view-business">
+      <p>
+        Todo coordenador sabe, por conversa de corredor, que "a turma empaca em Cálculo 2". Poucos conseguem dizer o número,
+        e quase nenhum consegue dizer <b>quanto isso custa em atraso de formatura</b> — porque o dado existe espalhado em
+        relatórios que ninguém cruza.
+      </p>
+      <div class="kpis">
+        <div class="kpi"><div class="v">412</div><div class="k">vínculos ativos no curso</div></div>
+        <div class="kpi"><div class="v bad">31%</div><div class="k">reprovação média nas obrigatórias de 1º a 4º período</div></div>
+        <div class="kpi"><div class="v bad">2,4</div><div class="k">semestres de atraso médio da coorte 2022/1</div></div>
+        <div class="kpi"><div class="v good">68</div><div class="k">alunos a menos de 240 h de formar</div></div>
+      </div>
+      <p><b>Disciplinas com maior reprovação — últimos 4 semestres</b></p>
+      <div class="bars">
+        <div class="bar-row"><span class="nm">Cálculo 2</span><span class="tr"><span class="fl" style="width:52%"></span></span><span class="pc">52%</span></div>
+        <div class="bar-row"><span class="nm">Física 1</span><span class="tr"><span class="fl" style="width:44%"></span></span><span class="pc">44%</span></div>
+        <div class="bar-row"><span class="nm">Álgebra Linear</span><span class="tr"><span class="fl" style="width:38%"></span></span><span class="pc">38%</span></div>
+        <div class="bar-row"><span class="nm">Estruturas de Dados</span><span class="tr"><span class="fl" style="width:29%"></span></span><span class="pc">29%</span></div>
+        <div class="bar-row"><span class="nm">Cálculo 1</span><span class="tr"><span class="fl" style="width:27%"></span></span><span class="pc">27%</span></div>
+      </div>
+      <div class="callout grifo">
+        <b>O número que ninguém tem:</b> cruzando reprovação com o grafo de pré-requisitos, o sistema diz
+        <i>"Cálculo 2 é responsável, sozinha, por 1,3 dos 2,4 semestres de atraso médio da coorte"</i>.
+        Isso transforma uma queixa em prioridade de colegiado — e é uma consulta sobre dado que já existe para outra coisa.
+      </div>
+      <p>As quatro perguntas que o painel responde:</p>
+      <ol class="rules">
+        <li><b>Onde a turma empaca.</b> Reprovação por disciplina e por oferta, com nota e falta separadas — conteúdo difícil e problema de permanência pedem respostas diferentes.</li>
+        <li><b>Quanto custa.</b> Atraso médio por coorte de ingresso, e a contribuição de cada disciplina-gargalo.</li>
+        <li><b>Quem está perto do limite.</b> Quantidade de vínculos se aproximando do prazo de integralização — o aviso de jubilamento que a universidade raramente dá a tempo.</li>
+        <li><b>O que está represado.</b> Quantos alunos precisam de determinada disciplina no próximo semestre — dado direto de planejamento de oferta, que hoje se estima no chute.</li>
+      </ol>
+    </div>
+    <div class="view-code">
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/staff/insights/{bottlenecks,cohorts,at-risk,demand}</span><span class="status-pill stretch">◎ B8</span></div>
+      <pre><code>// insights NÃO possui tabela. Ele lê por contrato declarado no core e
+// implementado no journey -- a alternativa (Eloquent direto em
+// subject_enrollments) fura a fronteira e o ArchTest quebra o CI.
+interface AcademicStatsProvider   // core
+{
+    public function failureRateBySubject(string $courseId, int $lastTerms): array;
+    public function cohortDelay(string $courseId): array;
+    public function registrationsNearDeadline(string $courseId, int $within): int;
+    public function demandForNextTerm(string $courseId): array;
+}</code></pre>
+      <div class="callout">
+        <b>Por que módulo, e não só mais um endpoint no journey:</b> a razão de mudar é diferente.
+        <code>journey</code> muda quando a regra acadêmica muda; <code>insights</code> muda quando a coordenação quer outro recorte.
+        Separar hoje custa um contrato de quatro métodos. <b>Mas é honesto dizer que a fronteira ainda não doeu</b> — se o relógio
+        apertar, nascer como <code>GET /staff/insights/*</code> dentro do <code>journey</code> e extrair depois é a decisão certa
+        pelo critério anti-over-engineering do próprio template.
+      </div>
+      <p>
+        <b>Agregação em SQL, não em PHP.</b> É a exceção legítima à regra "Eloquent é a única camada de dados":
+        <code>selectRaw</code> com <code>COUNT</code>/<code>AVG</code> agrupado continua sendo Eloquent, e trazer
+        quarenta mil linhas para somar em memória seria o erro real. O que não se faz é montar string de SQL com valor vindo do cliente.
+      </p>
+    </div>
+  </section>
+
+  <section class="step" id="fase-2">
+    <div class="step-head"><span class="step-num">2</span><h2>Privacidade — agregado, nunca nominal</h2></div>
+    <div class="view-business">
+      <ol class="rules">
+        <li><b>Nenhum endpoint deste painel devolve aluno nomeado.</b> "68 alunos a menos de 240 h de formar" é gestão; a lista dos 68 com nome é outra coisa, exige outra justificativa e não entra aqui.</li>
+        <li><b>Piso de anonimato.</b> Recorte com menos de 5 vínculos não é exibido — numa turma de 6, "33% de reprovação" identifica duas pessoas para quem conhece a turma.</li>
+        <li><b>Recorte por escopo.</b> O coordenador enxerga o próprio curso; o administrador institucional, a instituição. Nunca além.</li>
+        <li><b>O acervo não entra no painel.</b> Quem publicou quantas anotações não é métrica de gestão — transformar colaboração em vigilância mata a colaboração.</li>
+      </ol>
+      <div class="callout warn">
+        <b>A regra 4 é a mais tentadora de quebrar</b>, porque o dado está ali e o gráfico seria bonito.
+        Mas o desafio 5.2 pede pertencimento, e pertencimento não sobrevive a um painel que mede participação.
+      </div>
+    </div>
+    <div class="view-code">
+      <pre><code>// Piso de anonimato aplicado no read model, não na interface --
+// esconder no front é vazamento com passo extra (o JSON continua lá).
+const MIN_COHORT = 5;
+
+$rows-&gt;filter(fn ($r) =&gt; $r-&gt;total &gt;= self::MIN_COHORT);</code></pre>
+      <p>
+        RBAC: rotas sob <code>role:coordinator|institution_admin</code> com escopo resolvido no servidor a partir do
+        <code>campus_cps_id</code> e do curso do usuário — <b>nunca</b> a partir de um <code>course_id</code> que o cliente manda.
+        Aceitar o recorte do request é como um painel de gestão vira leitura de curso alheio.
+      </p>
+    </div>
+  </section>
+
+  <section class="step is-final" id="resumo">
+    <div class="step-head"><span class="step-num">✓</span><h2>Se o tempo acabar</h2></div>
+    <div class="callout grifo">
+      <b>Duas queries salvam esta página inteira na demo:</b> reprovação por disciplina (o gráfico de barras) e atraso médio
+      por coorte (um número). São 20 minutos, cabem no B8, e mudam a natureza da apresentação — de "app de estudante"
+      para "produto com cliente institucional". O resto do painel pode ser roadmap sem prejuízo nenhum.
+    </div>
+  </section>
+
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — a camada que responde à coordenação
+  <span class="sig">Todo coordenador sabe que a turma empaca em Cálculo 2. Nenhum sabe quanto isso custa em semestres.</span>
+</footer>
+
+<script src="../assets/site-chrome.js" defer></script>
+<script src="../assets/feature-view.js" defer></script>
+</body>
+</html>
