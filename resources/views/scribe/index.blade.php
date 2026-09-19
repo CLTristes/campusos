@@ -123,6 +123,19 @@
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-elegibilidade-e-simulacao" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="elegibilidade-e-simulacao">
+                    <a href="#elegibilidade-e-simulacao">Elegibilidade e simulação</a>
+                </li>
+                                    <ul id="tocify-subheader-elegibilidade-e-simulacao" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="elegibilidade-e-simulacao-GETapi-v1-me-next-term">
+                                <a href="#elegibilidade-e-simulacao-GETapi-v1-me-next-term">O que libera e o que trava</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="elegibilidade-e-simulacao-POSTapi-v1-me-simulate">
+                                <a href="#elegibilidade-e-simulacao-POSTapi-v1-me-simulate">E se eu reprovar? — simulação</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-horas-complementares" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="horas-complementares">
                     <a href="#horas-complementares">Horas complementares</a>
@@ -2189,6 +2202,326 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                     </form>
 
+                <h1 id="elegibilidade-e-simulacao">Elegibilidade e simulação</h1>
+
+    <p>B8, primeira esticada do desafio 5.1: "compreensão dos pré-requisitos",
+"planejamento dos próximos períodos" e "impactos de reprovações" — puro
+cálculo sobre o histórico e a matriz que já existem, nenhuma tabela nova.</p>
+
+                                <h2 id="elegibilidade-e-simulacao-GETapi-v1-me-next-term">O que libera e o que trava</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>As disciplinas que o aluno ainda não cursa nem cumpriu, separadas em
+liberadas (pode pegar já) e travadas — cada travada com o motivo
+explícito, não só a etiqueta.</p>
+
+<span id="example-requests-GETapi-v1-me-next-term">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/me/next-term" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/me/next-term"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-me-next-term">
+            <blockquote>
+            <p>Example response (200, com travas):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;current_period&quot;: 6,
+        &quot;eligible&quot;: [
+            {
+                &quot;code&quot;: &quot;ES52C&quot;,
+                &quot;name&quot;: &quot;Engenharia de Software II&quot;
+            }
+        ],
+        &quot;blocked&quot;: [
+            {
+                &quot;code&quot;: &quot;ES62A&quot;,
+                &quot;name&quot;: &quot;Compiladores&quot;,
+                &quot;blocked_by&quot;: [
+                    {
+                        &quot;type&quot;: &quot;subject&quot;,
+                        &quot;subject&quot;: {
+                            &quot;code&quot;: &quot;LIP301&quot;,
+                            &quot;name&quot;: &quot;Linguagens Formais&quot;
+                        },
+                        &quot;reason&quot;: &quot;Precisa ter aprovado Linguagens Formais.&quot;
+                    }
+                ]
+            }
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-me-next-term" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-me-next-term"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-me-next-term"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-me-next-term" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-me-next-term">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-me-next-term" data-method="GET"
+      data-path="api/v1/me/next-term"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-me-next-term', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-me-next-term"
+                    onclick="tryItOut('GETapi-v1-me-next-term');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-me-next-term"
+                    onclick="cancelTryOut('GETapi-v1-me-next-term');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-me-next-term"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/me/next-term</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-me-next-term"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-me-next-term"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="elegibilidade-e-simulacao-POSTapi-v1-me-simulate">E se eu reprovar? — simulação</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Sem escrita no banco: clona o histórico marcando as disciplinas
+informadas como reprovadas e recalcula a primeira oportunidade de
+cada disciplina pendente sobre o mesmo grafo de pré-requisitos.</p>
+
+<span id="example-requests-POSTapi-v1-me-simulate">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/me/simulate" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"fail\": [
+        \"MAT034\"
+    ]
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/me/simulate"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "fail": [
+        "MAT034"
+    ]
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-me-simulate">
+            <blockquote>
+            <p>Example response (200, com impacto em cascata):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;failed&quot;: [
+            &quot;MAT034&quot;
+        ],
+        &quot;current_period&quot;: 6,
+        &quot;affected_subjects&quot;: [
+            {
+                &quot;subject&quot;: {
+                    &quot;code&quot;: &quot;WBE501&quot;,
+                    &quot;name&quot;: &quot;Desenvolvimento Web Back-End&quot;
+                },
+                &quot;real_earliest_period&quot;: 6,
+                &quot;simulated_earliest_period&quot;: 7,
+                &quot;delay_terms&quot;: 1
+            }
+        ],
+        &quot;estimated_graduation_delay_terms&quot;: 1
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-me-simulate" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-me-simulate"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-me-simulate"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-me-simulate" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-me-simulate">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-me-simulate" data-method="POST"
+      data-path="api/v1/me/simulate"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-me-simulate', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-me-simulate"
+                    onclick="tryItOut('POSTapi-v1-me-simulate');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-me-simulate"
+                    onclick="cancelTryOut('POSTapi-v1-me-simulate');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-me-simulate"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/me/simulate</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-me-simulate"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-me-simulate"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>fail</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="fail[0]"                data-endpoint="POSTapi-v1-me-simulate"
+               data-component="body">
+        <input type="text" style="display: none"
+               name="fail[1]"                data-endpoint="POSTapi-v1-me-simulate"
+               data-component="body">
+    <br>
+<p>Os códigos das disciplinas a simular como reprovadas.</p>
+        </div>
+        </form>
+
                 <h1 id="horas-complementares">Horas complementares</h1>
 
     <p>O tracker pessoal do aluno para atividades complementares (B7) — teto por
@@ -2346,7 +2679,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "title=Semana Acadêmica de Sistemas de Informação"\
     --form "hours_claimed=20"\
     --form "issued_at=architecto"\
-    --form "certificate=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpilav51sh8gfd7SaDrWr" </code></pre></div>
+    --form "certificate=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpklg3r0u5tpt78KexqOy" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -2534,7 +2867,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>O certificado (PDF, PNG ou JPG). Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpilav51sh8gfd7SaDrWr</code></p>
+<p>O certificado (PDF, PNG ou JPG). Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpklg3r0u5tpt78KexqOy</code></p>
         </div>
         </form>
 
@@ -2706,7 +3039,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "kind=transcript"\
-    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php4kpqgnu4i706fr9RU3Z" </code></pre></div>
+    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpd15l9eep1ur2dXjVj9t" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -2841,7 +3174,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php4kpqgnu4i706fr9RU3Z</code></p>
+<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpd15l9eep1ur2dXjVj9t</code></p>
         </div>
         </form>
 
