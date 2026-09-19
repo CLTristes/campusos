@@ -359,16 +359,22 @@ inteira (`institution_admin`). RBAC de borda genérico
 `EntityScope` — as duas perguntas em SQL puro filtram `entity_ent_id` na mão.
 Ver [`PAINEL_COORDENACAO.md`](docs/dominio/PAINEL_COORDENACAO.md).
 
-**O copiloto MCP** (`app/Mcp/`, desafio 5.2, B8 terceira e última esticada)
-fecha o B8: sete tools (`CampusOsServer`) sobre os MESMOS Actions e read
-models do REST — seis de leitura (`minha_progressao`,
-`disciplinas_liberadas`, `acervo_da_disciplina`, `buscar_anotacoes`,
+**O copiloto MCP** (`app/Mcp/`, desafio 5.2, B8 terceira e última esticada,
+validado contra o Claude web via túnel em 2026-09-19) tem onze tools
+(`CampusOsServer`) sobre os MESMOS Actions/read models/Resources do REST —
+dez de leitura (`minha_progressao`, `disciplinas_liberadas`,
+`meu_historico`, `matriz_curricular`, `simular_reprovacao`,
+`acervo_da_disciplina`, `buscar_anotacoes`, `minhas_anotacoes`,
 `minha_agenda`, `minhas_horas`) mais `criar_anotacao`, a única de escrita.
 `POST /mcp` (`routes/ai.php`) exige `auth:sanctum` + `tenant.user` +
 `abilities:mcp:read`; o token do copiloto é separado do de login
 (`POST /api/v1/auth/mcp-token`, `IssueMcpTokenAction` em `tenancy`), com
 `mcp:write` opt-in que `criar_anotacao` confere dentro do próprio `handle()`
-como defesa em profundidade. Ver
+como defesa em profundidade. A validação contra cliente real achou (e já
+corrigiu) um bug de import em `ConfirmAcademicDocumentAction`: duas linhas do
+histórico para a mesma disciplina/período (matrícula regular × exame de
+suficiência) colidiam na mesma chave de `SubjectEnrollment`, e a ordem do
+documento decidia silenciosamente qual ficava valendo. Ver
 [`COPILOTO_MCP.md`](docs/dominio/COPILOTO_MCP.md).
 
 **Ainda não existe:** cálculo do período por déficit de CHS completo

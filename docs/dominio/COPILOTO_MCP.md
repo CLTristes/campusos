@@ -1,16 +1,27 @@
 # Copiloto MCP — o mesmo Actions, um canal a mais
 
-> **Área:** `app/Mcp` (canal, não módulo) + `tenancy` (token) · **Estado:** ATIVO (MVP) · **Última sincronização:** v0.10.0 · 2026-09-19
+> **Área:** `app/Mcp` (canal, não módulo) + `tenancy` (token) · **Estado:** ATIVO (validado contra cliente real) · **Última sincronização:** v0.10.0 · 2026-09-19
 
 ## O problema de negócio
 
 O desafio 5.2 pede integração e colaboração — e hoje em 2026 a forma mais
 natural de "integrar" um sistema acadêmico é deixar o aluno conversar com ele
 dentro do assistente de IA que ele já usa, em vez de abrir mais um app. O
-copiloto MCP é a última esticada do B8: sete tools que dão ao Claude (ou
+copiloto MCP é a última esticada do B8: onze tools que dão ao Claude (ou
 qualquer cliente MCP) o CONTEXTO REAL da graduação do aluno autenticado —
 prazo, autoria, semestre e conteúdo saem de tabelas do CampusOS, nunca de
 generalidade de internet.
+
+A validação contra um cliente real (Claude, via túnel) achou duas lacunas de
+leitura — nenhuma tool (nem endpoint REST) cobria o histórico
+disciplina-por-disciplina, nem a matriz inteira do curso — e, de quebra, um
+bug real de import em `ConfirmAcademicDocumentAction` (commit `e74279f`):
+o histórico real pode imprimir duas linhas pra mesma disciplina/período (a
+matrícula regular e uma tentativa de exame de suficiência à parte), e as duas
+colidiam na mesma chave de `SubjectEnrollment` — a ordem das linhas no
+documento decidia silenciosamente qual ficava valendo. A Action agora nunca
+deixa uma linha que não conta como cumprida apagar uma aprovação já
+registrada.
 
 Desenho completo em
 [`docs-site/features/copiloto-mcp.html`](../../docs-site/features/copiloto-mcp.html).
@@ -60,21 +71,30 @@ Desenho completo em
    (`CreateNoteAction` ignora qualquer visibilidade que o argumento da tool
    tente mandar — mesma regra do endpoint REST).
 
-## As sete tools
+## As onze tools
 
 | Tool | Responde | Escreve? |
 | --- | --- | --- |
 | `minha_progressao` | Quanto falta, por faixa de hora, com previsão de formatura | não |
 | `disciplinas_liberadas` | O que dá para pegar no próximo semestre, e o que trava cada uma | não |
+| `meu_historico` | O histórico disciplina por disciplina — situação, nota, frequência, horas | não |
+| `matriz_curricular` | A matriz inteira do curso, todo período — não só o que falta pro aluno | não |
+| `simular_reprovacao` | "E se eu reprovar em X?" — impacto em cascata, sem gravar nada | não |
 | `acervo_da_disciplina` | As anotações públicas que o aluno tem direito de ver naquela disciplina | não |
 | `buscar_anotacoes` | Busca por palavra-chave em todo o acervo a que ele tem acesso | não |
+| `minhas_anotacoes` | As anotações que o próprio aluno escreveu, qualquer visibilidade | não |
 | `minha_agenda` | Tarefas próprias e da turma, por prazo | não |
 | `minhas_horas` | Complementares por categoria, com teto e o que foi perdido | não |
 | `criar_anotacao` | — | **sim**, a única |
 
-Seis são adaptadores finos de um parágrafo sobre um read model ou Action que
-já existia; `criar_anotacao` é a única com uma regra de autorização própria
-(regra 5) por ser a única de escrita.
+Dez são adaptadores finos de um parágrafo sobre um read model, Resource ou
+Action que já existia (só `meu_historico` precisou de um read model novo —
+`AcademicHistoryReadModel`, em `journey` — porque nenhuma tool nem endpoint
+REST expunha o histórico cru até então); `criar_anotacao` é a única com uma
+regra de autorização própria (regra 5) por ser a única de escrita.
+`simular_reprovacao` chama a mesma Action de `POST /api/v1/me/simulate`
+(`SimulateFailureAction`) — é POST do lado REST só porque o corpo não cabe
+numa query string, mas não grava nada, por isso entra como tool de leitura.
 
 ## Decisões e porquês
 
@@ -86,15 +106,24 @@ já existia; `criar_anotacao` é a única com uma regra de autorização própri
 
 ## ⚠️ Pendências do dono do produto
 
-1. **Nenhum teste end-to-end contra um cliente MCP real** (Claude Desktop ou
-   equivalente) foi feito — a cobertura é Pest (harness `Server::test()` +
-   `postJson('/mcp', ...)` de verdade para a camada de middleware). Nuances
-   de negociação de protocolo que só aparecem com um cliente real
-   (`ValidateMcpHeaders`, `Accept` headers) não foram verificadas na prática.
+1. ~~Nenhum teste end-to-end contra um cliente MCP real foi feito~~ —
+   **validado** em 2026-09-19 contra o Claude web (custom connector, via
+   túnel Cloudflare): login → `POST /api/v1/auth/mcp-token` →
+   `Authorization: Bearer` como cabeçalho de requisição (o servidor não
+   registra `oauthRoutesFor()`, então a opção "Sem login" do Claude é a
+   correta, não "Entrar agora" — o `WWW-Authenticate` sem
+   `resource_metadata` confirma que não há descoberta OAuth). Achou as duas
+   lacunas de leitura e o bug de import descritos acima.
 2. **Sem UI/tela para o aluno gerar o token do copiloto.** O endpoint
    (`POST /api/v1/auth/mcp-token`) existe e está documentado em `/docs/api`,
    mas não há botão em nenhum front-end — quem for demonstrar precisa chamar
    a rota diretamente (Postman/curl) e colar o token no cliente MCP.
+3. **`meu_historico`/`matriz_curricular` não têm endpoint REST equivalente.**
+   Só o canal MCP expõe o histórico cru e a matriz inteira hoje — decisão
+   deliberada desta esticada (o pedido era "expandir leitura via MCP", não
+   REST), mas se um front-end quiser a mesma tela, os read models
+   (`AcademicHistoryReadModel`) e Resources (`CurriculumResource`) já
+   existem e reaproveitam sem duplicar lógica.
 
 ## Mapa de código
 
@@ -105,3 +134,8 @@ já existia; `criar_anotacao` é a única com uma regra de autorização própri
 | 3 | `AcervoDaDisciplinaTool`, `BuscarAnotacoesTool` (query Eloquent sobre `Note`) | `tests/Feature/Mcp/CopilotoMcpTest.php` |
 | 4 | `app-modules/tenancy/src/Actions/IssueMcpTokenAction.php` | `app-modules/tenancy/tests/TokenDoCopilotoTest.php` |
 | 5 | `routes/ai.php` (middleware da rota) + `app/Mcp/Tools/CriarAnotacaoTool.php` (checagem interna) | `tests/Feature/Mcp/CopilotoMcpTest.php` — testes via `postJson('/mcp', ...)` real E via `Server::test()` |
+| `meu_historico` | `app-modules/journey/src/ReadModels/AcademicHistoryReadModel.php` + `app/Mcp/Tools/MeuHistoricoTool.php` | `tests/Feature/Mcp/CopilotoMcpTest.php` |
+| `matriz_curricular` | `app/Mcp/Tools/MatrizCurricularTool.php` (reaproveita `CampusOs\Catalog\Http\Resources\CurriculumResource`, o mesmo de `GET /api/v1/courses/{course}/curriculum`) | `tests/Feature/Mcp/CopilotoMcpTest.php` |
+| `simular_reprovacao` | `app/Mcp/Tools/SimularReprovacaoTool.php` (reaproveita `SimulateFailureAction`, o mesmo de `POST /api/v1/me/simulate`) | `tests/Feature/Mcp/CopilotoMcpTest.php` |
+| `minhas_anotacoes` | `app/Mcp/Tools/MinhasAnotacoesTool.php` (query Eloquent sobre `Note`, filtrada por autor) | `tests/Feature/Mcp/CopilotoMcpTest.php` |
+| bug de import (`ConfirmAcademicDocumentAction`) | `app-modules/journey/src/Actions/ConfirmAcademicDocumentAction.php` | `app-modules/journey/tests/ImportacaoDocumentoTest.php` |

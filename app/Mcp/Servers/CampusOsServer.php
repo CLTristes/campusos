@@ -8,9 +8,13 @@ use App\Mcp\Tools\AcervoDaDisciplinaTool;
 use App\Mcp\Tools\BuscarAnotacoesTool;
 use App\Mcp\Tools\CriarAnotacaoTool;
 use App\Mcp\Tools\DisciplinasLiberadasTool;
+use App\Mcp\Tools\MatrizCurricularTool;
+use App\Mcp\Tools\MeuHistoricoTool;
 use App\Mcp\Tools\MinhaAgendaTool;
 use App\Mcp\Tools\MinhaProgressaoTool;
+use App\Mcp\Tools\MinhasAnotacoesTool;
 use App\Mcp\Tools\MinhasHorasTool;
+use App\Mcp\Tools\SimularReprovacaoTool;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
@@ -31,9 +35,13 @@ use Laravel\Mcp\Server\Attributes\Version;
     prazo, autoria, semestre e conteúdo vêm de tabelas do CampusOS, nunca de
     generalidade de internet. Prefira minha_progressao/disciplinas_liberadas/
     minha_agenda/minhas_horas para perguntas sobre a situação do próprio
-    aluno; acervo_da_disciplina/buscar_anotacoes para o que os veteranos
-    deixaram; criar_anotacao só quando o aluno pedir explicitamente pra
-    salvar algo.
+    aluno; meu_historico quando ele perguntar por uma disciplina específica do
+    passado ou desconfiar de algum número da progressão; matriz_curricular
+    para perguntas sobre a estrutura do curso (não o progresso dele);
+    simular_reprovacao só quando ele perguntar "e se eu reprovar em...";
+    acervo_da_disciplina/buscar_anotacoes para o que os veteranos deixaram;
+    minhas_anotacoes para o que ele próprio já escreveu; criar_anotacao só
+    quando o aluno pedir explicitamente pra salvar algo.
     MARKDOWN)]
 final class CampusOsServer extends Server
 {
@@ -41,8 +49,12 @@ final class CampusOsServer extends Server
     protected array $tools = [
         MinhaProgressaoTool::class,
         DisciplinasLiberadasTool::class,
+        MeuHistoricoTool::class,
+        MatrizCurricularTool::class,
+        SimularReprovacaoTool::class,
         AcervoDaDisciplinaTool::class,
         BuscarAnotacoesTool::class,
+        MinhasAnotacoesTool::class,
         MinhaAgendaTool::class,
         MinhasHorasTool::class,
         CriarAnotacaoTool::class,
