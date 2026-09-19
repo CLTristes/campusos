@@ -6,6 +6,7 @@ use CampusOs\Journey\Http\Controllers\AcademicDocumentController;
 use CampusOs\Journey\Http\Controllers\ComplementaryActivityController;
 use CampusOs\Journey\Http\Controllers\EligibilityController;
 use CampusOs\Journey\Http\Controllers\ProgressController;
+use CampusOs\Journey\Http\Controllers\StaffStudentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,4 +37,16 @@ Route::middleware(['api', 'auth:sanctum', 'tenant.user'])
         // B8 (esticada 1) — elegibilidade e simulação de reprovação.
         Route::get('me/next-term', [EligibilityController::class, 'nextTerm'])->name('me.next-term');
         Route::post('me/simulate', [EligibilityController::class, 'simulate'])->name('me.simulate');
+    });
+
+/*
+ * Painel administrativo — aluno NOMEADO, ao contrário de `insights`
+ * (agregado anônimo). Mesmo RBAC de borda de `insights/routes/api.php`.
+ */
+Route::middleware(['api', 'auth:sanctum', 'tenant.user', 'role:coordinator,institution_admin'])
+    ->prefix('api/v1/staff')
+    ->group(function (): void {
+        Route::get('dashboard', [StaffStudentController::class, 'dashboard'])->name('staff.dashboard');
+        Route::get('students', [StaffStudentController::class, 'index'])->name('staff.students.index');
+        Route::get('students/{registration}', [StaffStudentController::class, 'show'])->name('staff.students.show');
     });

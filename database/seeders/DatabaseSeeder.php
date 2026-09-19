@@ -86,5 +86,9 @@ class DatabaseSeeder extends Seeder
             $this->command?->info("  Câmpus: {$fb->cps_name} [{$fb->cps_code}]");
             $this->command?->info('  aluno@alunos.utfpr.edu.br / coordenacao@utfpr.edu.br — senha: campusos');
         });
+
+        // Sete alunos fictícios além do Felipe real — sem eles, insights
+        // (MIN_COHORT=5) e o painel administrativo respondem vazio.
+        $this->call(DemoDataSeeder::class);
     }
 }
