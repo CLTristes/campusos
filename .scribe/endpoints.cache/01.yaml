@@ -162,14 +162,14 @@ endpoints:
         name: erq_id
         description: 'The ID of the erq.'
         required: true
-        example: architecto
+        example: 01a0b896-25f9-7171-b291-5b5a8eba8aef
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      erq_id: architecto
+      erq_id: 01a0b896-25f9-7171-b291-5b5a8eba8aef
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -221,22 +221,22 @@ endpoints:
         name: document_erq_id
         description: 'The ID of the document erq.'
         required: true
-        example: architecto
+        example: 01a0b896-25f9-7171-b291-5b5a8eba8aef
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      document_erq_id: architecto
+      document_erq_id: 01a0b896-25f9-7171-b291-5b5a8eba8aef
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
       registration_id:
         custom: []
         name: registration_id
-        description: 'O vínculo que recebe as matrículas.'
-        required: true
+        description: 'O vínculo que recebe as matrículas. Omitido, nasce do cabeçalho do documento (curso, RA, ingresso).'
+        required: false
         example: architecto
         type: string
         enumValues: []

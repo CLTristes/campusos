@@ -3,8 +3,16 @@
 declare(strict_types=1);
 
 use CampusOs\Catalog\Database\Seeders\MatrizUtfprSeeder;
+use CampusOs\Catalog\Models\Course;
+use CampusOs\Catalog\Models\Curriculum;
 use CampusOs\Catalog\Models\Subject;
+use CampusOs\Catalog\Models\Term;
 use CampusOs\Core\Tenancy\TenantContext;
+use CampusOs\Journey\Enums\DocumentRequestStatus;
+use CampusOs\Journey\Models\EnrollmentRequest;
+use CampusOs\Journey\Models\Registration;
+use CampusOs\Journey\Models\Student;
+use CampusOs\Journey\Models\SubjectEnrollment;
 use CampusOs\Tenancy\Enums\UserRole;
 use CampusOs\Tenancy\Models\Campus;
 use CampusOs\Tenancy\Models\Entity;
@@ -57,8 +65,8 @@ it('as listagens do console abrem sem erro', function () {
     $this->seed(MatrizUtfprSeeder::class);
     $coord = User::factory()->coordinator()->create();
 
-    // Uma varredura rasa, mas que percorre os dois grupos de navegação e
-    // exercita Resource + Table de cada model do catálogo.
+    // Uma varredura rasa, mas que percorre os grupos de navegação e exercita
+    // Resource + Table de cada model do catálogo, tenancy e jornada.
     foreach ([
         '/data-console/subjects',
         '/data-console/courses',
@@ -69,6 +77,44 @@ it('as listagens do console abrem sem erro', function () {
         '/data-console/offerings',
         '/data-console/campuses',
         '/data-console/users',
+        '/data-console/students',
+        '/data-console/registrations',
+        '/data-console/subject-enrollments',
+        '/data-console/enrollment-requests',
+    ] as $url) {
+        $this->actingAs($coord)->get($url)->assertSuccessful();
+    }
+});
+
+it('as telas de edição da jornada abrem sem erro, com dado real', function () {
+    $this->seed(MatrizUtfprSeeder::class);
+    $coord = User::factory()->coordinator()->create();
+
+    $student = Student::factory()->create();
+    $registration = Registration::factory()->create([
+        'student_std_id' => $student->std_id,
+        'course_crs_id' => Course::query()->where('crs_code', '25')->value('crs_id'),
+        'curriculum_cur_id' => Curriculum::query()->where('cur_code', '45')->value('cur_id'),
+        'entry_term_trm_id' => Term::query()->where('trm_year', 2023)->where('trm_period', 1)->value('trm_id'),
+    ]);
+    $enrollment = SubjectEnrollment::factory()->create([
+        'registration_reg_id' => $registration->reg_id,
+        'subject_sbj_id' => Subject::query()->value('sbj_id'),
+        'term_trm_id' => Term::query()->value('trm_id'),
+    ]);
+    // erq_extraction preenchido é o caso que mais importa: o form usa
+    // afterStateHydrated/dehydrateStateUsing pra não corromper o JSON.
+    $document = EnrollmentRequest::factory()->create([
+        'user_usr_id' => User::factory()->create()->usr_id,
+        'erq_status' => DocumentRequestStatus::Parsed,
+        'erq_extraction' => ['kind' => 'transcript', 'lines' => [['code' => 'ARC102']]],
+    ]);
+
+    foreach ([
+        "/data-console/students/{$student->std_id}/edit",
+        "/data-console/registrations/{$registration->reg_id}/edit",
+        "/data-console/subject-enrollments/{$enrollment->sen_id}/edit",
+        "/data-console/enrollment-requests/{$document->erq_id}/edit",
     ] as $url) {
         $this->actingAs($coord)->get($url)->assertSuccessful();
     }

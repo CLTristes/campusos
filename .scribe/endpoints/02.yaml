@@ -1,31 +1,90 @@
-name: Autenticação
+name: 'Acervo do veterano'
 description: |-
 
-  Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
-  `Authorization: Bearer <token>` de toda rota autenticada — e é dele que o
-  sistema descobre a instituição do usuário, nunca de um parâmetro do cliente.
+  O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+  turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+  leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+  exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+  aqui.
 endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/auth/login
+      - GET
+    uri: api/v1/notes
     metadata:
       custom: []
-      groupName: Autenticação
+      groupName: 'Acervo do veterano'
       groupDescription: |-
 
-        Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
-        `Authorization: Bearer <token>` de toda rota autenticada — e é dele que o
-        sistema descobre a instituição do usuário, nunca de um parâmetro do cliente.
+        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+        aqui.
       subgroup: ''
       subgroupDescription: ''
-      title: Entrar
+      title: 'Listar notas'
       description: |-
-        Autentica e devolve o token. O e-mail é único **por instituição**: se o
-        mesmo endereço existir em mais de uma, responde 422 pedindo `entity_id`
-        em vez de escolher uma.
-      authenticated: false
+        As próprias (qualquer visibilidade) mais o que outros compartilharam com
+        este usuário, pela escada de visibilidade. Filtre por `subject_id` para
+        ver o acervo de uma disciplina específica — é a tela do 5.2.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      subject_id:
+        custom: []
+        name: subject_id
+        description: 'O acervo de uma disciplina específica.'
+        required: false
+        example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      subject_id: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":[{"id":"01a0…","title":"Resumo da P2","kind":"summary","visibility":"subject","author":{"id":"01a0…","name":"Um Veterano"},"term":{"year":2024,"period":1}}]}'
+        headers: []
+        description: 'acervo de uma disciplina'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/notes
+    metadata:
+      custom: []
+      groupName: 'Acervo do veterano'
+      groupDescription: |-
+
+        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+        aqui.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Criar nota'
+      description: 'Nasce privada — publicar é um passo separado (`.../visibility`).'
+      authenticated: true
       deprecated: false
     headers:
       Content-Type: application/json
@@ -35,69 +94,99 @@ endpoints:
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      email:
+      title:
         custom: []
-        name: email
-        description: 'E-mail institucional.'
+        name: title
+        description: ''
         required: true
-        example: aluno@alunos.utfpr.edu.br
+        example: 'Resumo da P2'
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-      password:
+      body_md:
         custom: []
-        name: password
-        description: 'A senha.'
+        name: body_md
+        description: 'Conteúdo em markdown.'
         required: true
-        example: campusos
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      kind:
+        custom: []
+        name: kind
+        description: 'summary, past_exam, solved_exercise_list, material ou tip.'
+        required: true
+        example: summary
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-      entity_id:
+      subject_id:
         custom: []
-        name: entity_id
-        description: 'Só quando o e-mail existe em mais de uma instituição.'
+        name: subject_id
+        description: 'A disciplina, se houver.'
         required: false
-        example: null
+        example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-      device:
+      offering_id:
         custom: []
-        name: device
-        description: 'Rótulo do token, para revogar só este dispositivo depois.'
+        name: offering_id
+        description: 'A turma, se houver.'
         required: false
-        example: iphone-felipe
+        example: architecto
         type: string
         enumValues: []
-        exampleWasSpecified: true
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      course_id:
+        custom: []
+        name: course_id
+        description: 'O curso, se houver.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      term_id:
+        custom: []
+        name: term_id
+        description: 'O semestre em que foi escrita, se houver.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      email: aluno@alunos.utfpr.edu.br
-      password: campusos
-      entity_id: null
-      device: iphone-felipe
+      title: 'Resumo da P2'
+      body_md: architecto
+      kind: summary
+      subject_id: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
+      offering_id: architecto
+      course_id: architecto
+      term_id: architecto
     fileParameters: []
     responses:
       -
         custom: []
-        status: 200
-        content: '{"data":{"id":"01a0…","name":"Felipe Kurt Pohling","email":"aluno@alunos.utfpr.edu.br","role":"student","role_label":"Estudante","registration_number":"2567857","entity_id":"01a0…","enabled_modules":[]},"token":"1|abc…"}'
+        status: 201
+        content: '{"data":{"id":"01a0…","title":"Resumo da P2","visibility":"private"}}'
         headers: []
-        description: sucesso
-      -
-        custom: []
-        status: 422
-        content: '{"message":"Credenciais inválidas.","errors":{"email":["Credenciais inválidas."]}}'
-        headers: []
-        description: 'credenciais inválidas'
+        description: criada
     responseFields: []
     auth: []
     controller: null
@@ -107,26 +196,40 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/auth/me
+    uri: 'api/v1/notes/{nte_id}'
     metadata:
       custom: []
-      groupName: Autenticação
+      groupName: 'Acervo do veterano'
       groupDescription: |-
 
-        Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
-        `Authorization: Bearer <token>` de toda rota autenticada — e é dele que o
-        sistema descobre a instituição do usuário, nunca de um parâmetro do cliente.
+        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+        aqui.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Quem sou eu'
-      description: 'O usuário do token atual. É o que a SPA chama no boot para saber que tela abrir.'
+      title: 'Ver uma nota'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
       Content-Type: application/json
       Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      nte_id:
+        custom: []
+        name: nte_id
+        description: 'The ID of the nte.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      nte_id: architecto
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -151,38 +254,84 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/v1/auth/logout
+    uri: 'api/v1/notes/{note_nte_id}/visibility'
     metadata:
       custom: []
-      groupName: Autenticação
+      groupName: 'Acervo do veterano'
       groupDescription: |-
 
-        Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
-        `Authorization: Bearer <token>` de toda rota autenticada — e é dele que o
-        sistema descobre a instituição do usuário, nunca de um parâmetro do cliente.
+        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+        aqui.
       subgroup: ''
       subgroupDescription: ''
-      title: Sair
-      description: 'Revoga **apenas o token atual** — os outros dispositivos do usuário seguem logados.'
+      title: 'Mudar a visibilidade'
+      description: |-
+        Publicar (subir na escada) ou despublicar (voltar para `private`, que
+        sempre funciona, sem pré-condição nenhuma). Só o autor pode chamar.
       authenticated: true
       deprecated: false
     headers:
       Content-Type: application/json
       Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      note_nte_id:
+        custom: []
+        name: note_nte_id
+        description: 'The ID of the note nte.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      note_nte_id: architecto
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      visibility:
+        custom: []
+        name: visibility
+        description: 'private, offering, subject, course ou institution.'
+        required: true
+        example: subject
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      subject_id:
+        custom: []
+        name: subject_id
+        description: 'Obrigatório se a nota ainda não tiver disciplina e o alvo exigir uma.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      visibility: subject
+      subject_id: architecto
     fileParameters: []
     responses:
       -
         custom: []
-        status: 204
-        content: '{}'
+        status: 200
+        content: '{"data":{"id":"01a0…","visibility":"subject"}}'
         headers: []
-        description: sucesso
+        description: publicada
+      -
+        custom: []
+        status: 403
+        content: '{"message":"Esta nota não é sua."}'
+        headers: []
+        description: 'não é o autor'
     responseFields: []
     auth: []
     controller: null

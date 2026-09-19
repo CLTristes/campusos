@@ -66,6 +66,25 @@
                     <a href="#authenticating-requests">Authenticating requests</a>
                 </li>
                             </ul>
+                    <ul id="tocify-header-acervo-do-veterano" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="acervo-do-veterano">
+                    <a href="#acervo-do-veterano">Acervo do veterano</a>
+                </li>
+                                    <ul id="tocify-subheader-acervo-do-veterano" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="acervo-do-veterano-GETapi-v1-notes">
+                                <a href="#acervo-do-veterano-GETapi-v1-notes">Listar notas</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="acervo-do-veterano-POSTapi-v1-notes">
+                                <a href="#acervo-do-veterano-POSTapi-v1-notes">Criar nota</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="acervo-do-veterano-GETapi-v1-notes--nte_id-">
+                                <a href="#acervo-do-veterano-GETapi-v1-notes--nte_id-">Ver uma nota</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="acervo-do-veterano-POSTapi-v1-notes--note_nte_id--visibility">
+                                <a href="#acervo-do-veterano-POSTapi-v1-notes--note_nte_id--visibility">Mudar a visibilidade</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-autenticacao" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="autenticacao">
                     <a href="#autenticacao">Autenticação</a>
@@ -74,11 +93,20 @@
                                                     <li class="tocify-item level-2" data-unique="autenticacao-POSTapi-v1-auth-login">
                                 <a href="#autenticacao-POSTapi-v1-auth-login">Entrar</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="autenticacao-POSTapi-v1-auth-signup">
+                                <a href="#autenticacao-POSTapi-v1-auth-signup">Cadastrar (aluno)</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="autenticacao-GETapi-v1-auth-me">
                                 <a href="#autenticacao-GETapi-v1-auth-me">Quem sou eu</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="autenticacao-POSTapi-v1-auth-logout">
                                 <a href="#autenticacao-POSTapi-v1-auth-logout">Sair</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="autenticacao-POSTapi-v1-auth-verify-email">
+                                <a href="#autenticacao-POSTapi-v1-auth-verify-email">Confirmar e-mail</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="autenticacao-POSTapi-v1-auth-verify-email-resend">
+                                <a href="#autenticacao-POSTapi-v1-auth-verify-email-resend">Reenviar código de verificação</a>
                             </li>
                                                                         </ul>
                             </ul>
@@ -143,7 +171,725 @@ You can switch the language used with the tabs at the top right (or from the nav
         <h1 id="authenticating-requests">Authenticating requests</h1>
 <p>This API is not authenticated.</p>
 
-        <h1 id="autenticacao">Autenticação</h1>
+        <h1 id="acervo-do-veterano">Acervo do veterano</h1>
+
+    <p>O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+turmas (o 5.2) são o MESMO recurso — o que muda é só <code>visibility</code>. Toda
+leitura já passa pelo <code>NoteVisibilityScope</code>: o que este controller devolve é
+exatamente o que o usuário autenticado tem direito de ver, sem <code>if</code> nenhum
+aqui.</p>
+
+                                <h2 id="acervo-do-veterano-GETapi-v1-notes">Listar notas</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>As próprias (qualquer visibilidade) mais o que outros compartilharam com
+este usuário, pela escada de visibilidade. Filtre por <code>subject_id</code> para
+ver o acervo de uma disciplina específica — é a tela do 5.2.</p>
+
+<span id="example-requests-GETapi-v1-notes">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/notes?subject_id=01a0b823-b7d7-72d8-8db9-810d0e28d9c7" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/notes"
+);
+
+const params = {
+    "subject_id": "01a0b823-b7d7-72d8-8db9-810d0e28d9c7",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-notes">
+            <blockquote>
+            <p>Example response (200, acervo de uma disciplina):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;id&quot;: &quot;01a0&hellip;&quot;,
+            &quot;title&quot;: &quot;Resumo da P2&quot;,
+            &quot;kind&quot;: &quot;summary&quot;,
+            &quot;visibility&quot;: &quot;subject&quot;,
+            &quot;author&quot;: {
+                &quot;id&quot;: &quot;01a0&hellip;&quot;,
+                &quot;name&quot;: &quot;Um Veterano&quot;
+            },
+            &quot;term&quot;: {
+                &quot;year&quot;: 2024,
+                &quot;period&quot;: 1
+            }
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-notes" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-notes"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-notes"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-notes" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-notes">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-notes" data-method="GET"
+      data-path="api/v1/notes"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-notes', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-notes"
+                    onclick="tryItOut('GETapi-v1-notes');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-notes"
+                    onclick="cancelTryOut('GETapi-v1-notes');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-notes"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/notes</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-notes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-notes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>subject_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="subject_id"                data-endpoint="GETapi-v1-notes"
+               value="01a0b823-b7d7-72d8-8db9-810d0e28d9c7"
+               data-component="query">
+    <br>
+<p>O acervo de uma disciplina específica. Example: <code>01a0b823-b7d7-72d8-8db9-810d0e28d9c7</code></p>
+            </div>
+                </form>
+
+                    <h2 id="acervo-do-veterano-POSTapi-v1-notes">Criar nota</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Nasce privada — publicar é um passo separado (<code>.../visibility</code>).</p>
+
+<span id="example-requests-POSTapi-v1-notes">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/notes" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"title\": \"Resumo da P2\",
+    \"body_md\": \"architecto\",
+    \"kind\": \"summary\",
+    \"subject_id\": \"01a0b823-b7d7-72d8-8db9-810d0e28d9c7\",
+    \"offering_id\": \"architecto\",
+    \"course_id\": \"architecto\",
+    \"term_id\": \"architecto\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/notes"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "title": "Resumo da P2",
+    "body_md": "architecto",
+    "kind": "summary",
+    "subject_id": "01a0b823-b7d7-72d8-8db9-810d0e28d9c7",
+    "offering_id": "architecto",
+    "course_id": "architecto",
+    "term_id": "architecto"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-notes">
+            <blockquote>
+            <p>Example response (201, criada):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;title&quot;: &quot;Resumo da P2&quot;,
+        &quot;visibility&quot;: &quot;private&quot;
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-notes" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-notes"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-notes"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-notes" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-notes">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-notes" data-method="POST"
+      data-path="api/v1/notes"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-notes', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-notes"
+                    onclick="tryItOut('POSTapi-v1-notes');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-notes"
+                    onclick="cancelTryOut('POSTapi-v1-notes');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-notes"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/notes</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-notes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-notes"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>title</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="title"                data-endpoint="POSTapi-v1-notes"
+               value="Resumo da P2"
+               data-component="body">
+    <br>
+<p>Example: <code>Resumo da P2</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>body_md</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="body_md"                data-endpoint="POSTapi-v1-notes"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Conteúdo em markdown. Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>kind</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="kind"                data-endpoint="POSTapi-v1-notes"
+               value="summary"
+               data-component="body">
+    <br>
+<p>summary, past_exam, solved_exercise_list, material ou tip. Example: <code>summary</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>subject_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="subject_id"                data-endpoint="POSTapi-v1-notes"
+               value="01a0b823-b7d7-72d8-8db9-810d0e28d9c7"
+               data-component="body">
+    <br>
+<p>A disciplina, se houver. Example: <code>01a0b823-b7d7-72d8-8db9-810d0e28d9c7</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>offering_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="offering_id"                data-endpoint="POSTapi-v1-notes"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>A turma, se houver. Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>course_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="course_id"                data-endpoint="POSTapi-v1-notes"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>O curso, se houver. Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>term_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="term_id"                data-endpoint="POSTapi-v1-notes"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>O semestre em que foi escrita, se houver. Example: <code>architecto</code></p>
+        </div>
+        </form>
+
+                    <h2 id="acervo-do-veterano-GETapi-v1-notes--nte_id-">Ver uma nota</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-v1-notes--nte_id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/notes/architecto" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/notes/architecto"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-notes--nte_id-">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+access-control-allow-origin: *
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-notes--nte_id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-notes--nte_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-notes--nte_id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-notes--nte_id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-notes--nte_id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-notes--nte_id-" data-method="GET"
+      data-path="api/v1/notes/{nte_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-notes--nte_id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-notes--nte_id-"
+                    onclick="tryItOut('GETapi-v1-notes--nte_id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-notes--nte_id-"
+                    onclick="cancelTryOut('GETapi-v1-notes--nte_id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-notes--nte_id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/notes/{nte_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-notes--nte_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-notes--nte_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>nte_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="nte_id"                data-endpoint="GETapi-v1-notes--nte_id-"
+               value="architecto"
+               data-component="url">
+    <br>
+<p>The ID of the nte. Example: <code>architecto</code></p>
+            </div>
+                    </form>
+
+                    <h2 id="acervo-do-veterano-POSTapi-v1-notes--note_nte_id--visibility">Mudar a visibilidade</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Publicar (subir na escada) ou despublicar (voltar para <code>private</code>, que
+sempre funciona, sem pré-condição nenhuma). Só o autor pode chamar.</p>
+
+<span id="example-requests-POSTapi-v1-notes--note_nte_id--visibility">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/notes/architecto/visibility" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"visibility\": \"subject\",
+    \"subject_id\": \"architecto\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/notes/architecto/visibility"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "visibility": "subject",
+    "subject_id": "architecto"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-notes--note_nte_id--visibility">
+            <blockquote>
+            <p>Example response (200, publicada):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;visibility&quot;: &quot;subject&quot;
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (403, não é o autor):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Esta nota n&atilde;o &eacute; sua.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-notes--note_nte_id--visibility" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-notes--note_nte_id--visibility"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-notes--note_nte_id--visibility"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-notes--note_nte_id--visibility" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-notes--note_nte_id--visibility">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-notes--note_nte_id--visibility" data-method="POST"
+      data-path="api/v1/notes/{note_nte_id}/visibility"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-notes--note_nte_id--visibility', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-notes--note_nte_id--visibility"
+                    onclick="tryItOut('POSTapi-v1-notes--note_nte_id--visibility');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-notes--note_nte_id--visibility"
+                    onclick="cancelTryOut('POSTapi-v1-notes--note_nte_id--visibility');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-notes--note_nte_id--visibility"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/notes/{note_nte_id}/visibility</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-notes--note_nte_id--visibility"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-notes--note_nte_id--visibility"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>note_nte_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="note_nte_id"                data-endpoint="POSTapi-v1-notes--note_nte_id--visibility"
+               value="architecto"
+               data-component="url">
+    <br>
+<p>The ID of the note nte. Example: <code>architecto</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>visibility</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="visibility"                data-endpoint="POSTapi-v1-notes--note_nte_id--visibility"
+               value="subject"
+               data-component="body">
+    <br>
+<p>private, offering, subject, course ou institution. Example: <code>subject</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>subject_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="subject_id"                data-endpoint="POSTapi-v1-notes--note_nte_id--visibility"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Obrigatório se a nota ainda não tiver disciplina e o alvo exigir uma. Example: <code>architecto</code></p>
+        </div>
+        </form>
+
+                <h1 id="autenticacao">Autenticação</h1>
 
     <p>Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
 <code>Authorization: Bearer &lt;token&gt;</code> de toda rota autenticada — e é dele que o
@@ -355,6 +1101,228 @@ You can check the Dev Tools console for debugging information.</code></pre>
                data-component="body">
     <br>
 <p>Rótulo do token, para revogar só este dispositivo depois. Example: <code>iphone-felipe</code></p>
+        </div>
+        </form>
+
+                    <h2 id="autenticacao-POSTapi-v1-auth-signup">Cadastrar (aluno)</h2>
+
+<p>
+</p>
+
+<p>Cadastro livre — sem escolher universidade numa lista. A instituição é
+resolvida pelo <strong>domínio do e-mail</strong>; sem um domínio habilitado para
+aquele endereço, o cadastro é recusado. Devolve o token <strong>imediatamente</strong>
+(acesso já liberado) e dispara um e-mail com um código de 6 dígitos para
+confirmar o endereço — que não bloqueia nada, é só a camada de segurança.</p>
+
+<span id="example-requests-POSTapi-v1-auth-signup">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/auth/signup" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"name\": \"Felipe Kurt Pohling\",
+    \"email\": \"aluno@alunos.utfpr.edu.br\",
+    \"password\": \"senha-forte-123\",
+    \"password_confirmation\": \"senha-forte-123\",
+    \"device\": \"iphone-felipe\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/auth/signup"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "name": "Felipe Kurt Pohling",
+    "email": "aluno@alunos.utfpr.edu.br",
+    "password": "senha-forte-123",
+    "password_confirmation": "senha-forte-123",
+    "device": "iphone-felipe"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-auth-signup">
+            <blockquote>
+            <p>Example response (201, cadastrado):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;name&quot;: &quot;Felipe Kurt Pohling&quot;,
+        &quot;email&quot;: &quot;aluno@alunos.utfpr.edu.br&quot;,
+        &quot;role&quot;: &quot;student&quot;,
+        &quot;email_verified&quot;: false
+    },
+    &quot;token&quot;: &quot;1|abc&hellip;&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (422, domínio não habilitado):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Use seu e-mail institucional &mdash; este dom&iacute;nio n&atilde;o est&aacute; habilitado para cadastro.&quot;,
+    &quot;errors&quot;: {
+        &quot;email&quot;: [
+            &quot;Use seu e-mail institucional &mdash; este dom&iacute;nio n&atilde;o est&aacute; habilitado para cadastro.&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-auth-signup" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-auth-signup"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-auth-signup"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-auth-signup" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-auth-signup">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-auth-signup" data-method="POST"
+      data-path="api/v1/auth/signup"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-auth-signup', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-auth-signup"
+                    onclick="tryItOut('POSTapi-v1-auth-signup');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-auth-signup"
+                    onclick="cancelTryOut('POSTapi-v1-auth-signup');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-auth-signup"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/auth/signup</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-auth-signup"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-auth-signup"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>name</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="name"                data-endpoint="POSTapi-v1-auth-signup"
+               value="Felipe Kurt Pohling"
+               data-component="body">
+    <br>
+<p>Nome completo. Example: <code>Felipe Kurt Pohling</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>email</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="email"                data-endpoint="POSTapi-v1-auth-signup"
+               value="aluno@alunos.utfpr.edu.br"
+               data-component="body">
+    <br>
+<p>E-mail institucional do aluno. Example: <code>aluno@alunos.utfpr.edu.br</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="password"                data-endpoint="POSTapi-v1-auth-signup"
+               value="senha-forte-123"
+               data-component="body">
+    <br>
+<p>Mínimo 8 caracteres. Example: <code>senha-forte-123</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>password_confirmation</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="password_confirmation"                data-endpoint="POSTapi-v1-auth-signup"
+               value="senha-forte-123"
+               data-component="body">
+    <br>
+<p>Repita a senha. Example: <code>senha-forte-123</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>device</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="device"                data-endpoint="POSTapi-v1-auth-signup"
+               value="iphone-felipe"
+               data-component="body">
+    <br>
+<p>Rótulo do token. Example: <code>iphone-felipe</code></p>
         </div>
         </form>
 
@@ -597,6 +1565,284 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="Accept"                data-endpoint="POSTapi-v1-auth-logout"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="autenticacao-POSTapi-v1-auth-verify-email">Confirmar e-mail</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Verifica o código de 6 dígitos enviado no cadastro. Não bloqueia acesso —
+é uma marca de segurança, não um portão.</p>
+
+<span id="example-requests-POSTapi-v1-auth-verify-email">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/auth/verify-email" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"code\": \"482913\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/auth/verify-email"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "code": "482913"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-auth-verify-email">
+            <blockquote>
+            <p>Example response (200, verificado):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;email_verified&quot;: true
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (422, código inválido):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;C&oacute;digo inv&aacute;lido.&quot;,
+    &quot;errors&quot;: {
+        &quot;code&quot;: [
+            &quot;C&oacute;digo inv&aacute;lido.&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-auth-verify-email" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-auth-verify-email"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-auth-verify-email"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-auth-verify-email" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-auth-verify-email">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-auth-verify-email" data-method="POST"
+      data-path="api/v1/auth/verify-email"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-auth-verify-email', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-auth-verify-email"
+                    onclick="tryItOut('POSTapi-v1-auth-verify-email');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-auth-verify-email"
+                    onclick="cancelTryOut('POSTapi-v1-auth-verify-email');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-auth-verify-email"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/auth/verify-email</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-auth-verify-email"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-auth-verify-email"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>code</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="code"                data-endpoint="POSTapi-v1-auth-verify-email"
+               value="482913"
+               data-component="body">
+    <br>
+<p>O código de 6 dígitos recebido por e-mail. Example: <code>482913</code></p>
+        </div>
+        </form>
+
+                    <h2 id="autenticacao-POSTapi-v1-auth-verify-email-resend">Reenviar código de verificação</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>O código anterior pode ter expirado (15 minutos) — gera um novo e reenvia.</p>
+
+<span id="example-requests-POSTapi-v1-auth-verify-email-resend">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/auth/verify-email/resend" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/auth/verify-email/resend"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "POST",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-auth-verify-email-resend">
+            <blockquote>
+            <p>Example response (204, reenviado):</p>
+        </blockquote>
+                <pre>
+<code>Empty response</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-auth-verify-email-resend" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-auth-verify-email-resend"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-auth-verify-email-resend"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-auth-verify-email-resend" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-auth-verify-email-resend">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-auth-verify-email-resend" data-method="POST"
+      data-path="api/v1/auth/verify-email/resend"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-auth-verify-email-resend', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-auth-verify-email-resend"
+                    onclick="tryItOut('POSTapi-v1-auth-verify-email-resend');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-auth-verify-email-resend"
+                    onclick="cancelTryOut('POSTapi-v1-auth-verify-email-resend');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-auth-verify-email-resend"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/auth/verify-email/resend</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-auth-verify-email-resend"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-auth-verify-email-resend"
                value="application/json"
                data-component="header">
     <br>
@@ -1079,7 +2325,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "kind=transcript"\
-    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php44qk2r5siobq4HE5WqQ" </code></pre></div>
+    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpbklldgsl124u5gIyoW7" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -1214,7 +2460,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php44qk2r5siobq4HE5WqQ</code></p>
+<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpbklldgsl124u5gIyoW7</code></p>
         </div>
         </form>
 
@@ -1234,14 +2480,14 @@ foi lido para o aluno revisar.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/me/academic-documents/architecto" \
+    --get "http://localhost/api/v1/me/academic-documents/01a0b896-25f9-7171-b291-5b5a8eba8aef" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/me/academic-documents/architecto"
+    "http://localhost/api/v1/me/academic-documents/01a0b896-25f9-7171-b291-5b5a8eba8aef"
 );
 
 const headers = {
@@ -1354,10 +2600,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="erq_id"                data-endpoint="GETapi-v1-me-academic-documents--erq_id-"
-               value="architecto"
+               value="01a0b896-25f9-7171-b291-5b5a8eba8aef"
                data-component="url">
     <br>
-<p>The ID of the erq. Example: <code>architecto</code></p>
+<p>The ID of the erq. Example: <code>01a0b896-25f9-7171-b291-5b5a8eba8aef</code></p>
             </div>
                     </form>
 
@@ -1377,7 +2623,7 @@ importação inteira, porque histórico real tem disciplina extinta.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/me/academic-documents/architecto/confirm" \
+    "http://localhost/api/v1/me/academic-documents/01a0b896-25f9-7171-b291-5b5a8eba8aef/confirm" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -1398,7 +2644,7 @@ importação inteira, porque histórico real tem disciplina extinta.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/me/academic-documents/architecto/confirm"
+    "http://localhost/api/v1/me/academic-documents/01a0b896-25f9-7171-b291-5b5a8eba8aef/confirm"
 );
 
 const headers = {
@@ -1528,23 +2774,23 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="document_erq_id"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
-               value="architecto"
+               value="01a0b896-25f9-7171-b291-5b5a8eba8aef"
                data-component="url">
     <br>
-<p>The ID of the document erq. Example: <code>architecto</code></p>
+<p>The ID of the document erq. Example: <code>01a0b896-25f9-7171-b291-5b5a8eba8aef</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>registration_id</code></b>&nbsp;&nbsp;
 <small>string</small>&nbsp;
- &nbsp;
+<i>optional</i> &nbsp;
  &nbsp;
                 <input type="text" style="display: none"
                               name="registration_id"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
                value="architecto"
                data-component="body">
     <br>
-<p>O vínculo que recebe as matrículas. Example: <code>architecto</code></p>
+<p>O vínculo que recebe as matrículas. Omitido, nasce do cabeçalho do documento (curso, RA, ingresso). Example: <code>architecto</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
         <details>
