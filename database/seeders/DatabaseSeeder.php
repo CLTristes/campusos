@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use CampusOs\Catalog\Database\Seeders\MatrizUtfprSeeder;
 use CampusOs\Core\Tenancy\TenantContext;
 use CampusOs\Tenancy\Enums\UserRole;
 use CampusOs\Tenancy\Models\Campus;
@@ -61,6 +62,10 @@ class DatabaseSeeder extends Seeder
                     'campus_cps_id' => $fb->cps_id,
                 ],
             );
+
+            // O catálogo é dado mestre e nasce do documento da matriz — aqui ele
+            // é semeado do CSV transcrito, que é a mesma informação.
+            $this->call(MatrizUtfprSeeder::class);
 
             $this->command?->info("  Instituição: {$utfpr->ent_name} (UTFPR)");
             $this->command?->info("  Câmpus: {$fb->cps_name} [{$fb->cps_code}]");

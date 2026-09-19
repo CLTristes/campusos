@@ -23,4 +23,13 @@ return [
     'entity' => CampusOs\Tenancy\Models\Entity::class,
     'campus' => CampusOs\Tenancy\Models\Campus::class,
     'user' => CampusOs\Tenancy\Models\User::class,
+
+    // catalog — o journey e o lifeos se relacionam com estes sem importar a
+    // classe do outro módulo (regra de ouro nº 3).
+    'course' => CampusOs\Catalog\Models\Course::class,
+    'curriculum' => CampusOs\Catalog\Models\Curriculum::class,
+    'curriculum_subject' => CampusOs\Catalog\Models\CurriculumSubject::class,
+    'subject' => CampusOs\Catalog\Models\Subject::class,
+    'term' => CampusOs\Catalog\Models\Term::class,
+    'offering' => CampusOs\Catalog\Models\Offering::class,
 ];
