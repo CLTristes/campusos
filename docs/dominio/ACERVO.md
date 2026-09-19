@@ -80,8 +80,9 @@ cursado a disciplina/já tiver cursado aquela oferta, conforme o degrau da nota.
    um palpite (publicar direto, denúncia + remoção pela coordenação), mas
    nada disso tem código ainda — hoje qualquer nota publicada fica visível
    sem nenhum mecanismo de denúncia.
-2. **B6 (tarefas da turma) e a curadoria por voto (Fase 4)** não têm código.
-   O palpite do `docs-site` vale até serem implementados.
+2. **A curadoria por voto (Fase 4)** não tem código — o palpite do `docs-site`
+   vale até ser implementada. (B6, tarefas da turma, já tem: ver
+   [`TAREFAS.md`](TAREFAS.md).)
 
 ## Mapa de código
 

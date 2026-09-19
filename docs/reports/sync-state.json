@@ -1,7 +1,7 @@
 {
     "version": 1,
     "project": "campusos",
-    "current_release": "v0.5.1",
+    "current_release": "v0.6.0",
     "last_sync": {
         "at": "2026-09-19",
         "by": "claude-sonnet-5",
@@ -145,6 +145,22 @@
             "synced_at": "2026-09-19",
             "touches": [
                 "docs/reports/SISTEMA.md"
+            ]
+        },
+        {
+            "id": "v0.6.0/feat_tarefas_da_turma",
+            "file": "docs/reports/v0.6.0/feat_tarefas_da_turma.md",
+            "title": "Tarefas da turma (B6) — cadastro já compartilhado, adotar por cópia, agenda filtrada pelo termo corrente",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
+            "synced_at": null,
+            "touches": [
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md",
+                "docs/arquitetura/BANCO.md",
+                "docs-site/features/acervo-compartilhado.html",
+                "docs-site/plano-de-ataque.html",
+                "docs-site/banco-de-dados.html"
             ]
         }
     ]

@@ -48,7 +48,8 @@ negócio. Contrato de cada documento em [dominio/README.md](dominio/README.md).
 | [DOCUMENTOS_ACADEMICOS.md](dominio/DOCUMENTOS_ACADEMICOS.md) | **De onde vêm os dados.** A estrutura real dos três documentos do portal da UTFPR (histórico escolar, matriz curricular, requerimento de matrícula): colunas, vocabulário de situação, quadros de resumo, a fórmula das cargas horárias e o grafo de pré-requisitos |
 | [PROGRESSAO.md](dominio/PROGRESSAO.md) | **As 12 regras da graduação.** Vínculo, matriz congelada, as dez situações de matrícula, a regra de aprovação (frequência × nota), as três faixas de carga horária, a previsão de formatura |
 | [ACESSO.md](dominio/ACESSO.md) | **Quem entra, no quê.** Tenant = instituição, 4 papéis, e-mail único por instituição, cadastro livre do aluno pelo domínio do e-mail, verificação por código |
-| [ACERVO.md](dominio/ACERVO.md) | **O acervo do veterano (5.2).** A escada de 5 visibilidades, a regra que faz a nota atravessar semestres, o que não entrou ainda (tarefas da turma, curadoria) |
+| [ACERVO.md](dominio/ACERVO.md) | **O acervo do veterano (5.2).** A escada de 5 visibilidades, a regra que faz a nota atravessar semestres, o que não entrou ainda (curadoria por voto) |
+| [TAREFAS.md](dominio/TAREFAS.md) | **Tarefas da turma (B6, 5.2).** Tarefa não nasce privada, adotar copia (nunca compartilha a linha), a agenda filtra por termo corrente — ao contrário do acervo de notas |
 
 > O **desenho de produto** — inclusive das features que ainda não existem — vive
 > em [`docs-site/`](../docs-site/index.html) e é canônico para elas, no mesmo
