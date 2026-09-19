@@ -70,6 +70,14 @@ endpoints:
         embutidas nas disciplinas (`extension_hours`) são uma exigência
         **ortogonal** e por isso `extension_counts_in_total` é `false` — somá-las
         inventaria horas que o aluno não precisa cursar.
+
+        `terms[].subjects[].available_this_term` só existe pras OPTATIVAS: nem
+        toda optativa cadastrada roda todo semestre (há rotação), e
+        "disponível" é literalmente "tem `offerings` para ela no termo
+        consultado" — sem `term_id`, cai no termo `current` da instituição; sem
+        termo corrente nenhum configurado, o campo some (`null`) em vez de
+        mentir "indisponível". As disciplinas OBRIGATÓRIAS nunca ganham este
+        campo — a matriz inteira continua aparecendo, nunca filtrada.
       authenticated: false
       deprecated: false
     headers:
@@ -101,8 +109,20 @@ endpoints:
     cleanUrlParameters:
       course_crs_id: 01a0b860-2cbf-7061-b1fc-ffce925b44c6
       course: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
-    queryParameters: []
-    cleanQueryParameters: []
+    queryParameters:
+      term_id:
+        custom: []
+        name: term_id
+        description: 'O termo pra checar disponibilidade de optativa. Omitido, usa o termo `current` da instituição.'
+        required: false
+        example: 01a0b860-2f64-70fb-8c67-f15096cdb2de
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      term_id: 01a0b860-2f64-70fb-8c67-f15096cdb2de
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []

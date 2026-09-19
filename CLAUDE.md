@@ -108,8 +108,8 @@ e **eventos** declarados no módulo `core`. Detalhe completo em
 | `core` | do template | shared kernel: `AbstractAction`, `Entityable`, `EntityScope`, `TenantContext`, `AuditObserver` |
 | `tenancy` | **em código** | `Entity` (a instituição) + `Campus` + `User` (4 papéis) + login/cadastro Sanctum |
 | `catalog` | **em código** | dados mestres: curso, matriz, disciplina, pré-requisito, equivalência, conjunto de optativas, semestre, oferta |
-| `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma), horas complementares (B7 — nunca soma na progressão), elegibilidade e simulação de reprovação (B8 esticada 1). Falta: endpoint de criar vínculo |
-| `lifeos` | **parcial** | o acervo do veterano (B5): `Note` + escada de visibilidade de 5 níveis. B6 (tarefas da turma): `Task` + adoção por cópia + `GET /me/agenda`. Falta curadoria por voto e `events` (esticada) |
+| `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma — `transcript` E `enrollment_request` completos: a matrícula do semestre corrente cria/reaproveita `Offering`, ainda sem grade de horários/sala), horas complementares (B7 — nunca soma na progressão), elegibilidade e simulação de reprovação (B8 esticada 1), painel administrativo NOMEADO (`/staff/dashboard`, `/staff/students`). Falta: endpoint de criar vínculo |
+| `lifeos` | **parcial** | o acervo do veterano (B5): `Note` + escada de visibilidade de 5 níveis + voto positivo (`ToggleNoteVoteAction`, `POST /notes/{note}/vote`) ordenando o acervo por score. B6 (tarefas da turma): `Task` + adoção por cópia + `GET /me/agenda`. Falta `events` (esticada) |
 | `insights` | **em código** | o painel da coordenação (B8): 4 perguntas agregadas via `AcademicStatsProvider`, implementado em `journey`. **Sem tabelas por desenho** — lê por read model |
 | `integrations` | **em código** | `GeminiDocumentExtractor` + `NullDocumentExtractor` atrás do contrato `AcademicDocumentExtractor`. **O único lugar que sabe qual IA lê os documentos** |
 
@@ -377,7 +377,50 @@ suficiência) colidiam na mesma chave de `SubjectEnrollment`, e a ordem do
 documento decidia silenciosamente qual ficava valendo. Ver
 [`COPILOTO_MCP.md`](docs/dominio/COPILOTO_MCP.md).
 
+**Voto positivo e o painel administrativo** (`lifeos`+`journey`, validação do
+copiloto MCP contra cliente real, 2026-09-19): `note_votes` — um voto por
+pessoa por nota (índice único), nunca na própria, alterna em vez de somar
+infinito. `nte_upvotes_count` desnormalizado ordena `GET /notes`,
+`acervo_da_disciplina` e `buscar_anotacoes` por score antes de data — a
+curadoria contra slop que faltava. Em paralelo, `StaffStudentController`
+(`journey`) abre o painel administrativo NOMEADO — diferente de `insights`
+(agregado anônimo, `MIN_COHORT=5`): `/staff/dashboard` (números agregados
+por instituição/curso), `/staff/students` (todos os vínculos com progresso)
+e `/staff/students/{registration}` (o "aluno 360" — progresso + histórico +
+horas + o que libera, reaproveitando os MESMOS read models de `GET
+/me/progress` e `meu_historico`). Mesmo RBAC de borda de `insights`
+(coordenador vê o próprio curso, `institution_admin` a instituição inteira).
+
+**O requerimento de matrícula fecha** (20/09/2026): `ConfirmAcademicDocumentAction`
+resolve linha sem situação como `Cursando` só para `enrollment_request`
+(o documento não imprime situação — é o semestre corrente), e cria/reaproveita
+`Offering` a partir de `class_code`+termo+câmpus, ligando
+`subject_enrollments.offering_ofr_id`. Ainda não extrai grade de
+horários/sala (§5.2 de `DOCUMENTOS_ACADEMICOS.md`) — fica pra quando `events`
+entrar. Ver [`DOCUMENTOS_ACADEMICOS.md`](docs/dominio/DOCUMENTOS_ACADEMICOS.md)
+§6.
+
+**Rotação de optativas** (mesma leva): nem toda optativa cadastrada roda todo
+semestre. `GET /api/v1/courses/{course}/curriculum` ganhou
+`terms[].subjects[].available_this_term` (só para `nature=elective` — nunca
+filtra a matriz, só anota) — "disponível" é literalmente "tem `Offering` para
+essa disciplina no termo consultado (`?term_id=`, default o termo `current`
+da instituição)". Zero tabela nova: reaproveita a mesma `Offering` que o
+requerimento de matrícula agora cria de verdade, então as duas coisas ficam
+sincronizadas sem ninguém precisar lembrar de marcar uma flag à parte. O
+copiloto MCP (`matriz_curricular`) ganhou o mesmo campo, sempre no termo
+`current`.
+
+**Upload da matriz — deliberadamente adiado.** `UploadAcademicDocumentAction`
+nem aceita `kind=curriculum`, e mesmo que aceitasse não existe Action que
+leia esse tipo e grave `Course`/`Curriculum`/`CurriculumSubject`/
+`Prerequisite` — hoje é só `MatrizUtfprSeeder`, CLI de desenvolvedor.
+`UserRole::managesCatalog()` já existe no enum como sinal de que isto foi
+planejado; nunca foi ligado a rota nenhuma. Decisão do dono do produto
+(19-20/09/2026): fica pra depois, prioridade é outra.
+
 **Ainda não existe:** cálculo do período por déficit de CHS completo
-(obrigatórias+optativas), curadoria por voto e `events` no `lifeos`, e
-homologação da coordenação para horas complementares. Lista completa em
+(obrigatórias+optativas), `events` no `lifeos`, homologação da coordenação
+para horas complementares, grade de horários/sala do requerimento de
+matrícula, e upload da matriz por gestor (adiado, acima). Lista completa em
 [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.

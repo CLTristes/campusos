@@ -83,6 +83,9 @@
                                                                                 <li class="tocify-item level-2" data-unique="acervo-do-veterano-POSTapi-v1-notes--note_nte_id--visibility">
                                 <a href="#acervo-do-veterano-POSTapi-v1-notes--note_nte_id--visibility">Mudar a visibilidade</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="acervo-do-veterano-POSTapi-v1-notes--note_nte_id--vote">
+                                <a href="#acervo-do-veterano-POSTapi-v1-notes--note_nte_id--vote">Votar / desfazer voto</a>
+                            </li>
                                                                         </ul>
                             </ul>
                     <ul id="tocify-header-autenticacao" class="tocify-header">
@@ -168,6 +171,22 @@
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="jornada-academica-POSTapi-v1-me-academic-documents--document_erq_id--confirm">
                                 <a href="#jornada-academica-POSTapi-v1-me-academic-documents--document_erq_id--confirm">Confirmar a leitura</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
+                    <ul id="tocify-header-painel-administrativo" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="painel-administrativo">
+                    <a href="#painel-administrativo">Painel administrativo</a>
+                </li>
+                                    <ul id="tocify-subheader-painel-administrativo" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="painel-administrativo-GETapi-v1-staff-dashboard">
+                                <a href="#painel-administrativo-GETapi-v1-staff-dashboard">Painel — os números agregados</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="painel-administrativo-GETapi-v1-staff-students">
+                                <a href="#painel-administrativo-GETapi-v1-staff-students">Todos os alunos</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="painel-administrativo-GETapi-v1-staff-students--registration_reg_id-">
+                                <a href="#painel-administrativo-GETapi-v1-staff-students--registration_reg_id-">Um aluno — progresso, histórico, horas e o que libera</a>
                             </li>
                                                                         </ul>
                             </ul>
@@ -304,6 +323,7 @@ fetch(url, {
             &quot;title&quot;: &quot;Resumo da P2&quot;,
             &quot;kind&quot;: &quot;summary&quot;,
             &quot;visibility&quot;: &quot;subject&quot;,
+            &quot;upvotes_count&quot;: 3,
             &quot;author&quot;: {
                 &quot;id&quot;: &quot;01a0&hellip;&quot;,
                 &quot;name&quot;: &quot;Um Veterano&quot;
@@ -955,6 +975,154 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>Obrigatório se a nota ainda não tiver disciplina e o alvo exigir uma. Example: <code>architecto</code></p>
         </div>
         </form>
+
+                    <h2 id="acervo-do-veterano-POSTapi-v1-notes--note_nte_id--vote">Votar / desfazer voto</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Alterna: primeira chamada vota, segunda desfaz. Só quem enxerga a nota
+(mesmo <code>NoteVisibilityScope</code> de sempre) e não é o autor pode votar.</p>
+
+<span id="example-requests-POSTapi-v1-notes--note_nte_id--vote">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/notes/architecto/vote" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/notes/architecto/vote"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "POST",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-notes--note_nte_id--vote">
+            <blockquote>
+            <p>Example response (200, votou):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;upvotes_count&quot;: 4
+    },
+    &quot;voted&quot;: true
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (422, a própria nota):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Voc&ecirc; n&atilde;o pode votar na pr&oacute;pria anota&ccedil;&atilde;o.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-notes--note_nte_id--vote" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-notes--note_nte_id--vote"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-notes--note_nte_id--vote"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-notes--note_nte_id--vote" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-notes--note_nte_id--vote">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-notes--note_nte_id--vote" data-method="POST"
+      data-path="api/v1/notes/{note_nte_id}/vote"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-notes--note_nte_id--vote', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-notes--note_nte_id--vote"
+                    onclick="tryItOut('POSTapi-v1-notes--note_nte_id--vote');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-notes--note_nte_id--vote"
+                    onclick="cancelTryOut('POSTapi-v1-notes--note_nte_id--vote');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-notes--note_nte_id--vote"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/notes/{note_nte_id}/vote</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-notes--note_nte_id--vote"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-notes--note_nte_id--vote"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>note_nte_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="note_nte_id"                data-endpoint="POSTapi-v1-notes--note_nte_id--vote"
+               value="architecto"
+               data-component="url">
+    <br>
+<p>The ID of the note nte. Example: <code>architecto</code></p>
+            </div>
+                    </form>
 
                 <h1 id="autenticacao">Autenticação</h1>
 
@@ -2240,6 +2408,13 @@ pré-requisitos de cada uma e o bloco de cargas horárias.</p>
 embutidas nas disciplinas (<code>extension_hours</code>) são uma exigência
 <strong>ortogonal</strong> e por isso <code>extension_counts_in_total</code> é <code>false</code> — somá-las
 inventaria horas que o aluno não precisa cursar.</p>
+<p><code>terms[].subjects[].available_this_term</code> só existe pras OPTATIVAS: nem
+toda optativa cadastrada roda todo semestre (há rotação), e
+"disponível" é literalmente "tem <code>offerings</code> para ela no termo
+consultado" — sem <code>term_id</code>, cai no termo <code>current</code> da instituição; sem
+termo corrente nenhum configurado, o campo some (<code>null</code>) em vez de
+mentir "indisponível". As disciplinas OBRIGATÓRIAS nunca ganham este
+campo — a matriz inteira continua aparecendo, nunca filtrada.</p>
 
 <span id="example-requests-GETapi-v1-courses--course_crs_id--curriculum">
 <blockquote>Example request:</blockquote>
@@ -2247,7 +2422,7 @@ inventaria horas que o aluno não precisa cursar.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/courses/01a0b860-2cbf-7061-b1fc-ffce925b44c6/curriculum" \
+    --get "http://localhost/api/v1/courses/01a0b860-2cbf-7061-b1fc-ffce925b44c6/curriculum?term_id=01a0b860-2f64-70fb-8c67-f15096cdb2de" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
@@ -2256,6 +2431,12 @@ inventaria horas que o aluno não precisa cursar.</p>
     <pre><code class="language-javascript">const url = new URL(
     "http://localhost/api/v1/courses/01a0b860-2cbf-7061-b1fc-ffce925b44c6/curriculum"
 );
+
+const params = {
+    "term_id": "01a0b860-2f64-70fb-8c67-f15096cdb2de",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
 
 const headers = {
     "Content-Type": "application/json",
@@ -2393,7 +2574,20 @@ You can check the Dev Tools console for debugging information.</code></pre>
     <br>
 <p>O id do curso. Example: <code>01a0b823-b7d7-72d8-8db9-810d0e28d9c7</code></p>
             </div>
-                    </form>
+                        <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>term_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="term_id"                data-endpoint="GETapi-v1-courses--course_crs_id--curriculum"
+               value="01a0b860-2f64-70fb-8c67-f15096cdb2de"
+               data-component="query">
+    <br>
+<p>O termo pra checar disponibilidade de optativa. Omitido, usa o termo <code>current</code> da instituição. Example: <code>01a0b860-2f64-70fb-8c67-f15096cdb2de</code></p>
+            </div>
+                </form>
 
                 <h1 id="elegibilidade-e-simulacao">Elegibilidade e simulação</h1>
 
@@ -2872,7 +3066,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "title=Semana Acadêmica de Sistemas de Informação"\
     --form "hours_claimed=20"\
     --form "issued_at=architecto"\
-    --form "certificate=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpevk8tvak7op3a3CcmwC" </code></pre></div>
+    --form "certificate=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php9ggijqj6dune70rGFXy" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -3060,7 +3254,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>O certificado (PDF, PNG ou JPG). Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpevk8tvak7op3a3CcmwC</code></p>
+<p>O certificado (PDF, PNG ou JPG). Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php9ggijqj6dune70rGFXy</code></p>
         </div>
         </form>
 
@@ -3232,7 +3426,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "kind=transcript"\
-    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php322fa5avjf3g7Cw991O" </code></pre></div>
+    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpeiql1p920eba3a36xgD" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -3367,7 +3561,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php322fa5avjf3g7Cw991O</code></p>
+<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpeiql1p920eba3a36xgD</code></p>
         </div>
         </form>
 
@@ -3784,6 +3978,450 @@ You can check the Dev Tools console for debugging information.</code></pre>
                                     </details>
         </div>
         </form>
+
+                <h1 id="painel-administrativo">Painel administrativo</h1>
+
+    <p>Diferente de <code>StaffInsightsController</code> (agregado ANÔNIMO, <code>insights</code>,
+<code>MIN_COHORT=5</code>): aqui o aluno é nomeado — o mesmo dado que <code>/data-console</code>
+já mostra tabela por tabela, só agregado numa lista e num "aluno 360" que
+reaproveita os MESMOS read models de <code>GET /me/progress</code>, <code>meu_historico</code>
+(copiloto MCP) e <code>GET /me/next-term</code>, sem duplicar cálculo nenhum.</p>
+<p>O escopo curso × instituição é o MESMO de <code>StaffInsightsController</code>:
+coordenador enxerga o próprio curso, <code>institution_admin</code> a instituição
+inteira. Nenhuma tool MCP expõe isto — é canal exclusivamente REST, porque
+o copiloto fala com o ALUNO sobre a própria jornada, nunca com um gestor
+sobre a jornada de terceiros.</p>
+
+                                <h2 id="painel-administrativo-GETapi-v1-staff-dashboard">Painel — os números agregados</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-v1-staff-dashboard">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/staff/dashboard" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/staff/dashboard"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-staff-dashboard">
+            <blockquote>
+            <p>Example response (200, ok):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;total_students&quot;: 42,
+        &quot;total_registrations&quot;: 42,
+        &quot;students_by_course&quot;: [
+            {
+                &quot;course&quot;: &quot;Bacharelado em Sistemas de Informa&ccedil;&atilde;o&quot;,
+                &quot;count&quot;: 42
+            }
+        ],
+        &quot;document_requests_by_status&quot;: [
+            {
+                &quot;status&quot;: &quot;parsed&quot;,
+                &quot;status_label&quot;: &quot;Aguardando sua confer&ecirc;ncia&quot;,
+                &quot;total&quot;: 3
+            }
+        ],
+        &quot;average_progress_percentage&quot;: 38.4
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-staff-dashboard" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-staff-dashboard"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-staff-dashboard"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-staff-dashboard" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-staff-dashboard">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-staff-dashboard" data-method="GET"
+      data-path="api/v1/staff/dashboard"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-staff-dashboard', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-staff-dashboard"
+                    onclick="tryItOut('GETapi-v1-staff-dashboard');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-staff-dashboard"
+                    onclick="cancelTryOut('GETapi-v1-staff-dashboard');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-staff-dashboard"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/staff/dashboard</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-staff-dashboard"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-staff-dashboard"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="painel-administrativo-GETapi-v1-staff-students">Todos os alunos</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Uma linha por vínculo (o mesmo aluno com dois cursos aparece duas
+vezes — é o que <code>EligibilityReadModel</code>/<code>ProgressReadModel</code> já tratam
+como unidade). <code>progress</code>/<code>at_risk</code> vêm do MESMO <code>ProgressReadModel</code>
+de <code>GET /me/progress</code>.</p>
+
+<span id="example-requests-GETapi-v1-staff-students">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/staff/students" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/staff/students"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-staff-students">
+            <blockquote>
+            <p>Example response (200, ok):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;registration_id&quot;: &quot;01a0&hellip;&quot;,
+            &quot;student_name&quot;: &quot;Felipe Kurt Pohling&quot;,
+            &quot;registration_number&quot;: &quot;2567857&quot;,
+            &quot;course&quot;: &quot;Bacharelado em Sistemas de Informa&ccedil;&atilde;o&quot;,
+            &quot;campus&quot;: &quot;Francisco Beltr&atilde;o&quot;,
+            &quot;entry_term&quot;: &quot;1/2023&quot;,
+            &quot;completed_hours&quot;: 2540,
+            &quot;required_hours&quot;: 3000,
+            &quot;percentage&quot;: 84.7,
+            &quot;terms_attended&quot;: 8,
+            &quot;at_risk&quot;: false
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-staff-students" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-staff-students"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-staff-students"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-staff-students" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-staff-students">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-staff-students" data-method="GET"
+      data-path="api/v1/staff/students"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-staff-students', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-staff-students"
+                    onclick="tryItOut('GETapi-v1-staff-students');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-staff-students"
+                    onclick="cancelTryOut('GETapi-v1-staff-students');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-staff-students"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/staff/students</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-staff-students"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-staff-students"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="painel-administrativo-GETapi-v1-staff-students--registration_reg_id-">Um aluno — progresso, histórico, horas e o que libera</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>O "aluno 360": junta <code>ProgressReadModel</code>, <code>AcademicHistoryReadModel</code>
+(o mesmo de <code>meu_historico</code> no copiloto MCP), <code>ComplementaryHoursReadModel</code>
+e <code>EligibilityReadModel::nextTerm</code> — zero cálculo novo, só composição.</p>
+
+<span id="example-requests-GETapi-v1-staff-students--registration_reg_id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/staff/students/01a0b897-1404-7199-b64e-62d10c74c9c0" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/staff/students/01a0b897-1404-7199-b64e-62d10c74c9c0"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-staff-students--registration_reg_id-">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+access-control-allow-origin: *
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-staff-students--registration_reg_id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-staff-students--registration_reg_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-staff-students--registration_reg_id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-staff-students--registration_reg_id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-staff-students--registration_reg_id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-staff-students--registration_reg_id-" data-method="GET"
+      data-path="api/v1/staff/students/{registration_reg_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-staff-students--registration_reg_id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-staff-students--registration_reg_id-"
+                    onclick="tryItOut('GETapi-v1-staff-students--registration_reg_id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-staff-students--registration_reg_id-"
+                    onclick="cancelTryOut('GETapi-v1-staff-students--registration_reg_id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-staff-students--registration_reg_id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/staff/students/{registration_reg_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-staff-students--registration_reg_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-staff-students--registration_reg_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>registration_reg_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="registration_reg_id"                data-endpoint="GETapi-v1-staff-students--registration_reg_id-"
+               value="01a0b897-1404-7199-b64e-62d10c74c9c0"
+               data-component="url">
+    <br>
+<p>The ID of the registration reg. Example: <code>01a0b897-1404-7199-b64e-62d10c74c9c0</code></p>
+            </div>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>registration</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="registration"                data-endpoint="GETapi-v1-staff-students--registration_reg_id-"
+               value="01a0b897-1404-7199-b64e-62d10c74c9c0"
+               data-component="url">
+    <br>
+<p>O id do vínculo. Example: <code>01a0b897-1404-7199-b64e-62d10c74c9c0</code></p>
+            </div>
+                    </form>
 
                 <h1 id="painel-da-coordenacao">Painel da coordenação</h1>
 
@@ -4733,14 +5371,14 @@ original nem quem mais adotou.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/tasks/architecto/adopt" \
+    "http://localhost/api/v1/tasks/01a0ba6b-131d-72f0-a717-b820ab5873b7/adopt" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/tasks/architecto/adopt"
+    "http://localhost/api/v1/tasks/01a0ba6b-131d-72f0-a717-b820ab5873b7/adopt"
 );
 
 const headers = {
@@ -4859,10 +5497,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="task_tsk_id"                data-endpoint="POSTapi-v1-tasks--task_tsk_id--adopt"
-               value="architecto"
+               value="01a0ba6b-131d-72f0-a717-b820ab5873b7"
                data-component="url">
     <br>
-<p>The ID of the task tsk. Example: <code>architecto</code></p>
+<p>The ID of the task tsk. Example: <code>01a0ba6b-131d-72f0-a717-b820ab5873b7</code></p>
             </div>
                     </form>
 
@@ -4880,7 +5518,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost/api/v1/tasks/architecto/status" \
+    "http://localhost/api/v1/tasks/01a0ba6b-131d-72f0-a717-b820ab5873b7/status" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -4891,7 +5529,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/tasks/architecto/status"
+    "http://localhost/api/v1/tasks/01a0ba6b-131d-72f0-a717-b820ab5873b7/status"
 );
 
 const headers = {
@@ -5013,10 +5651,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="task_tsk_id"                data-endpoint="PATCHapi-v1-tasks--task_tsk_id--status"
-               value="architecto"
+               value="01a0ba6b-131d-72f0-a717-b820ab5873b7"
                data-component="url">
     <br>
-<p>The ID of the task tsk. Example: <code>architecto</code></p>
+<p>The ID of the task tsk. Example: <code>01a0ba6b-131d-72f0-a717-b820ab5873b7</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
