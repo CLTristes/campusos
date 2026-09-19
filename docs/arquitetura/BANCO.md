@@ -12,7 +12,7 @@ contrato ou read model, nunca via Eloquent cru atravessando a fronteira (ver
 [`COMUNICACAO.md`](COMUNICACAO.md)). As migrations/factories de cada tabela vivem
 em `app-modules/<modulo>/database/`.
 
-**Estado atual — 16 tabelas de domínio em código:**
+**Estado atual — 17 tabelas de domínio em código:**
 
 | Tabela | Prefixo | PK | Módulo dono |
 | --- | --- | --- | --- |
@@ -32,6 +32,7 @@ em `app-modules/<modulo>/database/`.
 | `students` | `std_` | `std_id` | `journey` |
 | `registrations` | `reg_` | `reg_id` | `journey` |
 | `subject_enrollments` | `sen_` | `sen_id` | `journey` |
+| `enrollment_requests` | `erq_` | `erq_id` | `journey` — o documento que o aluno subiu |
 | `users`(framework), `cache`, `jobs`, `sessions`, `personal_access_tokens` | — | — | host (infra do Laravel/Sanctum) |
 
 > As tabelas de infraestrutura do framework não seguem as convenções de domínio

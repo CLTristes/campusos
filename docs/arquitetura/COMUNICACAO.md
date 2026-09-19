@@ -216,3 +216,37 @@ Adicione uma chave em `config/models.php` sempre que precisar. Factories e teste
 - **Dashboards server-side (Livewire/Inertia, se instalados):** o controller
   injeta read models (interfaces do `core`) e devolve DTOs para a view — nunca o
   Eloquent cru de outro módulo. Preserva a fronteira até na apresentação.
+
+---
+
+## O contrato real do sistema (v0.3.0)
+
+`AcademicDocumentExtractor` é o primeiro contrato de verdade do CampusOS, e
+serve de exemplo canônico do mecanismo síncrono:
+
+```
+core/src/Contracts/AcademicDocumentExtractor.php     a interface
+core/src/DTOs/{ExtractedDocument,ExtractedLine}.php  o que atravessa
+integrations/src/Extractors/GeminiDocumentExtractor  a implementação
+integrations/src/Providers/IntegrationsServiceProvider  o bind
+```
+
+Três decisões que valem copiar no próximo contrato:
+
+1. **O DTO é plano e sem regra.** `ExtractedLine::status` é o texto impresso no
+   documento, não um enum do domínio. Quem traduz é o módulo consumidor — assim,
+   trocar a implementação não arrasta vocabulário de negócio junto.
+2. **A exceção faz parte do contrato.** `ExtractorUnavailableException` está
+   declarada no `@throws` e significa uma coisa só: erro de **transporte**, que
+   o chamador deixa subir. Recusa de **negócio** volta no DTO, não como exceção.
+   Sem essa distinção explícita, cada implementação inventa a sua.
+3. **O bind lê de config, e provedor desconhecido falha alto.** `match` com
+   `default => throw` — um typo em `DOCUMENT_EXTRACTOR` estoura na hora, em vez
+   de silenciosamente não ler documento nenhum.
+
+Verificação de fronteira que roda no fechamento de cada entrega:
+
+```bash
+grep -rn "Gemini\|Http::" app-modules/journey/src/        # deve dar vazio
+grep -rn "CampusOs\\Journey" app-modules/integrations/src/  # deve dar vazio
+```

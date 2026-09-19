@@ -425,6 +425,60 @@ aparecer preenchido no instante em que ele confirma a importação.
 
 ---
 
+## 5.3 De documento a dado — o caminho em código
+
+> Implementado em v0.3.0. Regras de negócio da progressão em
+> [`PROGRESSAO.md`](PROGRESSAO.md); aqui só o caminho que o arquivo percorre.
+
+### Três passos, e só o último escreve
+
+```
+POST /api/v1/me/academic-documents        → 202 + Job na fila "imports"
+GET  /api/v1/me/academic-documents/{id}   → o que a IA leu (tela de conferência)
+POST .../{id}/confirm                     → o aluno confirma → subject_enrollments
+```
+
+**A IA nunca escreve matrícula.** Ela preenche `erq_extraction`, o aluno revisa
+e corrige, e só a confirmação grava. É o que transforma um erro de leitura numa
+correção de 30 segundos em vez de um histórico corrompido — e é o que torna
+aceitável usar IA num dado sensível.
+
+### O provedor é decisão de um lugar só
+
+`journey` fala com o contrato `AcademicDocumentExtractor` (no `core`) e **não
+conhece provedor nenhum**. A implementação é escolhida pelo bind em
+`IntegrationsServiceProvider`, lido de `DOCUMENT_EXTRACTOR`:
+
+| Valor | Implementação |
+| --- | --- |
+| `gemini` | Google AI Studio — camada gratuita, escolhida para o MVP |
+| `null` | Não chama ninguém; manda tudo para a tela de conferência. É o extrator dos testes e o plano B da demonstração |
+
+Os DTOs que atravessam o contrato são **planos e sem regra**:
+`ExtractedLine::status` é o texto impresso no documento ("Aprovado Por
+Nota/Frequência"), não um enum. Quem traduz é o `journey`
+(`DocumentStatusTranslator`) — assim, trocar de provedor não arrasta o
+vocabulário acadêmico junto.
+
+### Transporte × negócio
+
+| Situação | Tratamento |
+| --- | --- |
+| 5xx, timeout, **429 de cota**, credencial ausente | `ExtractorUnavailableException` → **sobe**, a fila reprocessa |
+| "não é documento acadêmico", "nenhuma disciplina encontrada" | volta no DTO como `failureReason` → estado **final** |
+
+Num provedor gratuito o **429 é o erro mais provável de todos**, e é transporte:
+marcar o documento como ilegível apagaria o upload do aluno por um limite nosso.
+
+### Linha que não casa vira pendência, não erro
+
+Código que não existe no catálogo, ou situação fora do vocabulário conhecido,
+volta em `pending[]` na resposta da confirmação. Histórico real tem disciplina
+extinta — derrubar a importação inteira por causa de uma linha de 2019 é o pior
+dos mundos.
+
+---
+
 ## 6. ⚠️ Pendências do dono do produto
 
 ### ✅ Fechadas pelo HTML da tela da matriz (19/09, 04:40)

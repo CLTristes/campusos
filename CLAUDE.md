@@ -108,10 +108,10 @@ e **eventos** declarados no módulo `core`. Detalhe completo em
 | `core` | do template | shared kernel: `AbstractAction`, `Entityable`, `EntityScope`, `TenantContext`, `AuditObserver` |
 | `tenancy` | **em código** | `Entity` (a instituição) + `Campus` + `User` (4 papéis) + login Sanctum |
 | `catalog` | **em código** | dados mestres: curso, matriz, disciplina, pré-requisito, equivalência, conjunto de optativas, semestre, oferta |
-| `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`. Falta: importação por IA, elegibilidade, horas complementares |
+| `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma). Falta: elegibilidade, horas complementares, endpoint de criar vínculo |
 | `lifeos` | esqueleto | o acervo do veterano (desafio 5.2) — notas, tarefas, visibilidade |
 | `insights` | esqueleto | agregados da coordenação. **Sem tabelas por desenho** — lê por read model |
-| `integrations` | esqueleto | extrator de documentos acadêmicos atrás de contrato |
+| `integrations` | **em código** | `GeminiDocumentExtractor` + `NullDocumentExtractor` atrás do contrato `AcademicDocumentExtractor`. **O único lugar que sabe qual IA lê os documentos** |
 
 ## As 10 regras de ouro
 
@@ -173,7 +173,9 @@ app-modules/                  # <- todo o domínio vive aqui
                               #   ApprovalPolicy + ProgressReadModel (/api/v1/me/progress)
   lifeos/                     # esqueleto — o acervo do veterano (desafio 5.2)
   insights/                   # esqueleto — agregados da coordenação, SEM tabelas
-  integrations/               # esqueleto — extrator de documentos atrás de contrato
+  integrations/               # GeminiDocumentExtractor + NullDocumentExtractor
+                              #   atrás do contrato do core. O bind no provider é
+                              #   o ÚNICO lugar que escolhe o provedor de IA
 config/app-modules.php        # config do internachi/modular (namespace CampusOs\)
 config/models.php             # bindings de model cross-módulo (relações por config)
 config/scribe.php             # documentação da API (UI Scalar em /docs/api)
@@ -216,7 +218,14 @@ em vez de escolher. Rotas autenticadas passam por `auth:sanctum` + `tenant.user`
 uma saturando no próprio teto; a carga extensionista total é indicador
 **ortogonal** e não entra no somatório. Previsão pelo ritmo **real** do aluno.
 
-**4. Importação do documento do aluno** — ◇ próxima entrega.
+**4. Importação do documento do aluno.** `POST /api/v1/me/academic-documents`
+→ **202** + `ParseAcademicDocumentJob` (fila `imports`) → o extrator lê →
+`parsed` → o aluno revisa → `POST .../confirm` cria as matrículas.
+
+**A IA nunca escreve matrícula.** E a fronteira transporte × negócio é rígida:
+5xx, timeout, **429 de cota** e credencial ausente **sobem** e a fila reprocessa;
+"não é documento acadêmico" vira estado final. Trocar de provedor é mudar
+`DOCUMENT_EXTRACTOR` — o `journey` não conhece o Google.
 
 ## Comandos úteis
 
@@ -265,25 +274,33 @@ test` antes de commitar.
 
 ## Estado atual
 
-**v0.2.0 (19/09/2026) — 103 testes / 330 asserções verdes**, Pint verde,
-ArchTest verde. 16 tabelas em código.
+**v0.3.0 (19/09/2026) — 140 testes / 409 asserções verdes**, Pint verde,
+ArchTest verde. 17 tabelas em código, 9 endpoints documentados em `/docs/api`.
 
 O **catálogo acadêmico** está completo, com a matriz 45 da UTFPR real semeada:
 121 disciplinas, 34 pré-requisitos, 98 equivalências. O total a integralizar
-(3.000 h) é conferido por teste contra a fórmula que o próprio documento
-imprime.
+(3.000 h) é conferido por teste contra a fórmula que o próprio documento imprime.
 
 A **jornada do aluno** responde `GET /api/v1/me/progress` — a barra de progresso
 existe. `ApprovalPolicy` traz a regra de aprovação da UTFPR (frequência < 50 %
 reprova; 50–75 % exige média 8,0; ≥ 75 % exige 6,0), verificada contra sete
 casos do histórico real. **O sistema não recalcula a situação de uma matrícula
-importada** — grava o que o documento imprime; a política serve ao alerta
-preventivo, à simulação e à conferência da importação.
+importada** — grava o que o documento imprime (decisão do dono do produto).
+
+A **importação de documento** funciona ponta a ponta: sobe → a IA lê em fila →
+o aluno confere → confirma → as matrículas nascem e a barra anda. O provedor é o
+Gemini, atrás de contrato; `DOCUMENT_EXTRACTOR=null` desliga a leitura e manda
+tudo para a tela de conferência (é o extrator dos testes e o plano B da demo).
 
 **Acesso:** login por token, 4 papéis, console de dados Filament em
 `/data-console` (só coordenação e gestão) e documentação de API em `/docs/api`.
 
-**Ainda não existe:** importação de documento por IA, elegibilidade e
-pré-requisitos em runtime, simulação de reprovação, horas complementares, e os
-módulos `lifeos`/`insights` inteiros. Lista completa em
+> ⚠️ **O extrator nunca rodou contra o Gemini de verdade** — todos os testes
+> usam `Http::fake`. A primeira chamada real pode exigir ajuste no formato de
+> `inline_data` ou `responseSchema`.
+
+**Ainda não existe:** elegibilidade e pré-requisitos em runtime, simulação de
+reprovação, horas complementares, endpoint para criar vínculo (hoje só por
+seeder — trava a importação de quem não tem vínculo), e os módulos
+`lifeos`/`insights` inteiros. Lista completa em
 [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.

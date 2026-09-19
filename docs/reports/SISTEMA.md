@@ -5,7 +5,7 @@
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-09-19 · reports até `v0.2.0/feat_journey_progressao` ·
+> **Última sincronização:** 2026-09-19 · reports até `v0.3.0/feat_importacao_documento` ·
 > por claude-opus-5
 
 ## Índice
@@ -118,22 +118,35 @@ portal.
 
 ## IV.4 `journey` — a trajetória do aluno
 
-**3 tabelas em código:** `students`, `registrations`, `subject_enrollments`.
-(`enrollment_requests` e `complementary_activities` estão desenhadas e ainda não
-existem.)
+**4 tabelas em código:** `students`, `registrations`, `subject_enrollments`,
+`enrollment_requests`. (`complementary_activities` segue desenhada e sem código.)
 
 - `ApprovalPolicy` — a regra de aprovação da UTFPR (ver
   [`PROGRESSAO.md`](../dominio/PROGRESSAO.md) regra 5).
 - `ProgressReadModel` — a barra de progresso, **calculada, nunca armazenada**.
 - `CreateRegistrationAction` — a matriz é resolvida no servidor e congelada.
+- `ParseAcademicDocumentJob` + `UploadAcademicDocumentAction` +
+  `ConfirmAcademicDocumentAction` — o caminho do documento até a matrícula.
+- `DocumentStatusTranslator` — o texto impresso vira enum. Mora aqui, não no
+  extrator: o provedor transcreve, o domínio interpreta.
 
-## IV.5 `lifeos` · `insights` · `integrations` — esqueletos
+## IV.5 `integrations` — os adaptadores externos
 
-Criados, registrados no ArchTest, sem código de domínio ainda. `insights` **não
-terá tabelas por desenho**: lê por read model o que `journey` e `catalog` já
-possuem.
+`GeminiDocumentExtractor` (Google AI Studio, camada gratuita) e
+`NullDocumentExtractor`, ambos implementando `AcademicDocumentExtractor` do
+`core`. O bind em `IntegrationsServiceProvider` é **o único lugar do sistema que
+sabe qual provedor de IA lê os documentos**.
 
-## IV.6 App host (`app/`) — só borda
+HTTP direto, sem SDK: a API é um POST com JSON, e o client do Laravel já dá
+timeout, retry e `Http::fake`. Saída estruturada por `responseSchema`, não por
+pedido no prompt.
+
+## IV.6 `lifeos` · `insights` — esqueletos
+
+Criados, registrados no ArchTest, sem código de domínio. `insights` **não terá
+tabelas por desenho**: lê por read model o que `journey` e `catalog` já possuem.
+
+## IV.7 App host (`app/`) — só borda
 
 Middlewares (`ResolveTenantFromHeader` placeholder, `ResolveTenantFromUser`
 real), o `DataConsolePanelProvider` do Filament e os Resources do console.
@@ -143,7 +156,7 @@ Nenhuma regra de negócio.
 
 # Parte V — A camada de dados
 
-**16 tabelas em código.** Convenções sem exceção: prefixo de 3 letras em toda
+**17 tabelas em código.** Convenções sem exceção: prefixo de 3 letras em toda
 coluna, PK UUID gerada na aplicação, `SoftDeletes` no que é transacional, FK no
 formato `{tabela_singular}_{pk_origem}`, `entity_ent_id` em toda tabela com
 escopo de tenant.
@@ -203,13 +216,21 @@ tenant) → token Sanctum. Toda rota autenticada passa por
 **3. Progressão.** `GET /api/v1/me/progress` → `ProgressReadModel` → três faixas
 (2730 + 210 + 60 = 3000 h), pendentes por período e previsão pelo ritmo real.
 
-**4. Importação de documento do aluno** — ◇ próxima entrega (B4).
+**4. Importação de documento do aluno.** `POST /api/v1/me/academic-documents`
+→ **202** + `ParseAcademicDocumentJob` na fila `imports` → o extrator lê →
+`erq_status` vira `parsed` → o aluno revisa na tela de conferência →
+`POST .../confirm` cria as `subject_enrollments`.
+
+**A IA nunca escreve matrícula.** E a fronteira transporte × negócio é rígida:
+5xx, timeout, 429 de cota e credencial ausente **sobem** (a fila reprocessa);
+"não é documento acadêmico" vira estado final. Num provedor gratuito o 429 é o
+erro mais provável, e tratá-lo como documento ruim apagaria o upload do aluno.
 
 ---
 
 # Parte IX — Testes e qualidade
 
-**103 testes / 330 asserções verdes** · Pint verde · ArchTest verde.
+**140 testes / 409 asserções verdes** · Pint verde · ArchTest verde.
 
 O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
 rodapé do documento da matriz imprime os totais de fechamento, então a
@@ -235,8 +256,9 @@ contra sete pares (média, frequência, situação) do histórico real.
 | `/data-console` | Console de dados (Filament), 11 recursos. Só coordenação e gestão |
 | `/up` | Health check |
 
-**5 endpoints** na spec: `auth/login`, `auth/me`, `auth/logout`, `courses`,
-`courses/{id}/curriculum`, `me/progress`.
+**9 endpoints** na spec: `auth/{login,me,logout}`, `courses`,
+`courses/{id}/curriculum`, `me/progress`, e os três de
+`me/academic-documents` (enviar, consultar, confirmar).
 
 ---
 
@@ -250,7 +272,7 @@ cp .env.example .env && php artisan key:generate
 createuser campusos --createdb && createdb campusos -O campusos
 
 php artisan migrate:fresh --seed     # matriz 45 da UTFPR semeada
-composer test                        # 103 testes verdes
+composer test                        # 140 testes verdes
 php artisan serve
 ```
 
@@ -263,10 +285,10 @@ php artisan serve
 
 | Área | O que falta |
 | --- | --- |
-| `journey` | Importação de documento por IA (B4), elegibilidade/pré-requisitos, simulação de reprovação, atividades complementares, cálculo do período por déficit de CHS |
+| `journey` | Elegibilidade/pré-requisitos em runtime, simulação de reprovação, atividades complementares, cálculo do período por déficit de CHS, **endpoint para criar vínculo** (hoje só por seeder — trava a importação de quem não tem vínculo) |
 | `lifeos` | Tudo — notas, tarefas, a escada de visibilidade (desafio 5.2) |
 | `insights` | Tudo — os agregados da coordenação |
-| `integrations` | Tudo — o extrator de documentos |
+| `integrations` | **O extrator nunca rodou contra o Gemini real** — todos os testes usam `Http::fake`. A primeira chamada pode exigir ajuste em `inline_data`/`responseSchema` |
 | Transversal | CCE autônomo (as 60 h de extensão que ninguém consegue cumprir pelo sistema), RBAC granular, guard próprio do console |
 
 ---
@@ -278,3 +300,4 @@ php artisan serve
 | 2026-07-07 | Criação — retrato inicial do template | `v0.0.1/feat_bootstrap` |
 | 2026-09-19 | **Reescrito como retrato do CampusOS** — 6 módulos, 16 tabelas, os três documentos acadêmicos, login e console | `v0.1.0/feat_fundacao_catalogo_e_acesso` |
 | 2026-09-19 | Módulo `journey`: vínculo, histórico, `ApprovalPolicy` e a barra de progresso | `v0.2.0/feat_journey_progressao` |
+| 2026-09-19 | Importação de documento por IA: contrato no `core`, Gemini no `integrations`, fluxo sobe→confere→confirma | `v0.3.0/feat_importacao_documento` |

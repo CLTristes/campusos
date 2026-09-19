@@ -6,8 +6,7 @@
         "at": "2026-09-19",
         "by": "claude-opus-5",
         "reports_processed": [
-            "v0.1.0/feat_fundacao_catalogo_e_acesso",
-            "v0.2.0/feat_journey_progressao"
+            "v0.3.0/feat_importacao_documento"
         ]
     },
     "targets": [
@@ -84,8 +83,8 @@
             "file": "docs/reports/v0.3.0/feat_importacao_documento.md",
             "title": "Importação do documento acadêmico por IA (B4) — provedor Gemini atrás de contrato",
             "delivered_at": "2026-09-19",
-            "status": "pending",
-            "synced_at": null,
+            "status": "synced",
+            "synced_at": "2026-09-19",
             "touches": [
                 "docs/dominio/DOCUMENTOS_ACADEMICOS.md",
                 "docs/reports/SISTEMA.md",
