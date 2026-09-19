@@ -68,7 +68,7 @@
       <span><b>Módulo:</b> lifeos</span>
       <span><b>Tabelas:</b> notes, tasks, note_votes</span>
       <span><b>Blocos:</b> B5, B6</span>
-      <span><b>Status:</b> Fases 0–2 (B5) <span class="status-pill built">✅ em código</span> · Fase 3 (B6) <span class="status-pill mvp">⚑ MVP</span> · Fase 4 <span class="status-pill stretch">◎ esticada</span></span>
+      <span><b>Status:</b> Fases 0–2 (B5) <span class="status-pill built">✅ em código</span> · Fase 3 (B6) <span class="status-pill built">✅ em código</span> · Fase 4 <span class="status-pill stretch">◎ esticada</span></span>
     </div>
     <div class="switch-bar">
       <div class="view-switch" role="group" aria-label="Nível de detalhe">
@@ -307,7 +307,7 @@ private function subjectIdsEverEnrolledBy(User $user): array
       </div>
     </div>
     <div class="view-code">
-      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/agenda · <span class="method post">POST</span>/api/v1/tasks/{id}/adopt</span><span class="status-pill mvp">⚑ B6</span></div>
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/agenda · <span class="method post">POST</span>/api/v1/tasks/{id}/adopt</span><span class="status-pill built">✅ em código</span></div>
       <pre><code>// AdoptTaskAction — replica, não compartilha.
 $copy = Task::create([
     'owner_usr_id'  =&gt; $user-&gt;usr_id,

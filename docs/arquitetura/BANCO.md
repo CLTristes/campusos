@@ -12,7 +12,7 @@ contrato ou read model, nunca via Eloquent cru atravessando a fronteira (ver
 [`COMUNICACAO.md`](COMUNICACAO.md)). As migrations/factories de cada tabela vivem
 em `app-modules/<modulo>/database/`.
 
-**Estado atual — 17 tabelas de domínio em código:**
+**Estado atual — 19 tabelas de domínio em código:**
 
 | Tabela | Prefixo | PK | Módulo dono |
 | --- | --- | --- | --- |
@@ -34,6 +34,7 @@ em `app-modules/<modulo>/database/`.
 | `subject_enrollments` | `sen_` | `sen_id` | `journey` |
 | `enrollment_requests` | `erq_` | `erq_id` | `journey` — o documento que o aluno subiu |
 | `notes` | `nte_` | `nte_id` | `lifeos` — o acervo do veterano (5.2); FKs de escopo (`subject_sbj_id`, `offering_ofr_id`, `course_crs_id`) todas nullable |
+| `tasks` | `tsk_` | `tsk_id` | `lifeos` — a tarefa da turma (B6, 5.2); `origin_tsk_id` auto-relacionado (a cópia de uma adoção aponta pra origem), `project_prj_id` sem FK ainda (`projects` é esticada) |
 | `users`(framework), `cache`, `jobs`, `sessions`, `personal_access_tokens` | — | — | host (infra do Laravel/Sanctum) |
 
 > As tabelas de infraestrutura do framework não seguem as convenções de domínio
@@ -58,6 +59,11 @@ em `app-modules/<modulo>/database/`.
 5. **`subject_enrollments` tem índice único `(registration, subject, term)`.**
    Cursar de novo em outro semestre é permitido e gera linha nova: é assim que
    reprovação aparece no histórico, e daí sai a contagem de tentativas de graça.
+6. **`tasks` tem índice único `(owner_usr_id, origin_tsk_id)`.** É a guarda de
+   idempotência da adoção (B6): duplo clique em "adotar" não cria duas cópias.
+   `origin_tsk_id` nullable não colide entre si (NULL é distinto de NULL em
+   índice único), então uma pessoa pode ter várias tarefas próprias
+   (`origin_tsk_id = null`) sem esbarrar nesse índice.
 
 ## Convenção de nomenclatura
 

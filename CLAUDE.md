@@ -109,7 +109,7 @@ e **eventos** declarados no módulo `core`. Detalhe completo em
 | `tenancy` | **em código** | `Entity` (a instituição) + `Campus` + `User` (4 papéis) + login/cadastro Sanctum |
 | `catalog` | **em código** | dados mestres: curso, matriz, disciplina, pré-requisito, equivalência, conjunto de optativas, semestre, oferta |
 | `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma). Falta: elegibilidade, horas complementares, endpoint de criar vínculo |
-| `lifeos` | **parcial** | o acervo do veterano (B5): `Note` + escada de visibilidade de 5 níveis. Falta B6 (tarefas da turma) e curadoria por voto (esticada) |
+| `lifeos` | **parcial** | o acervo do veterano (B5): `Note` + escada de visibilidade de 5 níveis. B6 (tarefas da turma): `Task` + adoção por cópia + `GET /me/agenda`. Falta curadoria por voto e `events` (esticada) |
 | `insights` | esqueleto | agregados da coordenação. **Sem tabelas por desenho** — lê por read model |
 | `integrations` | **em código** | `GeminiDocumentExtractor` + `NullDocumentExtractor` atrás do contrato `AcademicDocumentExtractor`. **O único lugar que sabe qual IA lê os documentos** |
 
@@ -171,8 +171,8 @@ app-modules/                  # <- todo o domínio vive aqui
     database/data/            #   CSVs da matriz + parse_matriz_html.py (o gerador)
   journey/                    # students, registrations, subject_enrollments +
                               #   ApprovalPolicy + ProgressReadModel (/api/v1/me/progress)
-  lifeos/                     # parcial — Note + escada de visibilidade (B5);
-                              #   falta B6 (tarefas da turma)
+  lifeos/                     # parcial — Note (B5) + Task/agenda (B6);
+                              #   falta curadoria por voto e events (esticada)
   insights/                   # esqueleto — agregados da coordenação, SEM tabelas
   integrations/               # GeminiDocumentExtractor + NullDocumentExtractor
                               #   atrás do contrato do core. O bind no provider é
@@ -275,8 +275,8 @@ test` antes de commitar.
 
 ## Estado atual
 
-**v0.4.0 (19/09/2026) — 152 testes / 463 asserções verdes**, Pint verde,
-ArchTest verde. 17 tabelas em código, 12 endpoints documentados em `/docs/api`.
+**v0.6.0 (19/09/2026) — 174 testes / 526 asserções verdes**, Pint verde,
+ArchTest verde. 19 tabelas em código, 20 endpoints documentados em `/docs/api`.
 
 O **catálogo acadêmico** está completo, com a matriz 45 da UTFPR real semeada:
 121 disciplinas, 34 pré-requisitos, 98 equivalências. O total a integralizar
@@ -308,6 +308,17 @@ e-mail (`entities.ent_email_domain`), acesso é imediato (token sai do próprio
 cadastro), e um código de verificação por e-mail confirma o endereço como
 camada de segurança em paralelo, sem bloquear nada.
 
+O **acervo do veterano** (`lifeos`, desafio 5.2) tem B5 e B6 em código: `Note`
+publica numa escada de 5 visibilidades (`private→offering→subject→course→
+institution`) que atravessa semestres de propósito (`NoteVisibilityScope`);
+`Task` reaproveita o MESMO enum — ao contrário da nota, uma tarefa pode nascer
+já compartilhada (`visibility: offering` na criação) — e `AdoptTaskAction`
+copia a tarefa da turma pro aluno (nunca a linha original), com
+`GET /api/v1/me/agenda` juntando pendências próprias e o que a turma
+compartilhou nas ofertas do termo corrente. Ver
+[`ACERVO.md`](docs/dominio/ACERVO.md) e [`TAREFAS.md`](docs/dominio/TAREFAS.md).
+
 **Ainda não existe:** elegibilidade e pré-requisitos em runtime, simulação de
-reprovação, horas complementares, e os módulos `lifeos`/`insights` inteiros.
-Lista completa em [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.
+reprovação, horas complementares, curadoria por voto e `events` no `lifeos`, e
+o módulo `insights` inteiro. Lista completa em
+[`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.

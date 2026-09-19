@@ -104,7 +104,7 @@
     <div class="eyebrow">hackathon · 14 horas e 15 minutos</div>
     <h1>Plano de ataque</h1>
     <p class="lede">
-      <b style="color:var(--leaf-700)">Atualizado v0.5.1 (19/09) — B0 a B5 fechados. O documento do aluno vira barra de progresso E o acervo do veterano entrega nota entre semestres; faltam B6 (tarefas da turma) e B7 (horas complementares).</b><br>
+      <b style="color:var(--leaf-700)">Atualizado v0.6.0 (19/09) — B0 a B6 fechados. O documento do aluno vira barra de progresso, o acervo do veterano entrega nota entre semestres, e a turma compartilha prazo pela agenda; falta B7 (horas complementares).</b><br>
       São <strong>01:45</strong>. A entrega é <strong>hoje às 16:00</strong>. Isso são <strong>14h15</strong> de relógio, das quais
       aproximadamente 13 são de código — o resto é a demo, e a demo não se improvisa.
       Esta página existe por um motivo só: às 05:30 da manhã ninguém decide prioridade direito,
@@ -213,12 +213,13 @@
     <div class="blk">
       <div class="blk-time">10:30<small>1h00</small></div>
       <div class="blk-card">
-        <div class="blk-head"><span class="blk-id">B6</span><h3>lifeos — tarefas da turma</h3></div>
+        <div class="blk-head"><span class="blk-id">B6</span><span class="status-pill built">✅ feito</span><h3>lifeos — tarefas da turma</h3></div>
         <p>Uma pessoa cadastra "Prova 2 — 14/10" na oferta e a turma inteira recebe. Custa pouco e é a feature que mais gera cabeça balançando na plateia.</p>
         <ul>
-          <li><code>tasks</code> com visibilidade + <code>tsk_origin_tsk_id</code> (adotar copia; cada um gerencia a própria).</li>
-          <li><code>GET /api/v1/me/agenda</code> — pendências próprias + compartilhadas da turma, em ordem de prazo.</li>
+          <li><code>tasks</code> com visibilidade + <code>origin_tsk_id</code> (adotar copia; cada um gerencia a própria). <b>✅ feito</b></li>
+          <li><code>GET /api/v1/me/agenda</code> — pendências próprias + compartilhadas da turma do termo corrente, em ordem de prazo. <b>✅ feito</b></li>
         </ul>
+        <div class="done-when"><b>Pronto quando:</b> adotar uma tarefa cria cópia própria sem afetar a original, e duplo clique em adotar não duplica. <b>Passou.</b></div>
       </div>
     </div>
 

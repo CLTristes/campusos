@@ -5,7 +5,7 @@
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-09-19 · reports até `v0.5.1/fix_data_console_jornada_e_scribe_desatualizado` ·
+> **Última sincronização:** 2026-09-19 · reports até `v0.6.0/feat_tarefas_da_turma` ·
 > por claude-sonnet-5
 
 ## Índice
@@ -153,18 +153,33 @@ optativas, enriquecimento, exame de suficiência, disciplinas matriculadas), e
 todo `"*"` de frequência voltou `null`. A camada gratuita devolveu um 503
 transitório em parte das chamadas — tratado como transporte, a fila reprocessa.
 
-## IV.6 `lifeos` (parcial) · `insights` (esqueleto)
+## IV.6 `lifeos` (B5+B6 em código) · `insights` (esqueleto)
 
 `lifeos` tem o acervo do veterano (desafio 5.2, B5): `Note` + `Visibility`
 (enum de 5 níveis: private/offering/subject/course/institution) +
 `NoteVisibilityScope` (global scope aplicado a toda leitura de `Note`). A
 regra que faz a nota atravessar semestres é a ausência de filtro por
-`term_trm_id` na leitura — ver [`ACERVO.md`](../dominio/ACERVO.md). Falta B6
-(tarefas da turma) e a curadoria por voto (◎ esticada no desenho).
+`term_trm_id` na leitura — ver [`ACERVO.md`](../dominio/ACERVO.md).
+
+B6 (tarefas da turma) também está em código: `Task` reaproveita o MESMO enum
+`Visibility` para `tsk_visibility` — mesmo vocabulário, sem repetir a
+armadilha do LifeOS original (dois enums "quase iguais" por tabela). Ao
+contrário de `Note`, uma tarefa não nasce sempre privada — cadastrar já com
+`visibility: offering` é o próprio ato de compartilhar com a turma.
+`AdoptTaskAction` copia a tarefa da turma para o aluno (`origin_tsk_id`
+aponta pra origem, índice único `(owner_usr_id, origin_tsk_id)` garante
+idempotência), e `GET /me/agenda` junta pendências próprias com o que a turma
+compartilhou nas ofertas do **termo corrente** ainda não adotado — ver
+[`TAREFAS.md`](../dominio/TAREFAS.md). Falta a curadoria por voto e `events`
+(◎ esticada no desenho).
 
 A fronteira com `journey` passa por `EnrolledSubjectsProvider` (contrato no
 `core`, implementado em `JourneyEnrolledSubjectsProvider`): o `lifeos` nunca
-lê `subject_enrollments` direto, e o `ArchTest` prova isso a cada build.
+lê `subject_enrollments` direto, e o `ArchTest` prova isso a cada build. A
+pergunta "em quais ofertas o aluno está matriculado AGORA" (para a agenda) não
+ganhou um método novo nesse contrato — é FK simples sem a regra de "atravessar
+termo" que justificou o contrato original, respondida direto em
+`AgendaReadModel` via `config('models.*')`.
 
 `insights` continua esqueleto. **Não terá tabelas por desenho**: lê por read
 model o que `journey` e `catalog` já possuem.
@@ -179,7 +194,7 @@ Nenhuma regra de negócio.
 
 # Parte V — A camada de dados
 
-**18 tabelas em código.** Convenções sem exceção: prefixo de 3 letras em toda
+**19 tabelas em código.** Convenções sem exceção: prefixo de 3 letras em toda
 coluna, PK UUID gerada na aplicação, `SoftDeletes` no que é transacional, FK no
 formato `{tabela_singular}_{pk_origem}`, `entity_ent_id` em toda tabela com
 escopo de tenant.
@@ -194,6 +209,13 @@ nova, que é como reprovação aparece no histórico.
 **`notes`** é a tabela do acervo: três FKs nullable (`subject_sbj_id`,
 `offering_ofr_id`, `course_crs_id`) — cada nível da escada de visibilidade usa
 uma delas ou nenhuma — e `nte_visibility` default `private`.
+
+**`tasks`** é a tabela da tarefa da turma (B6): mesmas FKs de escopo de
+`notes` mais `origin_tsk_id` (auto-relacionamento — a cópia de uma adoção
+aponta pra origem) e `project_prj_id` (sem FK ainda: `projects` é ◎ esticada,
+sem tabela). Índice único `(owner_usr_id, origin_tsk_id)` é a guarda de
+idempotência da adoção; `tsk_visibility` default `private`, mas ao contrário
+de `notes` pode nascer em qualquer nível já na criação.
 
 ---
 
@@ -265,7 +287,7 @@ erro mais provável, e tratá-lo como documento ruim apagaria o upload do aluno.
 
 # Parte IX — Testes e qualidade
 
-**164 testes / 496 asserções verdes** · Pint verde · ArchTest verde.
+**174 testes / 526 asserções verdes** · Pint verde · ArchTest verde.
 
 O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
 rodapé do documento da matriz imprime os totais de fechamento, então a
@@ -297,10 +319,11 @@ contra sete pares (média, frequência, situação) do histórico real.
 | `/data-console` | Console de dados (Filament), 15 recursos (catalog + tenancy + journey). Só coordenação e gestão |
 | `/up` | Health check |
 
-**16 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
+**20 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
 verify-email/resend}`, `courses`, `courses/{id}/curriculum`, `me/progress`, os
-três de `me/academic-documents` (enviar, consultar, confirmar), e os quatro de
-`notes` (listar, criar, ver, mudar visibilidade).
+três de `me/academic-documents` (enviar, consultar, confirmar), os quatro de
+`notes` (listar, criar, ver, mudar visibilidade), `me/agenda` e os três de
+`tasks` (criar, adotar, mudar status) — B6.
 
 ---
 
@@ -328,7 +351,7 @@ php artisan serve
 | Área | O que falta |
 | --- | --- |
 | `journey` | Elegibilidade/pré-requisitos em runtime, simulação de reprovação, atividades complementares, cálculo do período por déficit de CHS |
-| `lifeos` | B6 (tarefas da turma) e a curadoria por voto (◎ esticada) — o acervo de notas (B5) está pronto |
+| `lifeos` | Curadoria por voto e `events` (◎ esticada) — o acervo de notas (B5) e as tarefas da turma (B6) estão prontos |
 | `insights` | Tudo — os agregados da coordenação |
 | Transversal | CCE autônomo (as 60 h de extensão que ninguém consegue cumprir pelo sistema), RBAC granular, guard próprio do console |
 
@@ -346,3 +369,4 @@ php artisan serve
 | 2026-09-19 | Cadastro livre do aluno: instituição resolvida por `ent_email_domain`, acesso imediato, verificação por código em paralelo | `v0.4.0/feat_cadastro_aluno_com_verificacao_de_email` |
 | 2026-09-19 | O acervo do veterano (B5): escada de visibilidade de 5 níveis, `EnrolledSubjectsProvider` como fronteira com o `journey` | `v0.5.0/feat_acervo_do_veterano` |
 | 2026-09-19 | Console de dados ganha os 4 Resources da jornada (11→15); Scribe regenerado | `v0.5.1/fix_data_console_jornada_e_scribe_desatualizado` |
+| 2026-09-19 | Tarefas da turma (B6): `Task` reaproveita o enum `Visibility` de `notes`; adotar copia (`origin_tsk_id` + índice único de idempotência); `GET /me/agenda` filtra pelo termo corrente — ao contrário do acervo, aqui a ausência de filtro seria o bug | `v0.6.0/feat_tarefas_da_turma` |
