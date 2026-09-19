@@ -525,6 +525,19 @@ dos mundos.
    resolução do curso com os tetos reais por categoria** — o seed de
    `complementary_categories` é fictício até lá.
 
+### ✅ Resolvida — o requerimento de matrícula conclui (19/09/2026)
+
+4.1 ~~**O requerimento de matrícula classificava mas não confirmava.**~~
+   **Resolvido.** `ConfirmAcademicDocumentAction` agora: (a) resolve linha sem
+   `status` como `Cursando` (`EnrollmentStatus::Enrolled`) só para
+   `erq_kind === enrollment_request` — o documento não imprime situação
+   nenhuma, é o semestre CORRENTE; (b) cria (ou reaproveita, se outro aluno da
+   mesma turma já confirmou primeiro) a `Offering` a partir de `class_code` +
+   termo + câmpus do curso, e liga `subject_enrollments.offering_ofr_id` —
+   antes ficava sempre `null`. **Ainda não extrai a grade de horários/sala**
+   (§5.2) — o schema de extração (`AcademicDocumentPrompt`) não tem campo
+   pra isso; `ofr_schedule` continua vazio até essa esticada.
+
 ### Abertas
 
 5. **Frequência mínima não aparece em documento nenhum.** A escala de nota está

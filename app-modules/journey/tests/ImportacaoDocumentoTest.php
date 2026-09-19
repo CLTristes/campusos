@@ -5,6 +5,7 @@ declare(strict_types=1);
 use CampusOs\Catalog\Database\Seeders\MatrizUtfprSeeder;
 use CampusOs\Catalog\Models\Course;
 use CampusOs\Catalog\Models\Curriculum;
+use CampusOs\Catalog\Models\Offering;
 use CampusOs\Catalog\Models\Term;
 use CampusOs\Core\Contracts\AcademicDocumentExtractor;
 use CampusOs\Core\DTOs\ExtractedDocument;
@@ -333,6 +334,83 @@ it('uma linha reprovada não apaga aprovação já registrada na mesma disciplin
     expect($matricula->sen_status)->toBe(EnrollmentStatus::Approved)
         ->and((float) $matricula->sen_grade)->toBe(8.2)
         ->and($matricula->sen_hours_earned)->toBe(60);
+});
+
+it('requerimento de matrícula sem situação nasce Cursando e cria a turma', function () {
+    $doc = EnrollmentRequest::factory()->create([
+        'user_usr_id' => $this->user->usr_id,
+        'erq_kind' => 'enrollment_request',
+        'erq_status' => DocumentRequestStatus::Parsed,
+    ]);
+
+    $this->actingAs($this->user)
+        ->postJson("/api/v1/me/academic-documents/{$doc->erq_id}/confirm", [
+            'registration_id' => $this->registration->reg_id,
+            'lines' => [
+                ['code' => 'ARC102', 'year' => 2026, 'period' => 2, 'class_code' => '5SI'],
+            ],
+        ])
+        ->assertOk()
+        ->assertJsonPath('imported', 1);
+
+    $matricula = SubjectEnrollment::query()->whereRelation('subject', 'sbj_code', 'ARC102')->firstOrFail();
+    $oferta = Offering::query()->where('ofr_class_code', '5SI')->sole();
+
+    expect($matricula->sen_status)->toBe(EnrollmentStatus::Enrolled)
+        ->and($matricula->sen_hours_earned)->toBe(0)
+        ->and($matricula->offering_ofr_id)->toBe($oferta->ofr_id)
+        ->and($oferta->subject_sbj_id)->toBe($matricula->subject_sbj_id)
+        ->and($oferta->term_trm_id)->toBe($matricula->term_trm_id);
+});
+
+it('duas confirmações na mesma turma reaproveitam a MESMA oferta, não duplicam', function () {
+    $outroAluno = User::factory()->create();
+    $outroEstudante = Student::factory()->create(['user_usr_id' => $outroAluno->usr_id]);
+    $outraMatricula = Registration::factory()->create([
+        'student_std_id' => $outroEstudante->std_id,
+        'course_crs_id' => $this->registration->course_crs_id,
+        'curriculum_cur_id' => $this->registration->curriculum_cur_id,
+        'entry_term_trm_id' => $this->registration->entry_term_trm_id,
+    ]);
+
+    foreach ([$this->user, $outroAluno] as $aluno) {
+        $doc = EnrollmentRequest::factory()->create([
+            'user_usr_id' => $aluno->usr_id,
+            'erq_kind' => 'enrollment_request',
+            'erq_status' => DocumentRequestStatus::Parsed,
+        ]);
+
+        $this->actingAs($aluno)
+            ->postJson("/api/v1/me/academic-documents/{$doc->erq_id}/confirm", [
+                'registration_id' => $aluno->usr_id === $this->user->usr_id ? $this->registration->reg_id : $outraMatricula->reg_id,
+                'lines' => [
+                    ['code' => 'ARC102', 'year' => 2026, 'period' => 2, 'class_code' => '5SI'],
+                ],
+            ])
+            ->assertOk();
+    }
+
+    expect(Offering::query()->where('ofr_class_code', '5SI')->count())->toBe(1);
+});
+
+it('histórico sem situação vira pendência — a IA nunca inventa "Cursando" fora do requerimento', function () {
+    $doc = EnrollmentRequest::factory()->create([
+        'user_usr_id' => $this->user->usr_id,
+        'erq_kind' => 'transcript',
+        'erq_status' => DocumentRequestStatus::Parsed,
+    ]);
+
+    $r = $this->actingAs($this->user)
+        ->postJson("/api/v1/me/academic-documents/{$doc->erq_id}/confirm", [
+            'registration_id' => $this->registration->reg_id,
+            'lines' => [
+                ['code' => 'ARC102', 'year' => 2023, 'period' => 1],
+            ],
+        ])->assertOk();
+
+    expect($r->json('imported'))->toBe(0)
+        ->and($r->json('pending.0.code'))->toBe('ARC102')
+        ->and(SubjectEnrollment::query()->count())->toBe(0);
 });
 
 it('disciplina fora do catálogo vira pendência, não erro fatal', function () {

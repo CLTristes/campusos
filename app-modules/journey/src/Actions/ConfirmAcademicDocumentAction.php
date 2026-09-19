@@ -48,7 +48,13 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
             // ("Enade - Estudante Dispensado..." > 80 caracteres) que não é uma
             // situação acadêmica reconhecida — ela DEVE virar pendência, não
             // travar a confirmação inteira antes mesmo de chegar lá.
-            'lines.*.status' => ['required', 'string', 'max:255'],
+            //
+            // `nullable`: o requerimento de matrícula não imprime situação
+            // nenhuma (é o semestre CORRENTE, ninguém foi aprovado ainda) —
+            // `handle()` resolve `null` como "Cursando" só para
+            // `erq_kind === enrollment_request`; para `transcript`, `null`
+            // vira pendência (situação ausente é sempre uma anomalia ali).
+            'lines.*.status' => ['nullable', 'string', 'max:255'],
             'lines.*.grade' => ['nullable', 'numeric', 'min:0', 'max:10'],
             'lines.*.attendance' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'lines.*.class_code' => ['nullable', 'string', 'max:32'],
@@ -72,12 +78,15 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
         $subjectModel = config('models.subject');
         $termModel = config('models.term');
 
-        $registrationId = $data['registration_id'] ?? $this->resolveRegistration($request)->reg_id;
+        $registration = ($data['registration_id'] ?? null) !== null
+            ? Registration::query()->with('course')->findOrFail($data['registration_id'])
+            : $this->resolveRegistration($request)->loadMissing('course');
+        $registrationId = $registration->reg_id;
 
         $imported = 0;
         $pending = [];
 
-        DB::transaction(function () use ($data, $request, $subjectModel, $termModel, $registrationId, &$imported, &$pending): void {
+        DB::transaction(function () use ($data, $request, $subjectModel, $termModel, $registration, $registrationId, &$imported, &$pending): void {
             foreach ($data['lines'] as $line) {
                 $subject = $subjectModel::query()->where('sbj_code', $line['code'])->first();
 
@@ -93,10 +102,22 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
                     ['trm_status' => 'closed'],
                 );
 
-                $status = DocumentStatusTranslator::translate((string) $line['status']);
+                // Requerimento de matrícula não imprime situação — é o semestre
+                // CORRENTE, ninguém foi aprovado ainda. Só ESTE kind ganha o
+                // default; um `transcript` sem situação é uma anomalia real, e
+                // vira pendência como sempre foi.
+                $statusText = $line['status'] ?? ($request->erq_kind === 'enrollment_request' ? 'Cursando' : null);
+
+                if ($statusText === null) {
+                    $pending[] = ['code' => $line['code'], 'reason' => 'Situação não informada.'];
+
+                    continue;
+                }
+
+                $status = DocumentStatusTranslator::translate($statusText);
 
                 if ($status === null) {
-                    $pending[] = ['code' => $line['code'], 'reason' => "Situação não reconhecida: \"{$line['status']}\"."];
+                    $pending[] = ['code' => $line['code'], 'reason' => "Situação não reconhecida: \"{$statusText}\"."];
 
                     continue;
                 }
@@ -117,7 +138,7 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
                 if ($existing !== null && $existing->sen_status->countsAsCompleted() && ! $status->countsAsCompleted()) {
                     $pending[] = [
                         'code' => $line['code'],
-                        'reason' => "Já existe aprovação registrada para esta disciplina neste período; a situação \"{$line['status']}\" não foi aplicada — confira manualmente.",
+                        'reason' => "Já existe aprovação registrada para esta disciplina neste período; a situação \"{$statusText}\" não foi aplicada — confira manualmente.",
                     ];
 
                     continue;
@@ -134,6 +155,10 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
                         'sen_grade' => $line['grade'] ?? null,
                         'sen_attendance' => $line['attendance'] ?? null,
                         'sen_class_code' => $line['class_code'] ?? null,
+                        // Só o requerimento de matrícula tem TURMA sem nota — é
+                        // dali que a oferta nasce (ou é reaproveitada, se outro
+                        // aluno da mesma turma já confirmou primeiro).
+                        'offering_ofr_id' => $this->resolveOffering($request, $registration, $subject, $term, $line['class_code'] ?? null),
                         // Congelada na aprovação: a disciplina pode mudar de
                         // carga depois, o que foi integralizado não muda junto.
                         'sen_hours_earned' => $status->countsAsCompleted() ? (int) $subject->sbj_hours : 0,
@@ -154,6 +179,36 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
         });
 
         return ['request' => $request->refresh(), 'imported' => $imported, 'pending' => $pending];
+    }
+
+    /**
+     * A turma nasce (ou é reaproveitada) só do requerimento de matrícula —
+     * é o único documento que imprime `class_code` sem já ter uma nota, e é
+     * de onde `offerings` deveria sempre ter nascido (§5 de
+     * `docs/dominio/DOCUMENTOS_ACADEMICOS.md`). Sem campus resolvido (curso
+     * sem câmpus configurado) ou sem turma na linha, a matrícula ainda
+     * grava — só fica sem `offering_ofr_id`, nunca bloqueia a confirmação.
+     */
+    private function resolveOffering(EnrollmentRequest $request, Registration $registration, mixed $subject, mixed $term, ?string $classCode): ?string
+    {
+        if ($request->erq_kind !== 'enrollment_request' || $classCode === null) {
+            return null;
+        }
+
+        $campusId = $registration->course?->campus_cps_id;
+
+        if ($campusId === null) {
+            return null;
+        }
+
+        $offeringModel = config('models.offering');
+
+        return $offeringModel::query()->firstOrCreate([
+            'term_trm_id' => $term->trm_id,
+            'subject_sbj_id' => $subject->sbj_id,
+            'ofr_class_code' => $classCode,
+            'campus_cps_id' => $campusId,
+        ])->ofr_id;
     }
 
     /**
