@@ -75,7 +75,10 @@ Regra informada pelo dono do produto em 19/09/2026:
 Escala de nota: **0,0 a 10,0** (confirmada no histórico).
 
 **O sistema NÃO recalcula a situação de uma matrícula importada.** Ele grava a
-situação que o documento oficial imprime. A regra acima serve para outras três
+situação que o documento oficial imprime — **confirmado como decisão do dono do
+produto em 19/09/2026**, diante da divergência do `ISI604` (pendência 1).
+Discordar do documento oficial seria o sistema contradizer o registro acadêmico
+da pessoa. A regra acima serve para outras três
 coisas:
 
 1. **Alerta preventivo** — "você está com 62 % de frequência nesta disciplina:
@@ -149,13 +152,17 @@ extra: histórico escolar é dado pessoal sensível.
 
 ## ⚠️ Pendências do dono do produto
 
-1. **`ISI604` contradiz a regra 5.** No histórico real: média **7,4** com
-   frequência **73,0 %** — faixa que exigiria 8,0 — e o documento diz
-   *Aprovado Por Nota*. Hipóteses não verificadas: abono de falta, arredondamento
-   do cálculo oficial de frequência, conselho de classe, ou o corte de média
-   nessa faixa ser diferente de 8,0. **Impacto:** nenhum na importação (o sistema
-   grava o que o documento diz); afeta só a precisão do alerta preventivo e da
-   simulação. **Enquanto não for esclarecido, a regra 5 vale como informada.**
+1. **`ISI604` contradiz a regra 5 — registrado, não resolvido.** No histórico
+   real: média **7,4** com frequência **73,0 %** — faixa que exigiria 8,0 — e o
+   documento diz *Aprovado Por Nota*. Hipóteses não verificadas: abono de falta,
+   arredondamento do cálculo oficial de frequência, conselho de classe, ou o
+   corte de média nessa faixa ser diferente de 8,0.
+
+   **Decisão do dono do produto (19/09/2026):** manter a regra 5 como informada e
+   **a importação segue o que o histórico do aluno diz**. Divergir do documento
+   oficial seria o sistema discordar do registro acadêmico da pessoa — o que é um
+   bug, não uma feature. A regra permanece valendo para o alerta preventivo, a
+   simulação e a conferência da leitura.
 2. **Tetos por categoria de atividade complementar** — precisa da resolução do
    curso. Sem ela, `complementary_categories` não pode ser semeada e o contador
    por categoria não existe.

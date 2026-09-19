@@ -52,8 +52,7 @@ composer require internachi/modular
 
 # 2. Publica o config para customizar o namespace organizacional
 php artisan vendor:publish --tag=modular-config
-#    -> config/app-modules.php (namespace `Modules\` no template;
-#       o /prontuario renomeia para o nome do SEU projeto)
+#    -> config/app-modules.php (namespace `CampusOs\`, vendor `campus-os/`)
 
 # 3. Cria um módulo
 php artisan make:module meu-modulo
@@ -81,18 +80,18 @@ dentro de cada `app-modules/*` sem configuração extra:
 - Factories auto-carregadas para `factory()` (com `newFactory()` explícito no model)
 - Policies auto-descobertas para os Models
 - Rotas: todo arquivo em `app-modules/<modulo>/routes/` é carregado
-- Componentes Blade com namespace do módulo: `<x-orders::status-badge />`
+- Componentes Blade com namespace do módulo: `<x-catalog::status-badge />`
 - Event listeners auto-descobertos (o template prefere registro explícito no provider)
-- Traduções com namespace: `__('orders::messages.paid')`
+- Traduções com namespace: `__('journey::messages.approved')`
 
 E os comandos `make:` do Laravel ganham a flag `--module=`:
 
 ```bash
-php artisan make:model Order --module=orders
-php artisan make:job ProcessOrderPaymentJob --module=orders
-php artisan make:observer OrderObserver --module=orders
-php artisan make:test PlaceOrderTest --module=orders
-php artisan db:seed --module=orders
+php artisan make:model SubjectEnrollment --module=journey
+php artisan make:job ParseAcademicDocumentJob --module=journey
+php artisan make:observer SubjectEnrollmentObserver --module=journey
+php artisan make:test ProgressoTest --module=journey
+php artisan db:seed --module=catalog
 ```
 
 Comandos próprios do pacote: `make:module`, `modules:list`, `modules:cache`
@@ -106,105 +105,81 @@ Comandos próprios do pacote: `make:module`, `modules:list`, `modules:cache`
 
 ## Árvores de arquivos
 
-### Visão geral do projeto
+Cada módulo é um mini-Laravel. Abaixo o estado real — só o que existe em código.
+
+### `core` — shared kernel (do template)
 
 ```
-projeto/
-├── app/                       # app host ENXUTA
-│   ├── Http/Middleware/       # middlewares de BORDA (resolução de tenant/auth)
-│   └── Providers/             # providers globais
-├── app-modules/               # <- todo o domínio vive aqui
-│   ├── core/                  # shared kernel (permanente)
-│   ├── tenancy/               # o tenant (permanente)
-│   ├── orders/                # [EXEMPLO — removível]
-│   ├── payments/              # [EXEMPLO — removível]
-│   └── notifications/         # [EXEMPLO — removível]
-├── bootstrap/app.php          # aliases de middleware, exceções
-├── config/
-│   ├── app-modules.php        # config do internachi/modular (namespace)
-│   └── models.php             # bindings de model cross-módulo
-├── database/                  # migrations globais (só as que não são de módulo)
-├── docs/                      # índice em docs/README.md
-├── routes/web.php             # rotas raiz; módulos trazem as suas
-├── tests/                     # suítes root: Unit, Feature, Arch (+ Modules via módulos)
-├── composer.json              # path repos + require dos módulos
-└── phpunit.xml                # suítes Unit/Feature/Modules/Arch
+app-modules/core/src/
+  Actions/AbstractAction.php          sanitize→validate→authorize→handle
+  Actions/Input/                      adaptadores de entrada
+  Models/AuditLog.php
+  Models/Concerns/Entityable.php      trait multi-tenant
+  Observers/AuditObserver.php         base de toda auditoria
+  Scopes/EntityScope.php
+  Tenancy/TenantContext.php           set / runAs / withoutScope
+  Console/Commands/AuditQueryCommand.php
 ```
 
-### Módulo `core` (shared kernel — permanente)
+### `tenancy` — a instituição e quem entra
 
 ```
-app-modules/core/
-├── composer.json
-├── src/
-│   ├── Actions/
-│   │   ├── AbstractAction.php          # template method execute()
-│   │   └── Input/
-│   │       ├── HttpInputAdapter.php    # Request -> array canônico
-│   │       └── McpInputAdapter.php     # args de tool MCP -> array canônico
-│   ├── Contracts/                      # AS PORTAS entre módulos
-│   │   ├── PaymentGateway.php          # [EXEMPLO]
-│   │   └── OrderReadModel.php          # [EXEMPLO]
-│   ├── DTOs/
-│   │   ├── PaymentResult.php           # [EXEMPLO]
-│   │   └── OrderSummaryDTO.php         # [EXEMPLO]
-│   ├── Events/
-│   │   └── OrderPaid.php               # [EXEMPLO]
-│   ├── Exceptions/
-│   │   └── PaymentGatewayUnavailableException.php  # [EXEMPLO]
-│   ├── Models/
-│   │   ├── Concerns/Entityable.php     # trait multi-tenant
-│   │   └── AuditLog.php                # trilha append-only
-│   ├── Scopes/EntityScope.php
-│   ├── Observers/AuditObserver.php     # observer base que grava o diff
-│   ├── Tenancy/TenantContext.php       # ponto único do tenant atual
-│   ├── Console/Commands/AuditQueryCommand.php   # audit:query via CLI
-│   └── Providers/CoreServiceProvider.php
-├── database/migrations/                # audit_logs
-└── tests/
+app-modules/tenancy/
+  src/Models/{Entity,Campus,User}.php
+  src/Enums/UserRole.php              student | coordinator | professor | institution_admin
+  src/Observers/{Entity,Campus,User}Observer.php
+  src/Actions/LoginAction.php         fora do escopo de tenant — é dele que o tenant sai
+  src/Http/Controllers/AuthController.php
+  src/Http/Resources/UserResource.php
+  routes/api.php                      /api/v1/auth/{login,me,logout}
+  database/migrations/                entities, campuses, users
+  tests/AutenticacaoTest.php
 ```
 
-### Módulo `orders` (o exemplo executável — o molde de um módulo de domínio)
+### `catalog` — o esqueleto acadêmico
 
 ```
-app-modules/orders/
-├── composer.json
-├── src/
-│   ├── Actions/
-│   │   ├── PlaceOrderAction.php        # escrita: idempotência + 202 + Job
-│   │   └── GetOrderAction.php          # leitura: EntityScope faz o isolamento
-│   ├── Models/Order.php                # prefixo ord_, UUID, SoftDeletes, Entityable
-│   ├── Enums/OrderStatus.php           # máquina de estados
-│   ├── Jobs/ProcessOrderPaymentJob.php # runAs + contrato + evento + retry
-│   ├── Http/
-│   │   ├── Controllers/OrderController.php   # adapter REST fino
-│   │   └── Resources/OrderResource.php       # tradutor de saída JSON
-│   ├── ReadModels/EloquentOrderReadModel.php # implementa a porta de leitura
-│   ├── Observers/OrderObserver.php     # auditoria (oculta ord_internal_notes)
-│   └── Providers/OrdersServiceProvider.php   # bind do read model
-├── routes/orders-routes.php            # rotas /v1 do módulo
-├── database/
-│   ├── migrations/
-│   └── factories/OrderFactory.php
-└── tests/
+app-modules/catalog/
+  src/Models/                         Course, Curriculum, Subject, CurriculumSubject,
+                                      Prerequisite, ElectiveGroup, SubjectEquivalence,
+                                      Term, Offering
+  src/Enums/                          CourseDegree, CourseShift, CurriculumStatus,
+                                      SubjectNature, SubjectModel, PrerequisiteType,
+                                      TermStatus
+  src/Http/Controllers/CourseController.php
+  src/Http/Resources/{Course,Curriculum}Resource.php
+  routes/api.php                      /api/v1/courses[/{course}/curriculum]
+  database/data/                      matriz-45-utfpr-fb.csv, equivalencias-*.csv
+                                      + parse_matriz_html.py (o GERADOR — não edite
+                                        os CSVs à mão, rode o script)
+  database/seeders/MatrizUtfprSeeder.php
+  tests/{MatrizUtfpr,CatalogoApi}Test.php
 ```
 
-> Num sistema real, adicione conforme o domínio pedir: `Services/` (lógica que a
-> Action orquestra), `Gateways/` (integrações), `Builders/`, `Mail/`,
-> `Mcp/Tools/`, `Filament/Resources/`... Cada módulo é um **mini-Laravel**: o que
-> num app normal fica em `app/X`, aqui fica em `app-modules/<modulo>/src/X`. As
-> **migrations, factories e seeders** ficam em `app-modules/<modulo>/database/`
-> (não em `src/`). A regra de ownership: o dono do model é o dono da tabela.
-> Ver [`BANCO.md`](BANCO.md).
-
-### Módulos `payments` e `notifications` (exemplos mínimos)
+### `journey` — a trajetória do aluno
 
 ```
-app-modules/payments/          # FakePaymentGateway (implements PaymentGateway),
-                               #   provider com o bind — o lado "fornecedor" da fronteira
-app-modules/notifications/     # SendOrderPaidNotification (listener queued de OrderPaid),
-                               #   provider com Event::listen — o lado "reativo"
+app-modules/journey/
+  src/Models/{Student,Registration,SubjectEnrollment}.php
+  src/Enums/{EnrollmentStatus,RegistrationStatus,EnrollmentSource}.php
+  src/Support/ApprovalPolicy.php      a regra de aprovação da UTFPR
+  src/ReadModels/ProgressReadModel.php  a barra de progresso (calculada)
+  src/DTOs/ProgressTrack.php          uma faixa, saturando no próprio teto
+  src/Actions/CreateRegistrationAction.php
+  src/Http/Controllers/ProgressController.php
+  routes/api.php                      /api/v1/me/progress
+  tests/{ApprovalPolicy,Progresso,Vinculo}Test.php
 ```
+
+### `lifeos` · `insights` · `integrations` — esqueletos
+
+Só `composer.json` + `src/Providers/*ServiceProvider.php`. Registrados em
+`DOMAIN_MODULES` do ArchTest desde o nascimento, para não nascerem fora da lei.
+
+> `insights` **não terá tabelas por desenho**: responde perguntas de coordenação
+> lendo, por read model declarado no `core`, o que `journey` e `catalog` já
+> possuem. Dar tabelas próprias a ele seria duplicar dado e inventar um problema
+> de sincronização que ninguém tem.
 
 ## Referências
 

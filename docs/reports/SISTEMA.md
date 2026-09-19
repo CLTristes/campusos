@@ -1,12 +1,12 @@
-# 📚 SISTEMA — Template Laravel Modular (Relatório Geral Consolidado)
+# 📚 SISTEMA — CampusOS (Relatório Geral Consolidado)
 
 > **Documento *evergreen*:** este é o retrato completo e SEMPRE-ATUAL do sistema.
 > É atualizado pela skill `/sync-docs` a cada leva de reports pendentes
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-07-07 · reports até `v0.0.1/feat_bootstrap` ·
-> por claude-opus-4-8
+> **Última sincronização:** 2026-09-19 · reports até `v0.2.0/feat_journey_progressao` ·
+> por claude-opus-5
 
 ## Índice
 
@@ -15,226 +15,259 @@
 - [Parte III — A arquitetura modular](#parte-iii--a-arquitetura-modular)
 - [Parte IV — Passeio guiado pelos módulos](#parte-iv--passeio-guiado-pelos-módulos)
 - [Parte V — A camada de dados](#parte-v--a-camada-de-dados)
-- [Parte VI — Multi-tenancy](#parte-vi--multi-tenancy)
-- [Parte VII — Auditoria](#parte-vii--auditoria)
-- [Parte VIII — O fluxo canônico (exemplo executável)](#parte-viii--o-fluxo-canônico-exemplo-executável)
+- [Parte VI — Os três documentos que alimentam o sistema](#parte-vi--os-três-documentos-que-alimentam-o-sistema)
+- [Parte VII — Multi-tenancy e auditoria](#parte-vii--multi-tenancy-e-auditoria)
+- [Parte VIII — Os fluxos canônicos](#parte-viii--os-fluxos-canônicos)
 - [Parte IX — Testes e qualidade](#parte-ix--testes-e-qualidade)
-- [Parte X — Desenvolvimento orientado a IA](#parte-x--desenvolvimento-orientado-a-ia)
+- [Parte X — Superfícies operacionais](#parte-x--superfícies-operacionais)
 - [Parte XI — Como rodar](#parte-xi--como-rodar)
-- [Parte XII — Próximos passos](#parte-xii--próximos-passos)
+- [Parte XII — O que ainda não existe](#parte-xii--o-que-ainda-não-existe)
 
 ---
 
 # Parte I — Visão geral
 
-Este repositório é um **template de sistema Laravel** com arquitetura modular
-orientada a desenvolvimento com IA. Ainda **não é um produto**: é a fundação
-sobre a qual produtos nascem (via skill `/prontuario`). O que ele já contém, de
-verdade e testado:
+O **CampusOS** resolve dois problemas do HackLab UTFPR 2026 com um dado só:
 
-- **Shared kernel** (`core`): multi-tenancy automático, auditoria append-only,
-  Actions com template method, adapters de canal, contratos de fronteira.
-- **Tenancy mínimo**: o model `Entity` (o tenant) e sua fábrica.
-- **Exemplo executável** (`orders`/`payments`/`notifications`): um fluxo
-  completo de pedido→cobrança→notificação demonstrando TODOS os padrões do
-  template com testes.
-- **Fronteiras executáveis**: ArchTest quebra o CI se um módulo importar o
-  interno de outro.
-- **Disciplina de contexto**: reports versionados + `sync-state.json` + skills.
+- **Desafio 5.1 — jornada acadêmica.** O estudante não enxerga a própria
+  trajetória: quanto falta, o que trava, quando termina.
+- **Desafio 5.2 — integração na comunidade acadêmica** (cobertura). O
+  conhecimento de quem já cursou a disciplina evapora quando a turma acaba.
+
+**A matrícula é a chave dos dois.** No momento em que o sistema sabe que o aluno
+está em *Cálculo 2, turma S71, 2026/1*, duas coisas acontecem de graça: a barra
+de progresso anda (5.1), e ele passa a enxergar tudo que qualquer veterano
+deixou público **naquela disciplina, em qualquer semestre** (5.2). Separá-los em
+dois produtos seria manter duas cópias de `subject_enrollments`.
+
+**Nenhuma integração com sistema acadêmico.** Todo dado entra por documento que
+a própria universidade emite — o que permite o produto funcionar em qualquer
+instituição sem negociar acesso a nada. Ver [Parte VI](#parte-vi--os-três-documentos-que-alimentam-o-sistema).
+
+**Multi-tenant por instituição de ensino.** A `Entity` do template passa a
+significar a universidade; curso, matriz e disciplina são dados. Piloto: UTFPR,
+Câmpus Francisco Beltrão, curso 25 (Sistemas de Informação), matriz 45.
+
+O desenho de produto completo — anterior ao código e ainda canônico para o que
+não foi implementado — vive em [`docs-site/`](../../docs-site/index.html).
+
+---
 
 # Parte II — Stack e ambiente
 
-| Camada | Escolha | Nota |
-| --- | --- | --- |
-| Linguagem | PHP 8.2+ (`strict_types` em tudo) | ArchTest verifica |
-| Framework | Laravel 12 | esqueleto oficial `laravel/laravel` |
-| Modularização | `internachi/modular` ^3.0 | módulos = pacotes Composer em `app-modules/` |
-| Banco (produção) | PostgreSQL 16 próprio | `compose.yaml`; dev rápido: sqlite |
-| Filas/Cache (produção) | Redis 7 via `predis` | filas nomeadas; dev rápido: database |
-| Workers | Laravel Horizon ^5 | Linux/produção (`ext-pcntl`); Windows dev: `queue:work` |
-| Testes | Pest ^4 (+ plugin laravel) | sqlite `:memory:`, fila `sync` |
-| Estilo | Pint (preset laravel + `declare_strict_types`) | `composer lint` |
-| Front-end | Qualquer SPA consumindo a API | o backend não renderiza telas |
+| Peça | Escolha |
+| --- | --- |
+| PHP | 8.2+ (tipagem estrita em todo arquivo) |
+| Framework | Laravel 12 |
+| Banco | **PostgreSQL 16** — em dev roda o do Homebrew; `compose.yaml` sobe pg16+redis7 |
+| Dados | Eloquent como única camada |
+| Modularidade | `internachi/modular` — namespace `CampusOs\`, vendor `campus-os/` |
+| Auth | Laravel Sanctum (token) |
+| Testes | Pest — sqlite `:memory:`, fila `sync` |
+| Estilo | Pint (preset laravel + `declare_strict_types`) |
+| Docs de API | Scribe 5.11 + UI Scalar |
+| Console de dados | Filament 5.8 |
 
-> O `composer.json` tem **platform-fakes** de `ext-pcntl`/`ext-posix` (8.2) para
-> o Horizon instalar no Windows; ele só RODA em Unix — no Windows dev use
-> `php artisan queue:work`.
+---
 
 # Parte III — A arquitetura modular
 
-Modular monolith: um único deploy, fronteiras internas. Cada módulo é um pacote
-Composer com namespace `Modules\<Modulo>\`. Um módulo **nunca** importa a classe
-interna de outro; a travessia legítima é só via `core` (contratos, eventos,
-DTOs) ou `config/models.php` (relações Eloquent). A regra é executável:
-`tests/Arch/ArchTest.php`.
+Modular monolith. O domínio vive em `app-modules/<módulo>/`, cada um um pacote
+Composer com fronteira própria: **um módulo nunca importa a classe interna de
+outro**. Falam por contratos, eventos e — o caso mais comum aqui — relações
+Eloquent resolvidas por `config('models.*')`.
 
-Detalhes: [`../arquitetura/ARQUITETURA.md`](../arquitetura/ARQUITETURA.md) e
-irmãos.
+O `tests/Arch/ArchTest.php` quebra o CI se a fronteira for furada. Os seis
+módulos de domínio estão em `DOMAIN_MODULES`.
+
+---
 
 # Parte IV — Passeio guiado pelos módulos
 
-## IV.1 `core` — o shared kernel (permanente)
+## IV.1 `core` — o shared kernel
 
-| Peça | Arquivo | O que faz |
-| --- | --- | --- |
-| `TenantContext` | `src/Tenancy/` | ponto único do tenant atual; `set/runAs/withoutScope` |
-| `EntityScope` | `src/Scopes/` | global scope `WHERE entity_ent_id = tenant atual` |
-| `Entityable` | `src/Models/Concerns/` | trait: aplica o scope + preenche o tenant no create |
-| `AuditLog` | `src/Models/` | model da trilha append-only (sem Entityable, sem update) |
-| `AuditObserver` | `src/Observers/` | base abstrata: diff before/after, scrub `$hidden`, best-effort |
-| `AbstractAction` | `src/Actions/` | template method `sanitize→validate→authorize→handle` |
-| `HttpInputAdapter` / `McpInputAdapter` | `src/Actions/Input/` | canal → array canônico |
-| `audit:query` | `src/Console/Commands/` | trilha de um registro via CLI |
-| Contratos/DTOs/Eventos de exemplo | `src/{Contracts,DTOs,Events,Exceptions}/` | `PaymentGateway`, `OrderReadModel`, `PaymentResult`, `OrderSummaryDTO`, `OrderPaid` — [EXEMPLO, removíveis] |
+Vem do template, praticamente intocado: `AbstractAction` (o template method
+sanitize→validate→authorize→handle), `Entityable`, `EntityScope`,
+`TenantContext`, `AuditLog` + `AuditObserver`, adaptadores de Input e o comando
+`audit:query`.
 
-## IV.2 `tenancy` — o tenant (permanente)
+## IV.2 `tenancy` — a instituição e quem entra
 
-`Entity` (`entities`, prefixo `ent_`): o dono de tudo que tem escopo. Cresce com
-User/papéis/onboarding quando o sistema real precisar.
+**3 tabelas:** `entities` (a universidade), `campuses`, `users`.
 
-## IV.3 `orders` — [EXEMPLO] o molde de módulo de domínio
+- `UserRole`: `student`, `coordinator`, `professor`, `institution_admin`.
+- `LoginAction` (Sanctum) — o e-mail é único **por instituição**, então o login
+  roda fora do escopo de tenant e, em ambiguidade, pede `entity_id`.
+- `User` implementa `FilamentUser` + `HasName` para o console de dados.
 
-`PlaceOrderAction` (idempotência por `ref` + 202 + Job), `GetOrderAction`,
-`ProcessOrderPaymentJob` (runAs + contrato + evento + retry), `Order`
-(convenções completas), `OrderStatus`, `OrderController` fino, `OrderResource`,
-`EloquentOrderReadModel`, `OrderObserver` (`$hidden=[ord_internal_notes]`),
-rotas `/v1/orders`.
+## IV.3 `catalog` — o esqueleto acadêmico
 
-## IV.4 `payments` — [EXEMPLO] o fornecedor de capacidade
+**10 tabelas:** `courses`, `curricula`, `subjects`, `curriculum_subjects`,
+`prerequisites`, `elective_groups`, `subject_equivalences`, `terms`,
+`offerings`. Dados mestres: mudam por resolução de colegiado, nunca por ação de
+aluno.
 
-`FakePaymentGateway` implementa o contrato: aprova tudo, exceto `999.99` (recusa
-de negócio) e `666.66` (lança erro de transporte). Bind no provider.
+A distinção que sustenta o módulo: **`subjects` é a disciplina** (global na
+instituição, identidade única, onde o acervo se pendura) e
+**`curriculum_subjects` é o lugar dela numa matriz**. A mesma Cálculo 1 é 3º
+período numa matriz e 2º em outra, continuando a ser a mesma disciplina.
 
-## IV.5 `notifications` — [EXEMPLO] o reator a eventos
+A matriz 45 da UTFPR está semeada: **121 disciplinas, 34 pré-requisitos, 98
+equivalências**, geradas por `parse_matriz_html.py` a partir do HTML da tela do
+portal.
 
-`SendOrderPaidNotification` (queued) ouve `OrderPaid` e loga (placeholder de
-e-mail/webhook). Registro explícito no provider.
+## IV.4 `journey` — a trajetória do aluno
+
+**3 tabelas em código:** `students`, `registrations`, `subject_enrollments`.
+(`enrollment_requests` e `complementary_activities` estão desenhadas e ainda não
+existem.)
+
+- `ApprovalPolicy` — a regra de aprovação da UTFPR (ver
+  [`PROGRESSAO.md`](../dominio/PROGRESSAO.md) regra 5).
+- `ProgressReadModel` — a barra de progresso, **calculada, nunca armazenada**.
+- `CreateRegistrationAction` — a matriz é resolvida no servidor e congelada.
+
+## IV.5 `lifeos` · `insights` · `integrations` — esqueletos
+
+Criados, registrados no ArchTest, sem código de domínio ainda. `insights` **não
+terá tabelas por desenho**: lê por read model o que `journey` e `catalog` já
+possuem.
 
 ## IV.6 App host (`app/`) — só borda
 
-`ResolveTenantFromHeader` (**placeholder de auth**: lê `X-Tenant-Id`, valida o
-tenant, popula o `TenantContext`; substituir por token com hash antes de
-produção). Alias `resolve.tenant` em `bootstrap/app.php`.
+Middlewares (`ResolveTenantFromHeader` placeholder, `ResolveTenantFromUser`
+real), o `DataConsolePanelProvider` do Filament e os Resources do console.
+Nenhuma regra de negócio.
+
+---
 
 # Parte V — A camada de dados
 
-Tabelas de domínio: `entities` (tenancy), `audit_logs` (core), `orders`
-(exemplo). Convenções: prefixo de 3 letras em toda coluna, PK UUID, FKs
-`{tabela_singular}_{pk}`, timestamps prefixados, SoftDeletes em transacionais,
-índice único de idempotência `(entity_ent_id, ord_ref)`. ER completo:
-[`../arquitetura/BANCO.md`](../arquitetura/BANCO.md).
+**16 tabelas em código.** Convenções sem exceção: prefixo de 3 letras em toda
+coluna, PK UUID gerada na aplicação, `SoftDeletes` no que é transacional, FK no
+formato `{tabela_singular}_{pk_origem}`, `entity_ent_id` em toda tabela com
+escopo de tenant.
 
-# Parte VI — Multi-tenancy
+Ownership e ER completos em [`BANCO.md`](../arquitetura/BANCO.md).
 
-O tenant é resolvido na **borda** (middleware) e vive no `TenantContext`
-(session-backed, funciona por-request mesmo sem cookie). Leitura: `EntityScope`
-injeta o filtro em toda query de model `Entityable`. Escrita: o trait preenche
-`entity_ent_id` no `creating`. Workers: o job carrega o `entity_id` e restaura
-com `TenantContext::runAs()` como primeira instrução. Acesso administrativo
-deliberado: `withoutGlobalScope` / `TenantContext::withoutScope()`. Tudo isso
-está coberto por testes (`tests/Feature/MultiTenant/`).
+**A tabela mais importante é `subject_enrollments`** — dela saem a progressão
+(5.1) e o direito de ver o acervo (5.2). Índice único
+`(registration, subject, term)`: cursar de novo em outro semestre gera linha
+nova, que é como reprovação aparece no histórico.
 
-# Parte VII — Auditoria
+---
 
-Toda mutação de model transacional gera um registro em `audit_logs`
-(append-only): `created` (before=null), `updated` (só o diff real, sem
-`updated_at`), `deleted` (after=null), `restored`. Colunas sensíveis ficam fora
-do diff via `$hidden` do observer concreto. Falha de auditoria NUNCA derruba a
-operação (best-effort + log de erro). Consulta: `php artisan audit:query
-<tabela> <id>`. Sem FKs: a trilha sobrevive aos registros. Coberto por
-`tests/Feature/Audit/`.
+# Parte VI — Os três documentos que alimentam o sistema
 
-# Parte VIII — O fluxo canônico (exemplo executável)
+| Quem | Documento | O que o sistema ganha |
+| --- | --- | --- |
+| Coordenação | **Consulta Curso e Matriz Curricular** | O catálogo inteiro, com pré-requisitos e equivalências |
+| Aluno | **Histórico escolar** | Todo o passado dele, com situação por disciplina |
+| Aluno | **Requerimento de matrícula** | O semestre corrente + a grade de horários |
 
-```
-POST /v1/orders (X-Tenant-Id)                          [borda resolve tenant]
-  → PlaceOrderAction: sanitize→validate→authorize      [template method]
-  → idempotência por ref (índice único + short-circuit)
-  → Order::create (processing_payment)                  [Entityable + auditoria]
-  → ProcessOrderPaymentJob → fila "orders"              [202 Accepted]
-Worker:
-  → TenantContext::runAs(entity_id)                     [restaura o tenant]
-  → guard de idempotência (status)
-  → PaymentGateway::charge (contrato; impl. payments)
-      aprovado        → paid + event(OrderPaid) → notifications (queued)
-      recusa negócio  → payment_failed + motivo (estado final)
-      erro transporte → exceção sobe → retry (tries=5, backoff 10/30/60/120s)
-```
+Estrutura completa (colunas, vocabulário, quadros de resumo, a fórmula das
+cargas horárias) em [`DOCUMENTOS_ACADEMICOS.md`](../dominio/DOCUMENTOS_ACADEMICOS.md).
 
-Este fluxo é o molde de toda operação de escrita relevante de um sistema real.
+**O número que define tudo:** o total a integralizar da matriz 45 é **3.000 h**,
+pela fórmula que o próprio documento imprime —
+`CHTOTALPPC := 2940 + (300 − 240)`. A extensão é ortogonal até onde cabe dentro
+das disciplinas; o que sobra vira exigência autônoma que soma.
+
+---
+
+# Parte VII — Multi-tenancy e auditoria
+
+**Tenant** — `Entityable` + `EntityScope` filtram por `TenantContext`, populado
+na borda por `ResolveTenantFromUser` (API e painel) ou restaurado com
+`runAs()` em seeders, jobs e CLI.
+
+> **Armadilha registrada:** `WithoutModelEvents` num seeder desliga o hook
+> `creating` do `Entityable` — todo seed multi-tenant falha com
+> `null value in column entity_ent_id`.
+
+**Auditoria** — todo model de domínio tem observer estendendo `AuditObserver`.
+O hash de senha e o `remember_token` ficam fora do diff (`$hidden` do observer)
+**e** fora do Resource, com teste para os dois.
+
+---
+
+# Parte VIII — Os fluxos canônicos
+
+**1. Implantação (coordenação).** Sobe o documento da matriz → catálogo semeado.
+Hoje via `MatrizUtfprSeeder` lendo CSV gerado do HTML; a leitura por IA é o B4.
+
+**2. Login.** `POST /api/v1/auth/login` → `LoginAction` (fora do escopo de
+tenant) → token Sanctum. Toda rota autenticada passa por
+`auth:sanctum` + `tenant.user`.
+
+**3. Progressão.** `GET /api/v1/me/progress` → `ProgressReadModel` → três faixas
+(2730 + 210 + 60 = 3000 h), pendentes por período e previsão pelo ritmo real.
+
+**4. Importação de documento do aluno** — ◇ próxima entrega (B4).
+
+---
 
 # Parte IX — Testes e qualidade
 
-**44 testes / 113 assertions verdes · Pint verde · ArchTest verde.**
+**103 testes / 330 asserções verdes** · Pint verde · ArchTest verde.
 
-| Suíte | O que garante |
+O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
+rodapé do documento da matriz imprime os totais de fechamento, então a
+importação é conferida contra quatro somatórios independentes (2730, 240, 315 e
+a distribuição por período). O mesmo vale para a regra de aprovação, testada
+contra sete pares (média, frequência, situação) do histórico real.
+
+**Duas lições de teste registradas:**
+
+1. Testar o método não substitui renderizar a página. `canAccessPanel()` passava
+   com o painel quebrado por falta do contrato `HasName`.
+2. O guard do Laravel cacheia o usuário dentro do mesmo teste — um token
+   revogado ainda passa sem `forgetGuards()`.
+
+---
+
+# Parte X — Superfícies operacionais
+
+| Rota | O que é |
 | --- | --- |
-| `Arch` (6) | strict_types em todo módulo; core independente; nenhum import cruzado |
-| `Unit/Core` (10) | template method na ordem; validação barra handle; TenantContext runAs/withoutScope com restauração (inclusive sob exceção); precedência do input adapter |
-| `Feature/MultiTenant` (5) | isolamento de leitura; preenchimento no create; find cross-tenant = null; escape administrativo |
-| `Feature/Audit` (7) | created/updated/deleted/restored; diff real; scrub de sensíveis; sem-mudança não audita; trilha cronológica; sem escopo de tenant |
-| `Feature/Orders` (15) | 202+fila nomeada; idempotência; 422 sem efeito; 401 sem tenant; ponta a ponta sync; 404 cross-tenant; colunas internas nunca vazam; job: 3 desfechos + reentrega idempotente + runAs |
-| `Feature/HealthCheck` (1) | `/up` 200 |
+| `/docs/api` | Documentação interativa (Scribe → OpenAPI → UI Scalar). `composer docs` regenera |
+| `/docs/api/openapi.yaml` · `postman.json` | A spec e a coleção |
+| `/data-console` | Console de dados (Filament), 11 recursos. Só coordenação e gestão |
+| `/up` | Health check |
 
-Comandos: `composer test` · `composer test:coverage` (mín. 70%) ·
-`composer lint:check`.
+**5 endpoints** na spec: `auth/login`, `auth/me`, `auth/logout`, `courses`,
+`courses/{id}/curriculum`, `me/progress`.
 
-# Parte X — Desenvolvimento orientado a IA
-
-- **CLAUDE.md** — as 10 regras de ouro; o contrato da IA com o repositório.
-- **Skills** (`.claude/skills/`): `/prontuario` (nascimento do sistema),
-  `/dominio` (carregar contexto de negócio), `/nova-feature` (ciclo completo),
-  `/sync-docs` (propagar reports → docs evergreen), `/novo-modulo` (scaffold
-  com convenções).
-- **Versionamento de contexto**: `sync-state.json` rastreia quais reports já
-  foram absorvidos por este documento e pelos docs de domínio. Contrato em
-  [`README.md`](README.md).
+---
 
 # Parte XI — Como rodar
 
 ```bash
-# 1. dependências
 composer install
 cp .env.example .env && php artisan key:generate
 
-# 2. banco (quickstart: sqlite, zero infra)
-php artisan migrate
+# Postgres: o compose.yaml sobe pg16+redis7, ou use um Postgres local
+createuser campusos --createdb && createdb campusos -O campusos
 
-# 2b. (opcional, produção-like) Postgres 16 + Redis 7
-docker compose up -d      # e troque os blocos comentados do .env
-
-# 3. qualidade (deve estar TUDO verde)
-composer test && composer lint:check
-
-# 4. subir
-composer dev              # serve + queue + logs + vite
-# ou: php artisan serve  +  php artisan queue:work
-
-# 5. exercitar o exemplo
-# tinker: Modules\Tenancy\Models\Entity::factory()->create()->ent_id
-curl -X POST http://localhost:8000/v1/orders \
-  -H "X-Tenant-Id: <ent_id>" -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  -d '{"ref":"demo-1","customer_name":"Maria Silva","amount":100}'
-# resposta 202; consulta:
-curl http://localhost:8000/v1/orders/<id> -H "X-Tenant-Id: <ent_id>" -H "Accept: application/json"
-# auditoria:
-php artisan audit:query orders <id>
+php artisan migrate:fresh --seed     # matriz 45 da UTFPR semeada
+composer test                        # 103 testes verdes
+php artisan serve
 ```
 
-# Parte XII — Próximos passos
+**Logins de desenvolvimento** (senha `campusos`):
+`aluno@alunos.utfpr.edu.br` · `coordenacao@utfpr.edu.br` (este entra no console).
 
-O template está completo como fundação. O que ele deliberadamente NÃO traz (vira
-trabalho do sistema real):
+---
 
-- **Autenticação real de API** — substituir `ResolveTenantFromHeader` por token
-  com hash + rate limit por credencial (ou Sanctum) — ver README §Dependências.
-- **CI (GitHub Actions)** — `composer audit` + `lint:check` + `test` em todo
-  push/PR (o template roda tudo local; o workflow é ~20 linhas).
-- **Os SEUS módulos** — via `/prontuario` + `/novo-modulo`, removendo os
-  exemplos.
-- **Opcionais por demanda** — Filament (admin), Pulse (observabilidade),
-  laravel/mcp (canal IA), dompdf (PDFs)... — documentados no README.
+# Parte XII — O que ainda não existe
+
+| Área | O que falta |
+| --- | --- |
+| `journey` | Importação de documento por IA (B4), elegibilidade/pré-requisitos, simulação de reprovação, atividades complementares, cálculo do período por déficit de CHS |
+| `lifeos` | Tudo — notas, tarefas, a escada de visibilidade (desafio 5.2) |
+| `insights` | Tudo — os agregados da coordenação |
+| `integrations` | Tudo — o extrator de documentos |
+| Transversal | CCE autônomo (as 60 h de extensão que ninguém consegue cumprir pelo sistema), RBAC granular, guard próprio do console |
 
 ---
 
@@ -243,3 +276,5 @@ trabalho do sistema real):
 | Data | Mudança | Fonte |
 | --- | --- | --- |
 | 2026-07-07 | Criação — retrato inicial do template | `v0.0.1/feat_bootstrap` |
+| 2026-09-19 | **Reescrito como retrato do CampusOS** — 6 módulos, 16 tabelas, os três documentos acadêmicos, login e console | `v0.1.0/feat_fundacao_catalogo_e_acesso` |
+| 2026-09-19 | Módulo `journey`: vínculo, histórico, `ApprovalPolicy` e a barra de progresso | `v0.2.0/feat_journey_progressao` |

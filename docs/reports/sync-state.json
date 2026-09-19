@@ -3,10 +3,11 @@
     "project": "campusos",
     "current_release": "v0.2.0",
     "last_sync": {
-        "at": "2026-07-07",
-        "by": "claude-opus-4-8",
+        "at": "2026-09-19",
+        "by": "claude-opus-5",
         "reports_processed": [
-            "v0.0.1/feat_bootstrap"
+            "v0.1.0/feat_fundacao_catalogo_e_acesso",
+            "v0.2.0/feat_journey_progressao"
         ]
     },
     "targets": [
@@ -49,8 +50,8 @@
             "file": "docs/reports/v0.1.0/feat_fundacao_catalogo_e_acesso.md",
             "title": "Fundação, catálogo acadêmico e acesso (B0+B1+B2 + docs de API + console)",
             "delivered_at": "2026-09-19",
-            "status": "pending",
-            "synced_at": null,
+            "status": "synced",
+            "synced_at": "2026-09-19",
             "note": "Report escrito retroativamente — as entregas foram feitas sem ele.",
             "touches": [
                 "docs/reports/SISTEMA.md",
@@ -66,8 +67,8 @@
             "file": "docs/reports/v0.2.0/feat_journey_progressao.md",
             "title": "Jornada do aluno e progressão da graduação (B3)",
             "delivered_at": "2026-09-19",
-            "status": "pending",
-            "synced_at": null,
+            "status": "synced",
+            "synced_at": "2026-09-19",
             "touches": [
                 "docs/dominio/PROGRESSAO.md",
                 "docs/reports/SISTEMA.md",

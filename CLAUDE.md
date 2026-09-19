@@ -7,16 +7,35 @@ forem violadas).
 
 ## Visão
 
-> ⚠️ **PREENCHIDO PELO PRONTUÁRIO.** Enquanto este bloco existir, o projeto ainda
-> é o template genérico. Rode a skill **`/prontuario`** para: entrevistar o dono
-> do produto, gerar os documentos de domínio (`docs/dominio/`), definir os módulos
-> iniciais, renomear projeto/namespace e reescrever esta seção com a visão real
-> do sistema.
+O **CampusOS** é a gestão da graduação e o acervo acadêmico compartilhado entre
+veteranos e calouros. Nasceu no **HackLab UTFPR 2026** para o desafio **5.1**
+(jornada acadêmica e planejamento da graduação), cobrindo o **5.2** (integração
+e colaboração na comunidade acadêmica) com a mesma base de dados.
 
-Enquanto isso, o sistema de referência é o **exemplo executável**: um fluxo de
-pedidos (`orders`) que cobra pagamentos (`payments`) e notifica (`notifications`),
-multi-tenant, assíncrono e auditado — exatamente a mecânica que qualquer sistema
-construído sobre este template herda.
+**A matrícula é a chave dos dois.** Quando o sistema sabe que o aluno está em
+*Cálculo 2, turma S71, 2026/1*, a barra de progresso dele anda (5.1) **e** ele
+passa a enxergar tudo que qualquer veterano deixou público naquela disciplina,
+em qualquer semestre (5.2). É o mesmo dado sustentando os dois desafios — por
+isso é um produto só.
+
+Quatro capacidades:
+
+1. **Catálogo acadêmico** — curso, matriz, disciplina, pré-requisito, oferta;
+   importados de documento, nunca escritos em código.
+2. **Jornada do aluno** — vínculo, histórico, progressão da graduação, horas
+   complementares, certificados.
+3. **Acervo compartilhado** — a anotação pertence à *disciplina*, não à turma,
+   então sobrevive ao semestre que a escreveu.
+4. **Indicadores de coordenação** — agregados anônimos, nunca aluno nomeado.
+
+**Multi-tenant pela `Entity` = a instituição de ensino.** Curso, matriz e
+disciplina são dados, não código — é o que faz o produto funcionar em qualquer
+universidade no dia seguinte. Piloto: UTFPR, Câmpus Francisco Beltrão, curso 25
+(Sistemas de Informação), matriz 45.
+
+**Nenhuma integração com sistema acadêmico.** Todo dado entra por documento que
+a própria universidade já emite — ver
+[`docs/dominio/DOCUMENTOS_ACADEMICOS.md`](docs/dominio/DOCUMENTOS_ACADEMICOS.md).
 
 ## A verdade mora na documentação
 
@@ -82,9 +101,17 @@ um módulo **nunca** importa a classe interna de outro; eles falam por **contrat
 e **eventos** declarados no módulo `core`. Detalhe completo em
 [`docs/arquitetura/ARQUITETURA.md`](docs/arquitetura/ARQUITETURA.md).
 
-Módulos atuais: `core` (shared kernel), `tenancy` (o tenant), e os **exemplos
-removíveis** `orders`/`payments`/`notifications` (o fluxo de referência — remova-os
-ao iniciar o sistema real, via `/prontuario`).
+**Mapa de módulos:**
+
+| Módulo | Estado | Responsabilidade |
+| --- | --- | --- |
+| `core` | do template | shared kernel: `AbstractAction`, `Entityable`, `EntityScope`, `TenantContext`, `AuditObserver` |
+| `tenancy` | **em código** | `Entity` (a instituição) + `Campus` + `User` (4 papéis) + login Sanctum |
+| `catalog` | **em código** | dados mestres: curso, matriz, disciplina, pré-requisito, equivalência, conjunto de optativas, semestre, oferta |
+| `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`. Falta: importação por IA, elegibilidade, horas complementares |
+| `lifeos` | esqueleto | o acervo do veterano (desafio 5.2) — notas, tarefas, visibilidade |
+| `insights` | esqueleto | agregados da coordenação. **Sem tabelas por desenho** — lê por read model |
+| `integrations` | esqueleto | extrator de documentos acadêmicos atrás de contrato |
 
 ## As 10 regras de ouro
 
@@ -125,27 +152,43 @@ ao iniciar o sistema real, via `/prontuario`).
 ## Mapa de pastas
 
 ```
-app/                          # app host ENXUTA: middlewares de borda,
-                              #   exceção handler, providers globais. SÓ ISSO.
-  Http/Middleware/            #   ResolveTenantFromHeader (PLACEHOLDER de auth —
-                              #   substitua pelo middleware real de token)
+app/                          # app host ENXUTA: borda e ferramenta interna. SÓ ISSO.
+  Http/Middleware/            #   ResolveTenantFromUser (alias tenant.user — a borda
+                              #     REAL: tenant vindo do usuário autenticado) +
+                              #     ResolveTenantFromHeader (placeholder do template)
+  Providers/Filament/         #   DataConsolePanelProvider — o painel /data-console
+  Filament/                   #   Auth/Login (a coluna é usr_email, não email) +
+                              #     Resources/ do console (ferramenta de dev/QA,
+                              #     não domínio — por isso vivem aqui, não nos módulos)
 app-modules/                  # <- todo o domínio vive aqui
-  core/                       # shared kernel: Contracts, Events, DTOs, Exceptions,
-                              #   Entityable, EntityScope, TenantContext,
-                              #   AbstractAction, Input adapters, AuditLog,
-                              #   AuditObserver, audit:query
-  tenancy/                    # Entity (o tenant) — cresce com User/papéis/onboarding
-  orders/                     # [EXEMPLO] Action → 202+Job → contrato → evento
-  payments/                   # [EXEMPLO] implementa PaymentGateway (bind no provider)
-  notifications/              # [EXEMPLO] ouve OrderPaid (listener queued)
-config/app-modules.php        # config do internachi/modular (namespace Modules\)
+  core/                       # shared kernel: AbstractAction, Entityable, EntityScope,
+                              #   TenantContext, AuditLog, AuditObserver, audit:query
+  tenancy/                    # Entity (instituição) + Campus + User (4 papéis) +
+                              #   LoginAction/Sanctum (/api/v1/auth)
+  catalog/                    # curso, matriz, disciplina, curriculum_subjects,
+                              #   pré-requisito, equivalência, conjunto de optativas,
+                              #   semestre, oferta + o seeder da matriz real
+    database/data/            #   CSVs da matriz + parse_matriz_html.py (o gerador)
+  journey/                    # students, registrations, subject_enrollments +
+                              #   ApprovalPolicy + ProgressReadModel (/api/v1/me/progress)
+  lifeos/                     # esqueleto — o acervo do veterano (desafio 5.2)
+  insights/                   # esqueleto — agregados da coordenação, SEM tabelas
+  integrations/               # esqueleto — extrator de documentos atrás de contrato
+config/app-modules.php        # config do internachi/modular (namespace CampusOs\)
 config/models.php             # bindings de model cross-módulo (relações por config)
+config/scribe.php             # documentação da API (UI Scalar em /docs/api)
 docs/                         # índice em docs/README.md
   arquitetura/                #   COMO: ARQUITETURA, MODULOS, CORE, COMUNICACAO,
                               #     FRONTEIRAS, IMPLEMENTACAO, BANCO, CODE_STYLE
-  dominio/                    #   O QUE: regras de negócio (nasce do /prontuario)
+  dominio/                    #   O QUE: DOCUMENTOS_ACADEMICOS.md (a estrutura dos
+                              #     três documentos do portal) + PROGRESSAO.md (as
+                              #     12 regras da barra de progresso)
   reports/                    #   entregas versionadas + SISTEMA.md (evergreen)
                               #     + sync-state.json (versionamento de contexto)
+docs_referencia/              # os documentos REAIS do portal (histórico, matriz,
+                              #   requerimento) — fonte do extrator e dos seeds
+docs-site/                    # site estático: o desenho de produto, anterior ao
+                              #   código e canônico para o que ainda não existe
 tests/                        # Unit/ Feature/ Arch/ da raiz; módulos têm tests/
 .claude/skills/               # prontuario, dominio, nova-feature, sync-docs,
                               #   novo-modulo
@@ -156,23 +199,24 @@ app normal fica em `app/Models`, `app/Jobs`, `app/Http`, aqui fica em
 `app-modules/<modulo>/src/...`. Árvores completas em
 [`docs/arquitetura/MODULOS.md`](docs/arquitetura/MODULOS.md).
 
-## Fluxo canônico (o exemplo executável)
+## Fluxos canônicos
 
-1. `POST /v1/orders` → middleware `resolve.tenant` popula o `TenantContext` →
-   `OrderController` (fino) → `PlaceOrderAction` (sanitize→validate→authorize→handle)
-   → **idempotência pela `ref`** → cria `Order` (status `processing_payment`;
-   `Entityable` preenche o tenant; `OrderObserver` grava o audit_log) → despacha
-   `ProcessOrderPaymentJob` na fila `orders` → responde **202**.
-2. `ProcessOrderPaymentJob` (`tries=5`, backoff): **`TenantContext::runAs()`**
-   restaura o tenant → guard de idempotência → chama o contrato `PaymentGateway`
-   (implementação em `payments`, bind no provider):
-   - **aprovado** → `paid` + evento `OrderPaid`;
-   - **recusa de negócio** → `payment_failed` + motivo (estado final, sem retry);
-   - **erro de transporte** → exceção sobe → a fila reprocessa (nunca capture).
-3. `notifications` ouve `OrderPaid` (listener queued) e reage — `orders` não
-   conhece os ouvintes.
+**1. Implantação (coordenação).** O documento da matriz vira catálogo. Hoje via
+`MatrizUtfprSeeder`, que lê os CSVs gerados por
+`app-modules/catalog/database/data/parse_matriz_html.py` a partir do HTML da
+tela do portal. A leitura por IA é a próxima entrega.
 
-Esse fluxo é o molde de QUALQUER operação de escrita relevante do sistema real.
+**2. Login.** `POST /api/v1/auth/login` → `LoginAction` → token Sanctum. O
+e-mail é único **por instituição**, então a Action roda fora do escopo de tenant
+(é do usuário encontrado que o tenant sai) e, em ambiguidade, pede `entity_id`
+em vez de escolher. Rotas autenticadas passam por `auth:sanctum` + `tenant.user`.
+
+**3. Progressão.** `GET /api/v1/me/progress` → `ProgressReadModel`. Três faixas
+(obrigatórias 2730 + optativas 210 + extensão autônoma 60 = **3000 h**), cada
+uma saturando no próprio teto; a carga extensionista total é indicador
+**ortogonal** e não entra no somatório. Previsão pelo ritmo **real** do aluno.
+
+**4. Importação do documento do aluno** — ◇ próxima entrega.
 
 ## Comandos úteis
 
@@ -187,8 +231,9 @@ php artisan modules:list
 php artisan make:model X --module=<modulo>   # make:* com --module
 php artisan audit:query <tabela> <id>        # trilha de auditoria de um registro
 php artisan migrate
+composer docs            # regenera a documentação da API (Scribe → /docs/api)
 php artisan horizon     # workers (Linux/produção; Windows: queue:work)
-docker compose up -d    # PostgreSQL 16 + Redis 7 locais
+docker compose up -d    # PostgreSQL 16 + Redis 7 locais (ou use um Postgres local)
 ```
 
 ## Ciclo de feature (o "batimento")
@@ -220,8 +265,25 @@ test` antes de commitar.
 
 ## Estado atual
 
-Template recém-nascido: shared kernel + tenancy + exemplo executável, **44 testes
-/ 113 assertions verdes**, Pint verde, ArchTest verde. O retrato completo e
-sempre-atual do sistema vive em
-[`docs/reports/SISTEMA.md`](docs/reports/SISTEMA.md) — ao entregar features,
-mantenha-o vivo via `/sync-docs` (regra de ouro nº 10).
+**v0.2.0 (19/09/2026) — 103 testes / 330 asserções verdes**, Pint verde,
+ArchTest verde. 16 tabelas em código.
+
+O **catálogo acadêmico** está completo, com a matriz 45 da UTFPR real semeada:
+121 disciplinas, 34 pré-requisitos, 98 equivalências. O total a integralizar
+(3.000 h) é conferido por teste contra a fórmula que o próprio documento
+imprime.
+
+A **jornada do aluno** responde `GET /api/v1/me/progress` — a barra de progresso
+existe. `ApprovalPolicy` traz a regra de aprovação da UTFPR (frequência < 50 %
+reprova; 50–75 % exige média 8,0; ≥ 75 % exige 6,0), verificada contra sete
+casos do histórico real. **O sistema não recalcula a situação de uma matrícula
+importada** — grava o que o documento imprime; a política serve ao alerta
+preventivo, à simulação e à conferência da importação.
+
+**Acesso:** login por token, 4 papéis, console de dados Filament em
+`/data-console` (só coordenação e gestão) e documentação de API em `/docs/api`.
+
+**Ainda não existe:** importação de documento por IA, elegibilidade e
+pré-requisitos em runtime, simulação de reprovação, horas complementares, e os
+módulos `lifeos`/`insights` inteiros. Lista completa em
+[`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.

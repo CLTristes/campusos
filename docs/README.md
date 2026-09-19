@@ -15,9 +15,11 @@
 | Você quer... | Leia |
 | --- | --- |
 | Entender o sistema inteiro de uma vez | [reports/SISTEMA.md](reports/SISTEMA.md) (overview *evergreen*, ponta a ponta) |
-| Entender POR QUE o template é assim | [../README.md](../README.md) (o tutorial completo) |
+| Entender POR QUE a arquitetura é assim | [../README.md](../README.md) (o tutorial do template) |
 | Saber as regras de trabalho (IA e humanos) | [../CLAUDE.md](../CLAUDE.md) |
-| Entender as regras de negócio | [dominio/](dominio/README.md) (nasce do `/prontuario`) |
+| Entender as regras de negócio | [dominio/PROGRESSAO.md](dominio/PROGRESSAO.md) (as 12 regras da graduação) |
+| Entender de onde vêm os dados | [dominio/DOCUMENTOS_ACADEMICOS.md](dominio/DOCUMENTOS_ACADEMICOS.md) (os três documentos do portal) |
+| Ver o desenho do produto, inclusive o que não existe | [../docs-site/index.html](../docs-site/index.html) |
 | Mexer num módulo sem furar fronteira | [arquitetura/ARQUITETURA.md](arquitetura/ARQUITETURA.md) → [arquitetura/COMUNICACAO.md](arquitetura/COMUNICACAO.md) → [arquitetura/FRONTEIRAS.md](arquitetura/FRONTEIRAS.md) |
 | Escrever código novo (FAQ prático) | [arquitetura/IMPLEMENTACAO.md](arquitetura/IMPLEMENTACAO.md) |
 | Saber o que foi entregue em cada versão | [reports/](reports/README.md) |
@@ -38,10 +40,17 @@
 
 ## 🧾 `dominio/` — o que o sistema faz (regras de negócio)
 
-> **Estado: aguardando o `/prontuario`.** Esta pasta é preenchida quando o
-> template vira um sistema real — um documento por área de negócio, no contrato
-> descrito em [dominio/README.md](dominio/README.md). É a fonte que a skill
-> `/dominio` carrega para responder qualquer pergunta de negócio.
+É a fonte que a skill `/dominio` carrega para responder qualquer pergunta de
+negócio. Contrato de cada documento em [dominio/README.md](dominio/README.md).
+
+| Documento | O que cobre |
+| --- | --- |
+| [DOCUMENTOS_ACADEMICOS.md](dominio/DOCUMENTOS_ACADEMICOS.md) | **De onde vêm os dados.** A estrutura real dos três documentos do portal da UTFPR (histórico escolar, matriz curricular, requerimento de matrícula): colunas, vocabulário de situação, quadros de resumo, a fórmula das cargas horárias e o grafo de pré-requisitos |
+| [PROGRESSAO.md](dominio/PROGRESSAO.md) | **As 12 regras da graduação.** Vínculo, matriz congelada, as dez situações de matrícula, a regra de aprovação (frequência × nota), as três faixas de carga horária, a previsão de formatura |
+
+> O **desenho de produto** — inclusive das features que ainda não existem — vive
+> em [`docs-site/`](../docs-site/index.html) e é canônico para elas, no mesmo
+> espírito dos cards `◇ planejado` do FibroMais.
 
 ## 📦 `reports/` — relatórios de entrega + estado de sincronização
 
