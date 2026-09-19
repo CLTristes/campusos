@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use CampusOs\Lifeos\Http\Controllers\AgendaController;
 use CampusOs\Lifeos\Http\Controllers\NoteController;
+use CampusOs\Lifeos\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,4 +18,10 @@ Route::middleware(['api', 'auth:sanctum', 'tenant.user'])
         Route::post('notes', [NoteController::class, 'store'])->name('notes.store');
         Route::get('notes/{note}', [NoteController::class, 'show'])->name('notes.show');
         Route::post('notes/{note}/visibility', [NoteController::class, 'updateVisibility'])->name('notes.visibility');
+
+        // B6 — tarefas da turma.
+        Route::get('me/agenda', [AgendaController::class, 'me'])->name('me.agenda');
+        Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
+        Route::post('tasks/{task}/adopt', [TaskController::class, 'adopt'])->name('tasks.adopt');
+        Route::patch('tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.status');
     });
