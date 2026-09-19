@@ -110,7 +110,7 @@ e **eventos** declarados no módulo `core`. Detalhe completo em
 | `catalog` | **em código** | dados mestres: curso, matriz, disciplina, pré-requisito, equivalência, conjunto de optativas, semestre, oferta |
 | `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma), horas complementares (B7 — nunca soma na progressão), elegibilidade e simulação de reprovação (B8 esticada 1). Falta: endpoint de criar vínculo |
 | `lifeos` | **parcial** | o acervo do veterano (B5): `Note` + escada de visibilidade de 5 níveis. B6 (tarefas da turma): `Task` + adoção por cópia + `GET /me/agenda`. Falta curadoria por voto e `events` (esticada) |
-| `insights` | esqueleto | agregados da coordenação. **Sem tabelas por desenho** — lê por read model |
+| `insights` | **em código** | o painel da coordenação (B8): 4 perguntas agregadas via `AcademicStatsProvider`, implementado em `journey`. **Sem tabelas por desenho** — lê por read model |
 | `integrations` | **em código** | `GeminiDocumentExtractor` + `NullDocumentExtractor` atrás do contrato `AcademicDocumentExtractor`. **O único lugar que sabe qual IA lê os documentos** |
 
 ## As 10 regras de ouro
@@ -175,7 +175,8 @@ app-modules/                  # <- todo o domínio vive aqui
                               #   + complementary_activities (B7, nunca soma na progressão)
   lifeos/                     # parcial — Note (B5) + Task/agenda (B6);
                               #   falta curadoria por voto e events (esticada)
-  insights/                   # esqueleto — agregados da coordenação, SEM tabelas
+  insights/                   # painel da coordenação (B8) — 4 perguntas via
+                              #   AcademicStatsProvider, SEM tabelas próprias
   integrations/               # GeminiDocumentExtractor + NullDocumentExtractor
                               #   atrás do contrato do core. O bind no provider é
                               #   o ÚNICO lugar que escolhe o provedor de IA
@@ -277,8 +278,8 @@ test` antes de commitar.
 
 ## Estado atual
 
-**v0.8.0 (19/09/2026) — 192 testes / 585 asserções verdes**, Pint verde,
-ArchTest verde. 21 tabelas em código, 24 endpoints documentados em `/docs/api`.
+**v0.9.0 (19/09/2026) — 201 testes / 616 asserções verdes**, Pint verde,
+ArchTest verde. 21 tabelas em código, 28 endpoints documentados em `/docs/api`.
 
 O **catálogo acadêmico** está completo, com a matriz 45 da UTFPR real semeada:
 121 disciplinas, 34 pré-requisitos, 98 equivalências. O total a integralizar
@@ -343,7 +344,20 @@ contra o histórico do dono do produto, mas a parte de optativas exige dado
 que este schema não modela. Ver [`PROGRESSAO.md`](docs/dominio/PROGRESSAO.md)
 regra 10 e pendência 4.
 
+**O painel da coordenação** (`insights`+`journey`, desafio 5.1, B8 esticada 2)
+fecha o módulo `insights`: as quatro perguntas do desenho —
+`GET /api/v1/staff/insights/{bottlenecks,cohorts,at-risk,demand}` — em
+agregados ANÔNIMOS (piso `MIN_COHORT=5`), escopados ao curso do coordenador
+(`users.course_crs_id`, nunca a um `course_id` do cliente) ou à instituição
+inteira (`institution_admin`). RBAC de borda genérico
+(`role:coordinator,institution_admin`, `EnsureUserHasRole`). Reaproveita
+`ProgressReadModel`/`EligibilityReadModel` em vez de duplicar lógica em SQL.
+**Armadilha corrigida antes do merge:** `DB::table()` não aplica
+`EntityScope` — as duas perguntas em SQL puro filtram `entity_ent_id` na mão.
+Ver [`PAINEL_COORDENACAO.md`](docs/dominio/PAINEL_COORDENACAO.md).
+
 **Ainda não existe:** cálculo do período por déficit de CHS completo
 (obrigatórias+optativas), curadoria por voto e `events` no `lifeos`,
-homologação da coordenação para horas complementares, e o módulo `insights`
-inteiro. Lista completa em [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.
+homologação da coordenação para horas complementares, e o copiloto MCP
+(B8, terceira esticada). Lista completa em
+[`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.

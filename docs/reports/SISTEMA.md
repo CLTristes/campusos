@@ -5,7 +5,7 @@
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-09-19 · reports até `v0.8.0/feat_prerequisitos_e_simulacao` ·
+> **Última sincronização:** 2026-09-19 · reports até `v0.9.0/feat_painel_da_coordenacao` ·
 > por claude-sonnet-5
 
 ## Índice
@@ -168,7 +168,7 @@ optativas, enriquecimento, exame de suficiência, disciplinas matriculadas), e
 todo `"*"` de frequência voltou `null`. A camada gratuita devolveu um 503
 transitório em parte das chamadas — tratado como transporte, a fila reprocessa.
 
-## IV.6 `lifeos` (B5+B6 em código) · `insights` (esqueleto)
+## IV.6 `lifeos` (B5+B6 em código) · `insights` (B8 em código)
 
 `lifeos` tem o acervo do veterano (desafio 5.2, B5): `Note` + `Visibility`
 (enum de 5 níveis: private/offering/subject/course/institution) +
@@ -196,13 +196,29 @@ ganhou um método novo nesse contrato — é FK simples sem a regra de "atravess
 termo" que justificou o contrato original, respondida direto em
 `AgendaReadModel` via `config('models.*')`.
 
-`insights` continua esqueleto. **Não terá tabelas por desenho**: lê por read
-model o que `journey` e `catalog` já possuem.
+`insights` (B8, esticada 2 — o painel da coordenação) está em código. **Sem
+tabela própria por desenho**: lê por `AcademicStatsProvider` (contrato no
+`core`, implementado em `JourneyAcademicStatsProvider`). Quatro perguntas —
+`GET /staff/insights/{bottlenecks,cohorts,at-risk,demand}` — agregados
+ANÔNIMOS (piso de anonimato `MIN_COHORT=5`), escopados ao curso do
+coordenador (`users.course_crs_id`, nunca a um `course_id` do cliente) ou à
+instituição inteira (`institution_admin`). `registrationsNearDeadline`/
+`demandForNextTerm` reaproveitam `ProgressReadModel`/`EligibilityReadModel`
+em vez de duplicar a lógica em SQL. Ver
+[`PAINEL_COORDENACAO.md`](../dominio/PAINEL_COORDENACAO.md).
+
+**Armadilha registrada:** `DB::table()` não aplica `EntityScope` — as duas
+perguntas que agregam em SQL puro (`failureRateBySubject`/`cohortDelay`)
+filtram `entity_ent_id` explicitamente por `TenantContext::id()`; a primeira
+versão esqueceu isso e vazaria a instituição inteira no escopo de
+`institution_admin` — pego por teste antes do merge, documentado como FAQ
+geral em [`IMPLEMENTACAO.md`](../arquitetura/IMPLEMENTACAO.md).
 
 ## IV.7 App host (`app/`) — só borda
 
 Middlewares (`ResolveTenantFromHeader` placeholder, `ResolveTenantFromUser`
-real), o `DataConsolePanelProvider` do Filament e os Resources do console.
+real, `EnsureUserHasRole` — RBAC genérico por papel, B8), o
+`DataConsolePanelProvider` do Filament e os Resources do console.
 Nenhuma regra de negócio.
 
 ---
@@ -310,7 +326,7 @@ erro mais provável, e tratá-lo como documento ruim apagaria o upload do aluno.
 
 # Parte IX — Testes e qualidade
 
-**192 testes / 585 asserções verdes** · Pint verde · ArchTest verde.
+**201 testes / 616 asserções verdes** · Pint verde · ArchTest verde.
 
 O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
 rodapé do documento da matriz imprime os totais de fechamento, então a
@@ -342,13 +358,14 @@ contra sete pares (média, frequência, situação) do histórico real.
 | `/data-console` | Console de dados (Filament), 15 recursos (catalog + tenancy + journey). Só coordenação e gestão |
 | `/up` | Health check |
 
-**24 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
+**28 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
 verify-email/resend}`, `courses`, `courses/{id}/curriculum`, `me/progress`, os
 três de `me/academic-documents` (enviar, consultar, confirmar), os quatro de
 `notes` (listar, criar, ver, mudar visibilidade), `me/agenda` e os três de
 `tasks` (criar, adotar, mudar status) — B6 —, os dois de
-`me/complementary-activities` (listar+resumo, declarar) — B7 — e
-`me/next-term` + `me/simulate` — B8 esticada 1.
+`me/complementary-activities` (listar+resumo, declarar) — B7 —,
+`me/next-term` + `me/simulate` — B8 esticada 1 — e os quatro de
+`staff/insights/{bottlenecks,cohorts,at-risk,demand}` — B8 esticada 2.
 
 ---
 
@@ -377,8 +394,7 @@ php artisan serve
 | --- | --- |
 | `journey` | Cálculo do período por déficit de CHS completo (obrigatórias+optativas — hoje `EligibilityReadModel` usa `termsAttended` como aproximação), homologação da coordenação para atividades complementares (declaração já existe, B7) |
 | `lifeos` | Curadoria por voto e `events` (◎ esticada) — o acervo de notas (B5) e as tarefas da turma (B6) estão prontos |
-| `insights` | Tudo — os agregados da coordenação |
-| Transversal | CCE autônomo (as 60 h de extensão que ninguém consegue cumprir pelo sistema), RBAC granular, guard próprio do console |
+| Transversal | CCE autônomo (as 60 h de extensão que ninguém consegue cumprir pelo sistema), RBAC granular por permissão, guard próprio do console |
 
 ---
 
@@ -397,3 +413,4 @@ php artisan serve
 | 2026-09-19 | Tarefas da turma (B6): `Task` reaproveita o enum `Visibility` de `notes`; adotar copia (`origin_tsk_id` + índice único de idempotência); `GET /me/agenda` filtra pelo termo corrente — ao contrário do acervo, aqui a ausência de filtro seria o bug | `v0.6.0/feat_tarefas_da_turma` |
 | 2026-09-19 | Horas complementares (B7): teto por categoria (`complementary_categories`, catalog) + tracker do aluno (`complementary_activities`, journey); corte calculado agregado por categoria, nunca por certificado; decisão do dono do produto — nunca soma no `ProgressReadModel` (`ATV001` continua sendo o que conta) | `v0.7.0/feat_horas_complementares` |
 | 2026-09-19 | Pré-requisitos e simulação de reprovação (B8, esticada 1): `EligibilityReadModel` checa os 4 tipos de `prq_type` sem `journey` importar `catalog`; `POST /me/simulate` recalcula em memória o impacto em cascata de uma reprovação hipotética; "período atual" usa `termsAttended` como aproximação validada — mas incompleta — do déficit de CHS do documento | `v0.8.0/feat_prerequisitos_e_simulacao` |
+| 2026-09-19 | Painel da coordenação (B8, esticada 2): `AcademicStatsProvider` (core/journey), as quatro perguntas agregadas com piso de anonimato; `users.course_crs_id` resolve o escopo do coordenador; corrigido antes do merge um vazamento de tenant em `DB::table()` (não aplica `EntityScope`) | `v0.9.0/feat_painel_da_coordenacao` |
