@@ -9,6 +9,7 @@ use CampusOs\Catalog\Models\Curriculum;
 use CampusOs\Catalog\Models\CurriculumSubject;
 use CampusOs\Catalog\Models\Prerequisite;
 use CampusOs\Catalog\Models\Subject;
+use CampusOs\Catalog\Models\SubjectEquivalence;
 use CampusOs\Tenancy\Models\Campus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -139,6 +140,50 @@ it('o grafo de pré-requisitos não tem ciclo', function () {
     foreach (array_keys($edges) as $node) {
         expect($visit((string) $node))->toBeTrue();
     }
+});
+
+it('a matriz inteira entrou — 46 obrigatórias e 75 optativas', function () {
+    $porNatureza = CurriculumSubject::query()
+        ->where('curriculum_cur_id', $this->curriculum->cur_id)
+        ->get()
+        ->countBy(fn (CurriculumSubject $cs): string => $cs->cbs_nature->value);
+
+    // Números do HTML da tela do portal, não de transcrição manual.
+    expect($porNatureza['mandatory'])->toBe(46)
+        ->and($porNatureza['elective'])->toBe(75);
+});
+
+it('a extensão das optativas soma CHEXT_DISCOPTATIVAS (315 h)', function () {
+    $soma = CurriculumSubject::query()
+        ->where('curriculum_cur_id', $this->curriculum->cur_id)
+        ->where('cbs_nature', SubjectNature::Elective)
+        ->join('subjects', 'subjects.sbj_id', '=', 'curriculum_subjects.subject_sbj_id')
+        ->sum('subjects.sbj_extension_hours');
+
+    // O quarto somatório independente que o documento permite conferir.
+    expect((int) $soma)->toBe(315);
+});
+
+it('uma equivalência sem grupo satisfaz sozinha', function () {
+    $eq = SubjectEquivalence::query()
+        ->whereRelation('curriculumSubject.subject', 'sbj_code', 'ARC102')
+        ->firstOrFail();
+
+    expect($eq->seq_code)->toBe('AC31L')
+        ->and($eq->seq_group)->toBeNull()
+        ->and($eq->satisfiesAlone())->toBeTrue();
+});
+
+it('uma equivalência COM grupo exige o conjunto inteiro', function () {
+    // LIP201 ≡ AL32L + LP32L (grupo 1): uma das duas sozinha NÃO basta.
+    $grupo = SubjectEquivalence::query()
+        ->whereRelation('curriculumSubject.subject', 'sbj_code', 'LIP201')
+        ->orderBy('seq_code')
+        ->get();
+
+    expect($grupo->pluck('seq_code')->all())->toBe(['AL32L', 'LP32L'])
+        ->and($grupo->pluck('seq_group')->unique()->all())->toBe([1])
+        ->and($grupo->every(fn (SubjectEquivalence $e): bool => ! $e->satisfiesAlone()))->toBeTrue();
 });
 
 it('o conjunto de optativas ocupa 3,5 CHS por período', function () {

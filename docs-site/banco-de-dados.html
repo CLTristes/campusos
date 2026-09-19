@@ -103,13 +103,13 @@
     <div class="eyebrow">CampusOS · modelo de dados</div>
     <h1>Diagrama Entidade‑Relacionamento</h1>
     <p class="lede">
-      <strong>25 tabelas em 6 módulos</strong>, <strong>12 delas já em código</strong> (tenancy e catalog completos). Convenções do template modular sem exceção:
+      <strong>26 tabelas em 6 módulos</strong>, <strong>13 delas já em código</strong> (tenancy e catalog completos). Convenções do template modular sem exceção:
       prefixo de 3 letras em toda coluna, PK UUID gerada na aplicação, <code>SoftDeletes</code> em tudo que é transacional,
       FK no formato <code>{tabela_singular}_{pk}</code>, e <code>entity_ent_id</code> em toda tabela com escopo de tenant.
       Cada card traz a <strong>razão</strong> da modelagem — num hackathon, a decisão esquecida às 4 da manhã custa mais que a tabela errada.
     </p>
     <div class="meta-row">
-      <span><b>Código:</b> main @ 5c82b54 — tenancy + catalog</span>
+      <span><b>Código:</b> main — tenancy + catalog + auth</span>
       <span><b>API:</b> /api/v1</span>
       <span><b>Tenant:</b> entities = a instituição</span>
       <span><b>Escrito:</b> 2026-09-19 01:45</span>
@@ -378,7 +378,7 @@ flowchart LR
 
   <!-- CATALOG -->
   <section class="module">
-    <div class="module-head"><h2>catalog</h2><span class="module-tag">o esqueleto acadêmico · 9 tabelas · ✅ em código</span></div>
+    <div class="module-head"><h2>catalog</h2><span class="module-tag">o esqueleto acadêmico · 10 tabelas · ✅ em código</span></div>
     <p class="module-intro">
       Dados <b>mestres</b>: mudam por resolução de colegiado, não por ação de aluno. É o módulo que o aluno nunca escreve e do qual tudo depende —
       por isso é o primeiro a ser semeado e o mais caro em tempo de digitação, não de código. A separação entre <code>subjects</code>
@@ -540,6 +540,30 @@ flowchart LR
           optativas e a cadeia de inglês <code>HLA004→…→HLA009</code>. A cadeia mais longa é
           <code>LIP201 → POO303 → WBE501</code> — reprovar em <code>LIP201</code> trava seis disciplinas em cascata, e é isso que a
           <b>simulação de reprovação</b> mostra (ver <a href="features/matricula-e-progressao.html">Fases 5 e 6</a>).
+        </div>
+      </article>
+
+
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">subject_equivalences</span><span class="status-pill built">✅ em código</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>seq_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>curriculum_subject_cbs_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag uk">UK</span><code>seq_code</code><span class="type">string — código da matriz antiga</span></li>
+          <li><span class="key-tag"></span><code>seq_hours</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>seq_group</code><span class="type">smallint nullable — OR × AND</span></li>
+          <li><span class="key-tag"></span><code>seq_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>seq_updated_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          <b>Tabela nova (19/09 04:40), destravada pelo HTML da tela da matriz</b> — no PDF esta coluna saía cortada na margem.
+          É a explicação do <code>Crédito Consignado</code> que aparece no histórico de quem <b>mudou de matriz</b>: o que a pessoa
+          cursou na grade antiga é reconhecido por aqui. <b><code>seq_group</code> é a sutileza:</b> vazio significa que a equivalente
+          <i>sozinha</i> satisfaz (<code>ARC102 ≡ AC31L</code>); preenchido significa que só o <b>grupo inteiro</b> satisfaz
+          (<code>LIP201 ≡ AL32L + LP32L</code>) — tratar as duas como a mesma coisa daria crédito indevido.
+          98 linhas para 50 disciplinas na matriz 45. <code>seq_code</code> é <b>texto e não FK</b> de propósito: o equivalente vem de
+          uma matriz antiga e não existe no catálogo atual — o que a importação precisa é casar o código impresso no documento.
         </div>
       </article>
 

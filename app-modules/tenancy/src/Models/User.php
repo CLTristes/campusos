@@ -9,6 +9,7 @@ use CampusOs\Tenancy\Database\Factories\UserFactory;
 use CampusOs\Tenancy\Enums\UserRole;
 use CampusOs\Tenancy\Observers\UserObserver;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -31,7 +32,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property ?string $usr_registration_number
  */
 #[ObservedBy([UserObserver::class])]
-final class User extends Authenticatable implements FilamentUser
+final class User extends Authenticatable implements FilamentUser, HasName
 {
     use Entityable;
     use HasApiTokens;
@@ -75,7 +76,14 @@ final class User extends Authenticatable implements FilamentUser
         return in_array($this->usr_role, [UserRole::Coordinator, UserRole::InstitutionAdmin], true);
     }
 
-    /** Nome exibido no canto do painel. */
+    /**
+     * Nome exibido no canto do painel.
+     *
+     * O contrato HasName é obrigatório, não decorativo: o FilamentManager só
+     * chama este método se o model for `instanceof HasName` — senão cai em
+     * `getAttributeValue('name')`, e como a coluna aqui é `usr_name` o retorno
+     * é null e a página estoura em TypeError logo após o login bem-sucedido.
+     */
     public function getFilamentName(): string
     {
         return $this->usr_name;

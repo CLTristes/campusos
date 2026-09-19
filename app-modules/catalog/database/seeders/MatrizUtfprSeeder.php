@@ -17,6 +17,7 @@ use CampusOs\Catalog\Models\CurriculumSubject;
 use CampusOs\Catalog\Models\ElectiveGroup;
 use CampusOs\Catalog\Models\Prerequisite;
 use CampusOs\Catalog\Models\Subject;
+use CampusOs\Catalog\Models\SubjectEquivalence;
 use CampusOs\Catalog\Models\Term;
 use Illuminate\Database\Seeder;
 
@@ -36,6 +37,8 @@ use Illuminate\Database\Seeder;
 final class MatrizUtfprSeeder extends Seeder
 {
     private const CSV = __DIR__.'/../data/matriz-45-utfpr-fb.csv';
+
+    private const CSV_EQUIVALENCIAS = __DIR__.'/../data/equivalencias-45-utfpr-fb.csv';
 
     public function run(): void
     {
@@ -87,7 +90,7 @@ final class MatrizUtfprSeeder extends Seeder
         $byCode = [];
         $pending = [];
 
-        foreach ($this->rows() as $row) {
+        foreach ($this->rows(self::CSV) as $row) {
             $subject = Subject::query()->firstOrCreate(
                 ['sbj_code' => $row['codigo']],
                 [
@@ -150,6 +153,28 @@ final class MatrizUtfprSeeder extends Seeder
             }
         }
 
+        // Equivalências: "esta disciplina vale por aquela da matriz antiga".
+        // É a origem do Crédito Consignado no histórico de quem mudou de matriz.
+        $equivalences = 0;
+        foreach ($this->rows(self::CSV_EQUIVALENCIAS) as $row) {
+            if (! isset($byCode[$row['codigo']])) {
+                continue;
+            }
+
+            SubjectEquivalence::query()->firstOrCreate(
+                [
+                    'curriculum_subject_cbs_id' => $byCode[$row['codigo']]->cbs_id,
+                    'seq_code' => $row['equivalente'],
+                ],
+                [
+                    'seq_hours' => (int) $row['cht'],
+                    // vazio = satisfaz sozinha; N = só o grupo N inteiro satisfaz
+                    'seq_group' => $row['grupo'] === '' ? null : (int) $row['grupo'],
+                ],
+            );
+            $equivalences++;
+        }
+
         // Semestres do ingresso da primeira turma até 5 anos à frente.
         foreach (range(2023, 2030) as $year) {
             foreach ([1, 2] as $period) {
@@ -161,19 +186,20 @@ final class MatrizUtfprSeeder extends Seeder
         }
 
         $this->command?->info(sprintf(
-            '  Matriz %s · %d disciplinas · %d arestas · total a integralizar: %d h',
+            '  Matriz %s · %d disciplinas · %d pré-requisitos · %d equivalências · total a integralizar: %d h',
             $curriculum->cur_code,
             count($byCode),
             $edges,
+            $equivalences,
             $curriculum->totalRequiredHours(),
         ));
     }
 
     /** @return list<array<string, string>> */
-    private function rows(): array
+    private function rows(string $csv): array
     {
         $lines = array_filter(
-            file(self::CSV, FILE_IGNORE_NEW_LINES),
+            file($csv, FILE_IGNORE_NEW_LINES),
             fn (string $l): bool => $l !== '' && ! str_starts_with($l, '#'),
         );
 

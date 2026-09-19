@@ -1,14 +1,6 @@
 # Matriz 45 - Sistemas De Informação 02 · UTFPR · Câmpus Francisco Beltrão
-# Fonte: docs_referencia/matriz.pdf ("Consulta Curso e Matriz Curricular", Versão 2)
-#
-# OBRIGATÓRIAS: completas e CONFERIDAS — a soma de cht dá 2730 (= CHTOBRIGATORIASMATRIZ)
-# e a soma de chext dá 240 (= CHEXT_DISCOBRIGATORIAS). Os dois batem com o bloco de
-# fechamento do documento, o que valida a transcrição.
-#
-# OPTATIVAS: PARCIAIS. O conjunto [941] tem ~90 disciplinas e o PDF as espalha por
-# 4 páginas. Estão aqui as que importam para a demo (as que o aluno-piloto cursou,
-# a que ele cursa agora, e todas as que têm pré-requisito, para o grafo ter arestas
-# nas optativas). Regenerar a partir do HTML da página quando ele existir.
+# GERADO por parse_matriz_html.py a partir do HTML da tela do portal.
+# NÃO edite à mão: rode o script de novo quando a matriz mudar.
 #
 # prereq: códigos separados por "+" (todos exigidos) · "PERIODO:N" para período mínimo
 periodo,grupo,codigo,nome,modelo,chs,cht,chext,prereq
@@ -30,7 +22,7 @@ periodo,grupo,codigo,nome,modelo,chs,cht,chext,prereq
 3,,PEX304,Práticas Extensionistas 1,FORMAÇÃO PROFISSIONAL,2,30,30,
 3,,POO303,Programação Orientada a Objetos,FORMAÇÃO BÁSICA E CIENTÍFICA,6,90,0,LIP201
 4,,CVM401,"Construção, Validação e Manutenção de Software",FORMAÇÃO BÁSICA E CIENTÍFICA,4,60,0,MOS302
-4,,EDD404,Estrutura de Dados,FORMAÇÃO BÁSICA E CIENTÍFICA,4,60,0,LIP201
+4,,EDD404,Estrutura de Dados,FORMAÇÃO PROFISSIONAL,4,60,0,LIP201
 4,,IHC403,Interação Humano-Computador,FORMAÇÃO PROFISSIONAL,4,60,0,
 4,,PEX405,Práticas Extensionistas 2,FORMAÇÃO PROFISSIONAL,4,60,60,PEX304
 4,,WFE402,Desenvolvimento Web Front-End,FORMAÇÃO PROFISSIONAL,4,60,0,
@@ -40,6 +32,81 @@ periodo,grupo,codigo,nome,modelo,chs,cht,chext,prereq
 5,,HLA001,"Linguagem, Tecnologia e Sujeito",HUMANIDADES - NOVA,4,60,0,
 5,,PIN503,Projeto Integrador CT&I 1,FORMAÇÃO PROFISSIONAL,2,30,0,
 5,,WBE501,Desenvolvimento Web Back-End,FORMAÇÃO PROFISSIONAL,4,60,0,POO303+WFE402
+5,941,ADM019,Gestão de projetos,HUMANIDADES - NOVA,3,45,0,
+5,941,ADM020,Inovação sociotécnica,HUMANIDADES - NOVA,3,45,0,
+5,941,API001,Automação Em Agricultura De Precisão,FORMAÇÃO PROFISSIONAL,4,60,0,
+5,941,API002,Novas Tecnologias Em Sistemas De Informação,FORMAÇÃO PROFISSIONAL,4,60,0,
+5,941,API003,Internet Das Coisas,FORMAÇÃO PROFISSIONAL,2,30,0,LIP201+RED202
+5,941,API004,Padrões De Projeto,FORMAÇÃO PROFISSIONAL,2,30,0,ARS502
+5,941,API005,DISPOSITIVOS MÓVEIS,FORMAÇÃO PROFISSIONAL,4,60,0,POO303
+5,941,API006,Computação Sustentável,FORMAÇÃO PROFISSIONAL,2,30,0,
+5,941,API007,Computação Quântica,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
+5,941,API008,Operação de aeronaves remotamente pilotadas,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
+5,941,ART004,Prática de Orquestra,HUMANIDADES - NOVA,3,45,45,
+5,941,ART007,Canto Coral,HUMANIDADES - NOVA,3,45,45,
+5,941,EDU014,Educação científica e tecnológica,HUMANIDADES - NOVA,3,45,0,
+5,941,EDU015,História da técnica e da tecnologia,HUMANIDADES - NOVA,3,45,0,
+5,941,EDU016,História do Paraná e do Sudoeste Paranaense,HUMANIDADES - NOVA,3,45,0,
+5,941,EDU017,História e Cultura Afro-brasileira e Indígena,HUMANIDADES - NOVA,3,45,0,
+5,941,FIS018,Eletrotécnica e Instrumentação,FORMAÇÃO PROFISSIONAL,4,60,0,
+5,941,GAM001,Gamificação,FORMAÇÃO PROFISSIONAL,2,30,0,
+5,941,GAM002,Game Design,FORMAÇÃO PROFISSIONAL,4,60,0,
+5,941,GAM003,Game Engines,FORMAÇÃO PROFISSIONAL,2,30,0,
+5,941,GAM004,Diversidade e Narrativas Audiovisuais,FORMAÇÃO PROFISSIONAL,2,30,60,
+5,941,GES001,Gestão De Tecnologia Da Informação,FORMAÇÃO PROFISSIONAL,4,60,0,
+5,941,HCH004,"Ciência, tecnologia e gênero",HUMANIDADES - NOVA,3,45,0,
+5,941,HCH005,"Educação, trabalho e sociedade",HUMANIDADES - NOVA,3,45,0,
+5,941,HCH006,História da educação,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH007,Introdução à comunidade política,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH008,Políticas educacionais,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH009,Sociedade e Política no Brasil,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH010,Tecnologia e Sociedade,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH012,Tecnossistema e Tecnopolíticas,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH013,Psicologia Social,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH014,Filosofia da ciência,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH015,Antropologia da técnica e da tecnologia,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH017,Tópicos especiais em Ciências Humanas,HUMANIDADES - NOVA,3,45,0,
+5,941,HCH018,Tópicos especiais em Educação,HUMANIDADES - NOVA,3,45,0,
+5,941,HLA002,Literatura e formação do sujeito,HUMANIDADES - NOVA,3,45,0,
+5,941,HLA003,Representações da tecnologia na literatura,HUMANIDADES - NOVA,3,45,0,
+5,941,HLA004,Língua Inglesa I,HUMANIDADES - NOVA,4,60,0,
+5,941,HLA005,Língua Inglesa II,HUMANIDADES - NOVA,4,60,0,HLA004
+5,941,HLA006,Língua Inglesa III,HUMANIDADES - NOVA,4,60,0,HLA005
+5,941,HLA007,Língua Inglesa IV,HUMANIDADES - NOVA,4,60,0,HLA006
+5,941,HLA008,Língua Inglesa V,HUMANIDADES - NOVA,4,60,0,HLA007
+5,941,HLA009,Língua Inglesa VI,HUMANIDADES - NOVA,4,60,0,HLA008
+5,941,HLA011,Técnica vocal avançada,HUMANIDADES - NOVA,2,30,0,
+5,941,HLA012,Música instrumental,HUMANIDADES - NOVA,2,30,30,
+5,941,HLA013,Instrumento musical - Violino 1,HUMANIDADES - NOVA,4,60,0,
+5,941,HLA014,Instrumento musical - Violino 2,HUMANIDADES - NOVA,2,30,0,
+5,941,HLA015,Técnica Vocal - Canto,HUMANIDADES - NOVA,2,30,30,
+5,941,HLA017,"Linguagem, Cultura e Sociedade",HUMANIDADES - NOVA,2,30,0,
+5,941,HLA018,"Linguagem, Ideologia e Subjetividade",HUMANIDADES - NOVA,2,30,0,
+5,941,HLA023,Instrumento Musical – Violino III,HUMANIDADES - NOVA,2,30,0,
+5,941,HSA002,Gestão da qualidade,HUMANIDADES - NOVA,3,45,0,
+5,941,HSA006,Inovação Sustentável,HUMANIDADES - NOVA,4,60,0,
+5,941,HSA007,Administração de Marketing,HUMANIDADES - NOVA,4,60,0,
+5,941,HSA008,Gestão do conhecimento,HUMANIDADES - NOVA,3,45,0,
+5,941,HSA009,Comportamento organizacional,HUMANIDADES - NOVA,3,45,0,
+5,941,HSA010,Gestão e estratégias de inovação e tecnologia,HUMANIDADES - NOVA,3,45,0,
+5,941,IED001,Informática na Educação,FORMAÇÃO PROFISSIONAL,4,60,60,
+5,941,IED002,Tecnologias Da Educação,FORMAÇÃO PROFISSIONAL,2,30,0,
+5,941,IED003,Objetos de Aprendizagens Digitais,FORMAÇÃO PROFISSIONAL,4,60,0,
+5,941,LET006,Libras 1,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
+5,941,LET007,Libras 2,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
+5,941,LET008,Leitura e Produção Textual,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
+5,941,LET017,Inglês para fins acadêmicos,HUMANIDADES - NOVA,2,30,0,
+5,941,MAT012,Pré-Cálculo,FORMAÇÃO BÁSICA E CIENTÍFICA,4,60,0,
+5,941,MAT015,Cálculo 1,FORMAÇÃO BÁSICA E CIENTÍFICA,4,60,0,
+5,941,MAT016,Cálculo 2,FORMAÇÃO BÁSICA E CIENTÍFICA,4,60,0,
+5,941,MAT021,Educação Financeira,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
+5,941,MAT027,Esportes da Mente,HUMANIDADES - NOVA,3,45,45,
+5,941,MAT033,Pesquisa Operacional Aplicada,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,EST003+MAT032
+5,941,NEO001,Aprendizagem De Máquina,FORMAÇÃO PROFISSIONAL,2,30,0,LIP201
+5,941,NEO002,Business Intelligence,FORMAÇÃO PROFISSIONAL,2,30,0,BDD301+HSA005
+5,941,NEO003,Computação Afetiva,FORMAÇÃO PROFISSIONAL,2,30,0,
+5,941,NEO004,Processamento Digital de Imagens,FORMAÇÃO PROFISSIONAL,4,60,0,LIP201
+5,941,NEO005,Mobilidade Autônoma,FORMAÇÃO PROFISSIONAL,2,30,0,
 6,,HLA016,Comunicação Linguística,HUMANIDADES - NOVA,2,30,0,
 6,,ISI604,Infraestrutura para Sistemas de Informação,FORMAÇÃO BÁSICA E CIENTÍFICA,4,60,0,RED202
 6,,MAT032,Tópicos de Pesquisa Operacional,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,MAT034
@@ -52,40 +119,9 @@ periodo,grupo,codigo,nome,modelo,chs,cht,chext,prereq
 7,,SIN703,Segurança da Informação,FORMAÇÃO PROFISSIONAL,2,30,0,
 7,,TCC704,Trabalho de Conclusão de Curso 1,FORMAÇÃO PROFISSIONAL,4,60,0,MEP602
 8,,ATV001,Atividades Complementares,ATIVIDADES COMPLEMENTARES,0,90,0,
-8,,ENADECE,ENADE Concluinte,ENADE CONCLUINTE,0,0,0,
-8,,ENADEIE,ENADE Ingressante,ENADE INGRESSANTE,0,0,0,
+8,,ENADECE,ENADE CONCLUINTE,ENADE CONCLUINTE,0,0,0,
+8,,ENADEIE,ENADE INGRESSANTE,ENADE INGRESSANTE,0,0,0,
 8,,HCH023,Diversidade e cidadania na sociedade da informação,HUMANIDADES - NOVA,4,60,60,
 8,,HSA004,Gestão de pessoas,HUMANIDADES - NOVA,3,45,0,
 8,,MID801,Mineração de Dados,FORMAÇÃO PROFISSIONAL,4,60,0,BDD301
 8,,TCC804,Trabalho de Conclusão de Curso 2,TRABALHO DE CONCLUSÃO,0,120,0,TCC704
-5,941,ADM019,Gestão de projetos,HUMANIDADES - NOVA,3,45,0,
-5,941,ADM020,Inovação sociotécnica,HUMANIDADES - NOVA,3,45,0,
-5,941,API001,Automação em Agricultura de Precisão,FORMAÇÃO PROFISSIONAL,4,60,0,
-5,941,API002,Novas Tecnologias em Sistemas de Informação,FORMAÇÃO PROFISSIONAL,4,60,0,
-5,941,API003,Internet das Coisas,FORMAÇÃO PROFISSIONAL,2,30,0,LIP201+RED202
-5,941,API004,Padrões de Projeto,FORMAÇÃO PROFISSIONAL,2,30,0,ARS502
-5,941,API005,Dispositivos Móveis,FORMAÇÃO PROFISSIONAL,4,60,0,POO303
-5,941,API006,Computação Sustentável,FORMAÇÃO PROFISSIONAL,2,30,0,
-5,941,API007,Computação Quântica,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
-5,941,GAM001,Gamificação,FORMAÇÃO PROFISSIONAL,2,30,0,
-5,941,GAM002,Game Design,FORMAÇÃO PROFISSIONAL,4,60,0,
-5,941,GAM003,Game Engines,FORMAÇÃO PROFISSIONAL,2,30,0,
-5,941,HLA004,Língua Inglesa I,HUMANIDADES - NOVA,4,60,0,
-5,941,HLA005,Língua Inglesa II,HUMANIDADES - NOVA,4,60,0,HLA004
-5,941,HLA006,Língua Inglesa III,HUMANIDADES - NOVA,4,60,0,HLA005
-5,941,HLA007,Língua Inglesa IV,HUMANIDADES - NOVA,4,60,0,HLA006
-5,941,HLA008,Língua Inglesa V,HUMANIDADES - NOVA,4,60,0,HLA007
-5,941,HLA009,Língua Inglesa VI,HUMANIDADES - NOVA,4,60,0,HLA008
-5,941,LET006,Libras 1,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
-5,941,LET007,Libras 2,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
-5,941,LET008,Leitura e Produção Textual,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
-5,941,LET017,Inglês para fins acadêmicos,HUMANIDADES - NOVA,2,30,0,
-5,941,MAT012,Pré-Cálculo,FORMAÇÃO BÁSICA E CIENTÍFICA,4,60,0,
-5,941,MAT015,Cálculo 1,FORMAÇÃO BÁSICA E CIENTÍFICA,4,60,0,
-5,941,MAT016,Cálculo 2,FORMAÇÃO BÁSICA E CIENTÍFICA,4,60,0,
-5,941,MAT021,Educação Financeira,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,
-5,941,MAT033,Pesquisa Operacional Aplicada,FORMAÇÃO BÁSICA E CIENTÍFICA,2,30,0,EST003+MAT032
-5,941,NEO001,Aprendizagem de Máquina,FORMAÇÃO PROFISSIONAL,2,30,0,LIP201
-5,941,NEO002,Business Intelligence,FORMAÇÃO PROFISSIONAL,2,30,0,BDD301+HSA005
-5,941,NEO003,Computação Afetiva,FORMAÇÃO PROFISSIONAL,2,30,0,
-5,941,NEO004,Processamento Digital de Imagens,FORMAÇÃO PROFISSIONAL,4,60,0,LIP201

@@ -36,6 +36,44 @@ it('o estudante NUNCA entra no console, mesmo sendo usuário válido da API', fu
     expect($aluno->canAccessPanel(Filament::getPanel('data-console')))->toBeFalse();
 });
 
+it('o painel RENDERIZA para quem entrou — não basta poder acessar', function () {
+    // Este teste existe por causa de um bug real: canAccessPanel() devolvia
+    // true, o login passava, e a página seguinte estourava em
+    // "FilamentManager::getUserName(): must be of type string, null returned"
+    // — porque o model declarava getFilamentName() sem implementar o contrato
+    // HasName, e o Filament caía no fallback getAttributeValue('name'), coluna
+    // que não existe aqui (é usr_name).
+    //
+    // Testar o método não pega isso. Só renderizar pega.
+    $coord = User::factory()->coordinator()->create();
+
+    $this->actingAs($coord)
+        ->get('/data-console')
+        ->assertSuccessful()
+        ->assertSee($coord->usr_name, false);
+});
+
+it('as listagens do console abrem sem erro', function () {
+    $this->seed(MatrizUtfprSeeder::class);
+    $coord = User::factory()->coordinator()->create();
+
+    // Uma varredura rasa, mas que percorre os dois grupos de navegação e
+    // exercita Resource + Table de cada model do catálogo.
+    foreach ([
+        '/data-console/subjects',
+        '/data-console/courses',
+        '/data-console/curricula',
+        '/data-console/curriculum-subjects',
+        '/data-console/elective-groups',
+        '/data-console/terms',
+        '/data-console/offerings',
+        '/data-console/campuses',
+        '/data-console/users',
+    ] as $url) {
+        $this->actingAs($coord)->get($url)->assertSuccessful();
+    }
+});
+
 it('sem sessão, o console manda para o login', function () {
     $this->get('/data-console')->assertRedirect('/data-console/login');
 });
@@ -46,8 +84,10 @@ it('a página de login do console responde', function () {
 
 it('o console enxerga apenas os dados da instituição de quem entrou', function () {
     $this->seed(MatrizUtfprSeeder::class);
+    // Sem número mágico: o que importa aqui é o ISOLAMENTO, e a contagem exata
+    // da matriz é asserção do MatrizUtfprTest, que é quem tem o gabarito.
     $daUtfpr = Subject::query()->count();
-    expect($daUtfpr)->toBe(77);
+    expect($daUtfpr)->toBeGreaterThan(100);
 
     // Uma segunda instituição, com o próprio catálogo.
     $outra = Entity::factory()->create();

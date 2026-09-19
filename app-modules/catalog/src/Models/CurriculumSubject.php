@@ -69,6 +69,12 @@ final class CurriculumSubject extends Model
         return $this->hasMany(Prerequisite::class, 'required_cbs_id', 'cbs_id');
     }
 
+    /** Disciplinas de outra matriz que valem por esta (crédito consignado). */
+    public function equivalences(): HasMany
+    {
+        return $this->hasMany(SubjectEquivalence::class, 'curriculum_subject_cbs_id', 'cbs_id');
+    }
+
     protected static function newFactory(): CurriculumSubjectFactory
     {
         return CurriculumSubjectFactory::new();

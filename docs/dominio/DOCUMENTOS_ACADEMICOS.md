@@ -190,6 +190,13 @@ Limite correspondente na matriz: `cur_max_weekly_deficit` (16 na UTFPR).
 Seis páginas, emitidas pelo portal. **É o documento mais importante dos três**:
 dele sai o catálogo inteiro, e ele é o único que traz **pré-requisito**.
 
+> **Prefira o HTML ao PDF.** O PDF é mais largo que a página e corta a coluna de
+> equivalências. A tela fica dentro de um `<iframe>`, então `Cmd+S` salva a casca
+> do portal, não a tabela — o caminho é *DevTools → Elements → `<table id="grade">`
+> → botão direito → Copy → Copy outerHTML*. Desse HTML,
+> `app-modules/catalog/database/data/parse_matriz_html.py` gera os dois CSVs que
+> o seeder consome. **Transcrição manual não é mais necessária.**
+
 Cabeçalho: `Câmpus: Francisco Beltrão` · `Curso(s): Sist. Informação (25)` ·
 `Matriz: 45 - Sistemas De Informação 02` · `Matriz Curricular - Versão 2`.
 
@@ -207,7 +214,7 @@ Cabeçalho: `Câmpus: Francisco Beltrão` · `Curso(s): Sist. Informação (25)`
 | **`Total de horas de CHEXT`** | **`subjects.sbj_extension_hours`** |
 | **`Carga horária total`** | **`subjects.sbj_hours` (CHT)** |
 | **`Pré-requisito(s)`** | **`prerequisites`** — ver §4.4 |
-| `Equivalência(s)` | ⚠️ **truncada na margem direita do PDF** — ver §6 |
+| `Equivalência(s)` | `subject_equivalences` — três subcolunas: disciplina, CHT e **grupo** (§4.6) |
 
 ### 4.2 `Modelo de disciplina` — 8 valores observados
 
@@ -350,6 +357,27 @@ inteiro no quadro de cálculo do período. Vira a tabela `elective_groups`
 São ~90 optativas no conjunto — de `Cálculo 1` a `Canto Coral` e
 `Instrumento musical - Violino 3`.
 
+### 4.6 Equivalências — e por que "grupo" muda tudo
+
+Três subcolunas sob *Equivalentes*: **Disciplina**, **CHT** e **Grupo**. O
+tooltip do cabeçalho explica a terceira: *"Grupo indica se uma disciplina é
+equivalente a duas ou mais disciplinas"*. Ou seja:
+
+| `seq_group` | Semântica | Exemplo real |
+| --- | --- | --- |
+| vazio | **OR** — a equivalente sozinha satisfaz | `ARC102 ≡ AC31L` · `MAT034 ≡ GA31E` *ou* `GA31Q` *ou* `GA32I` *ou* `MAT002` *ou* `MAT020` |
+| `1` | **AND** — só o grupo inteiro satisfaz | `LIP201 ≡ AL32L + LP32L` (60 h + 45 h) |
+
+São **98 equivalências para 50 disciplinas**; 6 delas em grupo (`LIP201`,
+`API005`, `NEO004`). É esta tabela que explica o `Crédito Consignado` do
+histórico: quando o aluno muda de matriz, o que ele cursou na antiga é
+reconhecido por aqui.
+
+`subject_equivalences.seq_code` é **texto**, não FK para `subjects`: o
+equivalente quase sempre vem de uma matriz antiga e não existe no catálogo
+atual. O que a importação precisa é exatamente casar um código impresso no
+documento do aluno.
+
 ---
 
 ## 5. O requerimento de matrícula — de onde saem as ofertas
@@ -399,6 +427,16 @@ aparecer preenchido no instante em que ele confirma a importação.
 
 ## 6. ⚠️ Pendências do dono do produto
 
+### ✅ Fechadas pelo HTML da tela da matriz (19/09, 04:40)
+
+0. ~~**A coluna `Equivalência(s)` está truncada no PDF.**~~ **Resolvida.** O HTML
+   da tela (`DevTools → Copy outerHTML` da `<table id="grade">`) traz as três
+   subcolunas inteiras — 98 equivalências para 50 disciplinas, com a semântica
+   de grupo (§4.6). De quebra, o CSV da matriz passou a ser **gerado por script**
+   (`parse_matriz_html.py`) em vez de transcrito à mão: 121 disciplinas em vez
+   das 46+31 que couberam na transcrição do PDF, e quatro somatórios do
+   documento conferidos por máquina (2730, 240, 315 e a distribuição por período).
+
 ### ✅ Fechadas pelo documento da matriz (19/09, 02:35)
 
 1. ~~**O histórico não traz pré-requisito nenhum.**~~ **Resolvido.** O documento
@@ -413,13 +451,6 @@ aparecer preenchido no instante em que ele confirma a importação.
 
 ### Abertas
 
-3. ⚠️ **A coluna `Equivalência(s)` está truncada no PDF.** O documento é mais
-   largo que a página e a última coluna sai cortada — dá para ver `AC3…`, `IS3…`,
-   `LP3…`, `BD3…`, mas não o código inteiro. É ela que explica o
-   `Crédito Consignado` do histórico (equivalência por mudança de matriz).
-   **Impacto:** a importação funciona sem ela; o que não funciona é resolver
-   automaticamente uma disciplina cursada na matriz antiga. *Precisa de um
-   re-export em paisagem, ou da mesma consulta em HTML.* **Não bloqueia o B2.**
 4. **Atividades complementares são uma DISCIPLINA** (`ATV001`, 90 h, modelo
    `ATIVIDADES COMPLEMENTARES`), confirmado pela matriz. Decidir: a tabela
    `complementary_activities` continua como **acervo de evidência** que justifica
