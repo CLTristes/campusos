@@ -12,7 +12,7 @@ contrato ou read model, nunca via Eloquent cru atravessando a fronteira (ver
 [`COMUNICACAO.md`](COMUNICACAO.md)). As migrations/factories de cada tabela vivem
 em `app-modules/<modulo>/database/`.
 
-**Estado atual — 19 tabelas de domínio em código:**
+**Estado atual — 21 tabelas de domínio em código:**
 
 | Tabela | Prefixo | PK | Módulo dono |
 | --- | --- | --- | --- |
@@ -29,10 +29,12 @@ em `app-modules/<modulo>/database/`.
 | `subject_equivalences` | `seq_` | `seq_id` | `catalog` |
 | `terms` | `trm_` | `trm_id` | `catalog` |
 | `offerings` | `ofr_` | `ofr_id` | `catalog` |
+| `complementary_categories` | `ccg_` | `ccg_id` | `catalog` — o teto por categoria de atividade complementar (B7), dado da matriz; sem `SoftDeletes` |
 | `students` | `std_` | `std_id` | `journey` |
 | `registrations` | `reg_` | `reg_id` | `journey` |
 | `subject_enrollments` | `sen_` | `sen_id` | `journey` |
 | `enrollment_requests` | `erq_` | `erq_id` | `journey` — o documento que o aluno subiu |
+| `complementary_activities` | `cac_` | `cac_id` | `journey` — o tracker do aluno para horas complementares (B7); nunca soma no `ProgressReadModel` (ver `docs/dominio/HORAS_COMPLEMENTARES.md`) |
 | `notes` | `nte_` | `nte_id` | `lifeos` — o acervo do veterano (5.2); FKs de escopo (`subject_sbj_id`, `offering_ofr_id`, `course_crs_id`) todas nullable |
 | `tasks` | `tsk_` | `tsk_id` | `lifeos` — a tarefa da turma (B6, 5.2); `origin_tsk_id` auto-relacionado (a cópia de uma adoção aponta pra origem), `project_prj_id` sem FK ainda (`projects` é esticada) |
 | `users`(framework), `cache`, `jobs`, `sessions`, `personal_access_tokens` | — | — | host (infra do Laravel/Sanctum) |
@@ -41,7 +43,7 @@ em `app-modules/<modulo>/database/`.
 > — não as imite. O `users` do esqueleto do Laravel foi **removido**: no
 > CampusOS o usuário é model de domínio, com escopo de tenant e auditoria.
 
-**Cinco decisões de modelagem que vale conhecer antes de mexer:**
+**Sete decisões de modelagem que vale conhecer antes de mexer:**
 
 1. **`subjects` é global na instituição, não por curso.** É o que faz a anotação
    do veterano de Engenharia chegar ao calouro de Química que cursa a mesma
@@ -64,6 +66,12 @@ em `app-modules/<modulo>/database/`.
    `origin_tsk_id` nullable não colide entre si (NULL é distinto de NULL em
    índice único), então uma pessoa pode ter várias tarefas próprias
    (`origin_tsk_id = null`) sem esbarrar nesse índice.
+7. **`complementary_activities.cac_hours_granted` fica sempre `null` nesta
+   entrega (B7).** O corte automático pelo teto da categoria é calculado
+   AGREGADO por categoria em `ComplementaryHoursReadModel`, nunca gravado por
+   linha — dividir a perda entre certificados é ambíguo quando o teto corta
+   no meio de um conjunto. A coluna existe pronta para a homologação manual
+   futura da coordenação.
 
 ## Convenção de nomenclatura
 

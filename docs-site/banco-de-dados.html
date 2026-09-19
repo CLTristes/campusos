@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Modelo de Dados (DER) · CampusOS</title>
-<meta name="description" content="Diagrama entidade-relacionamento do CampusOS — 26 tabelas desenhadas em 6 módulos (19 já em código), com o porquê de cada decisão de modelagem.">
+<meta name="description" content="Diagrama entidade-relacionamento do CampusOS — 26 tabelas desenhadas em 6 módulos (21 já em código), com o porquê de cada decisão de modelagem.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -103,7 +103,7 @@
     <div class="eyebrow">CampusOS · modelo de dados</div>
     <h1>Diagrama Entidade‑Relacionamento</h1>
     <p class="lede">
-      <strong>26 tabelas em 6 módulos</strong>, <strong>19 delas já em código</strong> (tenancy, catalog, journey inteiros e o acervo + tarefas do lifeos). Convenções do template modular sem exceção:
+      <strong>26 tabelas em 6 módulos</strong>, <strong>21 delas já em código</strong> (tenancy, catalog, journey inteiros e o acervo + tarefas do lifeos). Convenções do template modular sem exceção:
       prefixo de 3 letras em toda coluna, PK UUID gerada na aplicação, <code>SoftDeletes</code> em tudo que é transacional,
       FK no formato <code>{tabela_singular}_{pk}</code>, e <code>entity_ent_id</code> em toda tabela com escopo de tenant.
       Cada card traz a <strong>razão</strong> da modelagem — a decisão esquecida às 4 da manhã custa mais que a tabela errada.
@@ -250,8 +250,7 @@ flowchart LR
     SUBJECTS -.-> NOTES
     USERS -.-> NOTES
 
-    class ENTITIES,CAMPUSES,USERS,AUDIT_LOGS,COURSES,CURRICULA,SUBJECTS,CURRICULUM_SUBJECTS,ELECTIVE_GROUPS,PREREQUISITES,SUBJECT_EQUIVALENCES,TERMS,OFFERINGS,STUDENTS,REGISTRATIONS,SUBJECT_ENROLLMENTS,ENROLLMENT_REQUESTS,NOTES,TASKS built
-    class COMPLEMENTARY_CATEGORIES,COMPLEMENTARY_ACTIVITIES mvp
+    class ENTITIES,CAMPUSES,USERS,AUDIT_LOGS,COURSES,CURRICULA,SUBJECTS,CURRICULUM_SUBJECTS,ELECTIVE_GROUPS,PREREQUISITES,SUBJECT_EQUIVALENCES,TERMS,OFFERINGS,STUDENTS,REGISTRATIONS,SUBJECT_ENROLLMENTS,ENROLLMENT_REQUESTS,NOTES,TASKS,COMPLEMENTARY_CATEGORIES,COMPLEMENTARY_ACTIVITIES built
     class NOTE_VOTES,EVENTS stretch
     class NOTE_ATTACHMENTS,PROJECTS,TRANSACTIONS planned
 
@@ -391,7 +390,7 @@ flowchart LR
 
   <!-- CATALOG -->
   <section class="module">
-    <div class="module-head"><h2>catalog</h2><span class="module-tag">o esqueleto acadêmico · 10 tabelas · 9 ✅ em código</span></div>
+    <div class="module-head"><h2>catalog</h2><span class="module-tag">o esqueleto acadêmico · 10 tabelas · 10 ✅ em código</span></div>
     <p class="module-intro">
       Dados <b>mestres</b>: mudam por resolução de colegiado, não por ação de aluno. É o módulo que o aluno nunca escreve e do qual tudo depende —
       por isso é o primeiro a ser semeado e o mais caro em tempo de digitação, não de código. A separação entre <code>subjects</code>
@@ -632,8 +631,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">complementary_categories</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">complementary_categories</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>ccg_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>curriculum_cur_id</code><span class="type">uuid</span></li>
@@ -647,7 +646,9 @@ flowchart LR
           O <b>teto por categoria</b> da resolução de atividades complementares, virado dado: monitoria até 80h, eventos até 40h,
           publicação até 60h, e por aí. Pertence ao <code>catalog</code> e não ao <code>journey</code> porque é regra de <b>matriz</b>,
           não fato de aluno. É a tabela que permite ao sistema dizer "você tem 60h de evento mas só 40 contam" — a conta que
-          todo universitário descobre errada no último semestre. <b>Pendência:</b> precisa da resolução real do curso pra semear.
+          todo universitário descobre errada no último semestre. Embutida em <code>GET /courses/{course}/curriculum</code>
+          (chave <code>complementary_categories</code>, fora de <code>workload</code>). <b>Pendência:</b> o seed hoje é
+          fictício, replicando o exemplo do desenho — precisa da resolução real do curso pra virar definitivo.
         </div>
       </article>
 
@@ -656,7 +657,7 @@ flowchart LR
 
   <!-- JOURNEY -->
   <section class="module">
-    <div class="module-head"><h2>journey</h2><span class="module-tag">a trajetória do aluno · 5 tabelas · 4 ✅ em código</span></div>
+    <div class="module-head"><h2>journey</h2><span class="module-tag">a trajetória do aluno · 5 tabelas · 5 ✅ em código</span></div>
     <p class="module-intro">
       O desafio 5.1 inteiro mora aqui. É o módulo que <b>lê</b> o catálogo e <b>escreve</b> o que aconteceu de fato com uma pessoa.
       Toda a progressão — percentual, horas, pendências, previsão de formatura — é <b>calculada</b> sobre estas tabelas, nunca
@@ -779,8 +780,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">complementary_activities</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">complementary_activities</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>cac_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
@@ -800,10 +801,15 @@ flowchart LR
         </ul>
         <div class="tcard-note">
           Duas colunas de hora, e a diferença entre elas é a feature: <code>cac_hours_claimed</code> é o que o certificado diz,
-          <code>cac_hours_granted</code> é o que sobrou depois do teto da categoria. O aluno vê as duas, e é ver as duas que resolve
-          a frustração clássica — "eu tinha 60 horas de evento e só contaram 40" vira informação do primeiro dia, não surpresa do último.
-          A validação pela coordenação (<code>cac_status</code> além de <code>draft</code>, <code>reviewer_usr_id</code>) está modelada e é
-          <span class="status-pill planned">◇ planejado</span>: hoje o aluno declara e o contador anda, com a ressalva na tela.
+          <code>cac_hours_granted</code> é o que sobra depois do teto — mas <b>calculado agregado por categoria</b> em
+          <code>ComplementaryHoursReadModel</code>, nunca gravado por linha (dividir a perda entre certificados é ambíguo quando o
+          teto corta no meio de um conjunto), então esta coluna fica sempre <code>null</code> nesta entrega. O aluno vê o resumo por
+          categoria em <code>GET /me/complementary-activities</code>, e é ver os dois números que resolve a frustração clássica —
+          "eu tinha 60 horas de evento e só contaram 40" vira informação do primeiro dia, não surpresa do último.
+          A validação pela coordenação (<code>cac_status</code> além de <code>draft</code>/<code>submitted</code>, <code>reviewer_usr_id</code>) está
+          modelada e é <span class="status-pill planned">◇ planejado</span>: hoje o aluno declara (nasce <code>submitted</code>) e o
+          contador anda, com a ressalva na tela. <b>Nunca soma em <code>GET /me/progress</code></b> — decisão do dono do produto,
+          ver <a href="../docs/dominio/HORAS_COMPLEMENTARES.md">HORAS_COMPLEMENTARES.md</a>.
         </div>
       </article>
 
@@ -1045,7 +1051,7 @@ flowchart LR
 </div>
 
 <footer class="site-footer">
-  CampusOS · docs-site — 26 tabelas desenhadas em 6 módulos, 19 já em código
+  CampusOS · docs-site — 26 tabelas desenhadas em 6 módulos, 21 já em código
   <span class="sig">Desenhado antes da primeira migration — divergiu ao implementar? Mude o código e vire o card junto.</span>
 </footer>
 

@@ -39,7 +39,7 @@
       <span><b>Módulos:</b> catalog + journey</span>
       <span><b>Tabelas:</b> complementary_categories, complementary_activities</span>
       <span><b>Bloco:</b> B7</span>
-      <span><b>Status:</b> <span class="status-pill mvp">⚑ MVP</span></span>
+      <span><b>Status:</b> Fases 1–2 <span class="status-pill built">✅ em código</span> · Fase 3 <span class="status-pill planned">◇ planejado</span></span>
     </div>
     <div class="switch-bar">
       <div class="view-switch" role="group" aria-label="Nível de detalhe">
@@ -82,7 +82,7 @@
       </ol>
     </div>
     <div class="view-code">
-      <div class="code-path"><span>app-modules/catalog — complementary_categories (semeada com a matriz)</span><span class="status-pill mvp">⚑ B2/B7</span></div>
+      <div class="code-path"><span>app-modules/catalog — complementary_categories (semeada com a matriz)</span><span class="status-pill built">✅ em código</span></div>
       <pre><code>// A categoria pertence ao catalog (regra de matriz), não ao journey
 // (fato de aluno). É a mesma razão de prerequisites viver no catalog.
 ccg_name        string     'Participação em eventos'
@@ -96,9 +96,11 @@ $granted = $byCategory-&gt;map(fn ($rows, $ccgId) =&gt; min(
     $categories[$ccgId]-&gt;ccg_max_hours,
 ));
 
-// Alimenta a faixa "complementary" do ProgressReadModel — uma fonte só.
-// Recalcular horas complementares dentro do endpoint de progresso é como
-// nascem dois números diferentes para a mesma pergunta.</code></pre>
+// NUNCA alimenta o ProgressReadModel (decisão do dono do produto, 19/09):
+// ATV001 (a disciplina de 90h da matriz real) já soma em "obrigatórias"
+// quando aparece no histórico oficial. Somar os dois seria contar a
+// mesma hora duas vezes sem regra de conciliação. Ver
+// docs/dominio/HORAS_COMPLEMENTARES.md e PROGRESSAO.md pendência 3.</code></pre>
       <div class="callout warn">
         <b>Armadilha:</b> <code>cac_hours_granted</code> por linha é ambíguo quando o teto corta no meio de um conjunto
         (três certificados de 20h com teto de 50 — quem perde as 10?). Guarde o total concedido <b>por categoria</b> no read model
@@ -123,7 +125,7 @@ $granted = $byCategory-&gt;map(fn ($rows, $ccgId) =&gt; min(
       </ol>
     </div>
     <div class="view-code">
-      <div class="code-path"><span><span class="method post">POST</span>/api/v1/me/complementary-activities</span><span class="status-pill mvp">⚑ B7</span></div>
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/complementary-activities · <span class="method post">POST</span>/api/v1/me/complementary-activities</span><span class="status-pill built">✅ em código</span></div>
       <div class="io"><span class="io-k">entrada</span><span class="io-v">multipart — <code>category_id</code>, <code>title</code>, <code>hours_claimed</code>, <code>issued_at</code>, <code>certificate</code></span></div>
       <div class="io"><span class="io-k">saída</span><span class="io-v">201 com a atividade <b>e o resumo da categoria já recalculado</b> — o front não precisa de segunda chamada pra atualizar a barra</span></div>
       <div class="io"><span class="io-k">aviso</span><span class="io-v"><code>capped: true</code> + <code>hours_not_counted: 46</code> quando estoura o teto</span></div>
@@ -178,10 +180,10 @@ $granted = $byCategory-&gt;map(fn ($rows, $ccgId) =&gt; min(
     <table>
       <thead><tr><th>Entrega</th><th>Status</th></tr></thead>
       <tbody>
-        <tr><td>Categorias com teto, semeadas da resolução do curso</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Cadastro de atividade + upload do certificado</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Contador respeitando o teto, com aviso preventivo</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Horas entrando na mesma barra de progresso</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Categorias com teto (semeadas ficticiamente até a resolução real do curso)</td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Cadastro de atividade + upload do certificado</td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Contador respeitando o teto, com aviso preventivo</td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Contador paralelo — decisão do dono do produto: NUNCA soma em <code>GET /me/progress</code> (evita duplicar as horas de <code>ATV001</code>)</td><td><span class="status-pill built">✅ em código</span></td></tr>
         <tr><td>Leitura automática do certificado por IA</td><td><span class="status-pill planned">◇ planejado</span></td></tr>
         <tr><td>Fila de homologação da coordenação</td><td><span class="status-pill planned">◇ planejado</span></td></tr>
       </tbody>

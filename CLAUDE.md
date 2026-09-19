@@ -108,7 +108,7 @@ e **eventos** declarados no módulo `core`. Detalhe completo em
 | `core` | do template | shared kernel: `AbstractAction`, `Entityable`, `EntityScope`, `TenantContext`, `AuditObserver` |
 | `tenancy` | **em código** | `Entity` (a instituição) + `Campus` + `User` (4 papéis) + login/cadastro Sanctum |
 | `catalog` | **em código** | dados mestres: curso, matriz, disciplina, pré-requisito, equivalência, conjunto de optativas, semestre, oferta |
-| `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma). Falta: elegibilidade, horas complementares, endpoint de criar vínculo |
+| `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma), horas complementares (B7 — nunca soma na progressão). Falta: elegibilidade, endpoint de criar vínculo |
 | `lifeos` | **parcial** | o acervo do veterano (B5): `Note` + escada de visibilidade de 5 níveis. B6 (tarefas da turma): `Task` + adoção por cópia + `GET /me/agenda`. Falta curadoria por voto e `events` (esticada) |
 | `insights` | esqueleto | agregados da coordenação. **Sem tabelas por desenho** — lê por read model |
 | `integrations` | **em código** | `GeminiDocumentExtractor` + `NullDocumentExtractor` atrás do contrato `AcademicDocumentExtractor`. **O único lugar que sabe qual IA lê os documentos** |
@@ -167,10 +167,12 @@ app-modules/                  # <- todo o domínio vive aqui
                               #   LoginAction/Sanctum (/api/v1/auth)
   catalog/                    # curso, matriz, disciplina, curriculum_subjects,
                               #   pré-requisito, equivalência, conjunto de optativas,
-                              #   semestre, oferta + o seeder da matriz real
+                              #   semestre, oferta, complementary_categories (B7)
+                              #   + o seeder da matriz real
     database/data/            #   CSVs da matriz + parse_matriz_html.py (o gerador)
   journey/                    # students, registrations, subject_enrollments +
                               #   ApprovalPolicy + ProgressReadModel (/api/v1/me/progress)
+                              #   + complementary_activities (B7, nunca soma na progressão)
   lifeos/                     # parcial — Note (B5) + Task/agenda (B6);
                               #   falta curadoria por voto e events (esticada)
   insights/                   # esqueleto — agregados da coordenação, SEM tabelas
@@ -275,8 +277,8 @@ test` antes de commitar.
 
 ## Estado atual
 
-**v0.6.0 (19/09/2026) — 174 testes / 526 asserções verdes**, Pint verde,
-ArchTest verde. 19 tabelas em código, 20 endpoints documentados em `/docs/api`.
+**v0.7.0 (19/09/2026) — 184 testes / 557 asserções verdes**, Pint verde,
+ArchTest verde. 21 tabelas em código, 22 endpoints documentados em `/docs/api`.
 
 O **catálogo acadêmico** está completo, com a matriz 45 da UTFPR real semeada:
 121 disciplinas, 34 pré-requisitos, 98 equivalências. O total a integralizar
@@ -318,7 +320,17 @@ copia a tarefa da turma pro aluno (nunca a linha original), com
 compartilhou nas ofertas do termo corrente. Ver
 [`ACERVO.md`](docs/dominio/ACERVO.md) e [`TAREFAS.md`](docs/dominio/TAREFAS.md).
 
+**Horas complementares** (`journey`+`catalog`, desafio 5.1, B7) também está em
+código: `complementary_categories` guarda o teto por categoria (dado da
+matriz), o aluno declara em `POST /api/v1/me/complementary-activities` com
+certificado opcional, e o corte pelo teto é calculado **agregado por
+categoria** (nunca por certificado) em `ComplementaryHoursReadModel`. Decisão
+do dono do produto: isso **nunca soma** em `GET /api/v1/me/progress` —
+`ATV001` (a disciplina de 90h da matriz real) continua sendo o que de fato
+conta como aprovado; as duas fontes não se tocam. Ver
+[`HORAS_COMPLEMENTARES.md`](docs/dominio/HORAS_COMPLEMENTARES.md).
+
 **Ainda não existe:** elegibilidade e pré-requisitos em runtime, simulação de
-reprovação, horas complementares, curadoria por voto e `events` no `lifeos`, e
-o módulo `insights` inteiro. Lista completa em
-[`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.
+reprovação, curadoria por voto e `events` no `lifeos`, homologação da
+coordenação para horas complementares, e o módulo `insights` inteiro. Lista
+completa em [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.

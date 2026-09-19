@@ -5,7 +5,7 @@
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-09-19 · reports até `v0.6.0/feat_tarefas_da_turma` ·
+> **Última sincronização:** 2026-09-19 · reports até `v0.7.0/feat_horas_complementares` ·
 > por claude-sonnet-5
 
 ## Índice
@@ -109,8 +109,9 @@ sanitize→validate→authorize→handle), `Entityable`, `EntityScope`,
 
 **10 tabelas:** `courses`, `curricula`, `subjects`, `curriculum_subjects`,
 `prerequisites`, `elective_groups`, `subject_equivalences`, `terms`,
-`offerings`. Dados mestres: mudam por resolução de colegiado, nunca por ação de
-aluno.
+`offerings`, `complementary_categories` (B7 — o teto por categoria de
+atividade complementar, embutido em `GET /courses/{course}/curriculum`).
+Dados mestres: mudam por resolução de colegiado, nunca por ação de aluno.
 
 A distinção que sustenta o módulo: **`subjects` é a disciplina** (global na
 instituição, identidade única, onde o acervo se pendura) e
@@ -123,8 +124,8 @@ portal.
 
 ## IV.4 `journey` — a trajetória do aluno
 
-**4 tabelas em código:** `students`, `registrations`, `subject_enrollments`,
-`enrollment_requests`. (`complementary_activities` segue desenhada e sem código.)
+**5 tabelas em código:** `students`, `registrations`, `subject_enrollments`,
+`enrollment_requests`, `complementary_activities` (B7).
 
 - `ApprovalPolicy` — a regra de aprovação da UTFPR (ver
   [`PROGRESSAO.md`](../dominio/PROGRESSAO.md) regra 5).
@@ -134,6 +135,13 @@ portal.
   `ConfirmAcademicDocumentAction` — o caminho do documento até a matrícula.
 - `DocumentStatusTranslator` — o texto impresso vira enum. Mora aqui, não no
   extrator: o provedor transcreve, o domínio interpreta.
+- `ComplementaryHoursReadModel` (B7) — o teto por categoria de atividade
+  complementar, calculado por categoria (nunca por certificado). **Nunca
+  soma no `ProgressReadModel`** — decisão do dono do produto (ver
+  [`PROGRESSAO.md`](../dominio/PROGRESSAO.md) pendência 3 e
+  [`HORAS_COMPLEMENTARES.md`](../dominio/HORAS_COMPLEMENTARES.md)): `ATV001`
+  (a disciplina de 90h da matriz real) é o que de fato conta como aprovado;
+  `complementary_activities` é só o tracker pessoal do aluno.
 
 ## IV.5 `integrations` — os adaptadores externos
 
@@ -194,7 +202,7 @@ Nenhuma regra de negócio.
 
 # Parte V — A camada de dados
 
-**19 tabelas em código.** Convenções sem exceção: prefixo de 3 letras em toda
+**21 tabelas em código.** Convenções sem exceção: prefixo de 3 letras em toda
 coluna, PK UUID gerada na aplicação, `SoftDeletes` no que é transacional, FK no
 formato `{tabela_singular}_{pk_origem}`, `entity_ent_id` em toda tabela com
 escopo de tenant.
@@ -209,6 +217,14 @@ nova, que é como reprovação aparece no histórico.
 **`notes`** é a tabela do acervo: três FKs nullable (`subject_sbj_id`,
 `offering_ofr_id`, `course_crs_id`) — cada nível da escada de visibilidade usa
 uma delas ou nenhuma — e `nte_visibility` default `private`.
+
+**`complementary_categories`** (catalog) guarda o teto por categoria
+(`ccg_max_hours`), sem `SoftDeletes` — dado mestre, mesmo padrão de
+`curriculum_subjects`. **`complementary_activities`** (journey) é o tracker
+do aluno: `cac_hours_claimed` é o que o certificado declara,
+`cac_hours_granted` fica reservado para a homologação manual futura (sempre
+`null` nesta entrega) — o corte automático pelo teto é calculado agregado
+por categoria em `ComplementaryHoursReadModel`, nunca gravado por linha.
 
 **`tasks`** é a tabela da tarefa da turma (B6): mesmas FKs de escopo de
 `notes` mais `origin_tsk_id` (auto-relacionamento — a cópia de uma adoção
@@ -287,7 +303,7 @@ erro mais provável, e tratá-lo como documento ruim apagaria o upload do aluno.
 
 # Parte IX — Testes e qualidade
 
-**174 testes / 526 asserções verdes** · Pint verde · ArchTest verde.
+**184 testes / 557 asserções verdes** · Pint verde · ArchTest verde.
 
 O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
 rodapé do documento da matriz imprime os totais de fechamento, então a
@@ -319,11 +335,12 @@ contra sete pares (média, frequência, situação) do histórico real.
 | `/data-console` | Console de dados (Filament), 15 recursos (catalog + tenancy + journey). Só coordenação e gestão |
 | `/up` | Health check |
 
-**20 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
+**22 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
 verify-email/resend}`, `courses`, `courses/{id}/curriculum`, `me/progress`, os
 três de `me/academic-documents` (enviar, consultar, confirmar), os quatro de
 `notes` (listar, criar, ver, mudar visibilidade), `me/agenda` e os três de
-`tasks` (criar, adotar, mudar status) — B6.
+`tasks` (criar, adotar, mudar status) — B6 — e os dois de
+`me/complementary-activities` (listar+resumo, declarar) — B7.
 
 ---
 
@@ -350,7 +367,7 @@ php artisan serve
 
 | Área | O que falta |
 | --- | --- |
-| `journey` | Elegibilidade/pré-requisitos em runtime, simulação de reprovação, atividades complementares, cálculo do período por déficit de CHS |
+| `journey` | Elegibilidade/pré-requisitos em runtime, simulação de reprovação, cálculo do período por déficit de CHS, homologação da coordenação para atividades complementares (declaração já existe, B7) |
 | `lifeos` | Curadoria por voto e `events` (◎ esticada) — o acervo de notas (B5) e as tarefas da turma (B6) estão prontos |
 | `insights` | Tudo — os agregados da coordenação |
 | Transversal | CCE autônomo (as 60 h de extensão que ninguém consegue cumprir pelo sistema), RBAC granular, guard próprio do console |
@@ -370,3 +387,4 @@ php artisan serve
 | 2026-09-19 | O acervo do veterano (B5): escada de visibilidade de 5 níveis, `EnrolledSubjectsProvider` como fronteira com o `journey` | `v0.5.0/feat_acervo_do_veterano` |
 | 2026-09-19 | Console de dados ganha os 4 Resources da jornada (11→15); Scribe regenerado | `v0.5.1/fix_data_console_jornada_e_scribe_desatualizado` |
 | 2026-09-19 | Tarefas da turma (B6): `Task` reaproveita o enum `Visibility` de `notes`; adotar copia (`origin_tsk_id` + índice único de idempotência); `GET /me/agenda` filtra pelo termo corrente — ao contrário do acervo, aqui a ausência de filtro seria o bug | `v0.6.0/feat_tarefas_da_turma` |
+| 2026-09-19 | Horas complementares (B7): teto por categoria (`complementary_categories`, catalog) + tracker do aluno (`complementary_activities`, journey); corte calculado agregado por categoria, nunca por certificado; decisão do dono do produto — nunca soma no `ProgressReadModel` (`ATV001` continua sendo o que conta) | `v0.7.0/feat_horas_complementares` |

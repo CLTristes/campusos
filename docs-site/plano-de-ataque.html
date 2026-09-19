@@ -104,7 +104,7 @@
     <div class="eyebrow">hackathon · 14 horas e 15 minutos</div>
     <h1>Plano de ataque</h1>
     <p class="lede">
-      <b style="color:var(--leaf-700)">Atualizado v0.6.0 (19/09) — B0 a B6 fechados. O documento do aluno vira barra de progresso, o acervo do veterano entrega nota entre semestres, e a turma compartilha prazo pela agenda; falta B7 (horas complementares).</b><br>
+      <b style="color:var(--leaf-700)">Atualizado v0.7.0 (19/09) — B0 a B7 fechados. O documento do aluno vira barra de progresso, o acervo do veterano entrega nota entre semestres, a turma compartilha prazo pela agenda, e o aluno acompanha horas complementares com teto por categoria. Restam as esticadas (B8).</b><br>
       São <strong>01:45</strong>. A entrega é <strong>hoje às 16:00</strong>. Isso são <strong>14h15</strong> de relógio, das quais
       aproximadamente 13 são de código — o resto é a demo, e a demo não se improvisa.
       Esta página existe por um motivo só: às 05:30 da manhã ninguém decide prioridade direito,
@@ -226,13 +226,14 @@
     <div class="blk">
       <div class="blk-time">11:30<small>1h00</small></div>
       <div class="blk-card">
-        <div class="blk-head"><span class="blk-id">B7</span><h3>journey — horas complementares e certificados</h3></div>
+        <div class="blk-head"><span class="blk-id">B7</span><span class="status-pill built">✅ feito</span><h3>journey — horas complementares e certificados</h3></div>
         <p>O bullet do 5.1 que os outros times vão esquecer, e que todo universitário sofre no último semestre.</p>
         <ul>
-          <li><code>complementary_categories</code> (no catalog, com teto por categoria) + <code>complementary_activities</code>.</li>
-          <li>Upload do certificado + regra do teto: horas que passam do limite da categoria <b>não contam</b>, e a tela diz isso.</li>
-          <li>As horas entram no mesmo <code>ProgressReadModel</code> do B3 — sem segunda fonte de verdade.</li>
+          <li><code>complementary_categories</code> (no catalog, com teto por categoria) + <code>complementary_activities</code>. <b>✅ feito</b></li>
+          <li>Upload do certificado + regra do teto: horas que passam do limite da categoria <b>não contam</b>, e a tela diz isso. <b>✅ feito</b></li>
+          <li><b>Decisão tomada durante a implementação</b> (corrigindo o palpite original deste card): as horas <b>NÃO</b> entram no <code>ProgressReadModel</code> do B3 — a matriz real já tem <code>ATV001</code>, uma disciplina de 90h que soma em "obrigatórias" quando aparece no histórico. Somar as duas seria contar a mesma hora duas vezes sem regra de conciliação. <code>complementary_activities</code> é um tracker paralelo, puramente informativo. Ver <a href="../docs/dominio/HORAS_COMPLEMENTARES.md">HORAS_COMPLEMENTARES.md</a>. <b>✅ feito</b></li>
         </ul>
+        <div class="done-when"><b>Pronto quando:</b> declarar uma atividade que estoura o teto da categoria avisa quantas horas não contam, sem mexer no total de <code>/me/progress</code>. <b>Passou.</b></div>
       </div>
     </div>
 
