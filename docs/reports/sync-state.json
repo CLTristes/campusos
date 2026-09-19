@@ -93,6 +93,19 @@
                 "docs/arquitetura/COMUNICACAO.md",
                 "docs-site/features/matricula-e-progressao.html"
             ]
+        },
+        {
+            "id": "v0.3.1/feat_gemini_real_e_vinculo_automatico",
+            "file": "docs/reports/v0.3.1/feat_gemini_real_e_vinculo_automatico.md",
+            "title": "Gemini plugado contra a API real (modelo trocado) + confirmação cria o vínculo sozinha a partir do documento",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
+            "touches": [
+                "docs/dominio/DOCUMENTOS_ACADEMICOS.md",
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md",
+                "docs-site/features/matricula-e-progressao.html"
+            ]
         }
     ]
 }

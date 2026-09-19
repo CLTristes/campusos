@@ -8,6 +8,8 @@ use CampusOs\Core\Actions\AbstractAction;
 use CampusOs\Journey\Enums\DocumentRequestStatus;
 use CampusOs\Journey\Enums\EnrollmentSource;
 use CampusOs\Journey\Models\EnrollmentRequest;
+use CampusOs\Journey\Models\Registration;
+use CampusOs\Journey\Models\Student;
 use CampusOs\Journey\Models\SubjectEnrollment;
 use CampusOs\Journey\Support\DocumentStatusTranslator;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +25,12 @@ use Illuminate\Validation\ValidationException;
  * Linha cujo código não existe no catálogo vira PENDÊNCIA na resposta, nunca
  * erro fatal: histórico real tem disciplina extinta, e derrubar a importação
  * inteira por causa de uma linha de 2019 é o pior dos mundos.
+ *
+ * `registration_id` é OPCIONAL: um aluno sem vínculo nenhum não tinha como
+ * confirmar nada (só nascia por seeder). Omitido, o vínculo nasce do próprio
+ * `meta` que a IA leu do cabeçalho do documento oficial — curso, RA e o
+ * semestre de ingresso — que é mais confiável do que pedir para o aluno
+ * digitar de novo o que o documento já imprime.
  */
 final class ConfirmAcademicDocumentAction extends AbstractAction
 {
@@ -31,12 +39,16 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
     {
         return [
             'request_id' => ['required', 'string', 'uuid'],
-            'registration_id' => ['required', 'string', 'uuid'],
+            'registration_id' => ['nullable', 'string', 'uuid'],
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.code' => ['required', 'string', 'max:32'],
             'lines.*.year' => ['required', 'integer', 'min:1990', 'max:2100'],
             'lines.*.period' => ['required', 'integer', 'in:1,2'],
-            'lines.*.status' => ['required', 'string', 'max:64'],
+            // 64 não bastava: o histórico real tem situação administrativa
+            // ("Enade - Estudante Dispensado..." > 80 caracteres) que não é uma
+            // situação acadêmica reconhecida — ela DEVE virar pendência, não
+            // travar a confirmação inteira antes mesmo de chegar lá.
+            'lines.*.status' => ['required', 'string', 'max:255'],
             'lines.*.grade' => ['nullable', 'numeric', 'min:0', 'max:10'],
             'lines.*.attendance' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'lines.*.class_code' => ['nullable', 'string', 'max:32'],
@@ -60,10 +72,12 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
         $subjectModel = config('models.subject');
         $termModel = config('models.term');
 
+        $registrationId = $data['registration_id'] ?? $this->resolveRegistration($request)->reg_id;
+
         $imported = 0;
         $pending = [];
 
-        DB::transaction(function () use ($data, $request, $subjectModel, $termModel, &$imported, &$pending): void {
+        DB::transaction(function () use ($data, $request, $subjectModel, $termModel, $registrationId, &$imported, &$pending): void {
             foreach ($data['lines'] as $line) {
                 $subject = $subjectModel::query()->where('sbj_code', $line['code'])->first();
 
@@ -89,7 +103,7 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
 
                 SubjectEnrollment::query()->updateOrCreate(
                     [
-                        'registration_reg_id' => $data['registration_id'],
+                        'registration_reg_id' => $registrationId,
                         'subject_sbj_id' => $subject->sbj_id,
                         'term_trm_id' => $term->trm_id,
                     ],
@@ -112,11 +126,71 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
 
             $request->update([
                 'erq_status' => DocumentRequestStatus::Confirmed,
-                'registration_reg_id' => $data['registration_id'],
+                'registration_reg_id' => $registrationId,
                 'erq_confirmed_at' => now(),
             ]);
         });
 
         return ['request' => $request->refresh(), 'imported' => $imported, 'pending' => $pending];
+    }
+
+    /**
+     * Sem `registration_id` explícito, o vínculo vem do que a própria IA leu.
+     *
+     * Um Student já existente reaproveita o vínculo da MESMA disciplina/curso
+     * (o mesmo aluno pode ter dois vínculos — um por curso, nunca um só); sem
+     * vínculo nenhum, nasce um novo a partir do cabeçalho do documento.
+     */
+    private function resolveRegistration(EnrollmentRequest $request): Registration
+    {
+        $meta = $request->erq_extraction['meta'] ?? [];
+        $courseCode = $meta['course_code'] ?? null;
+
+        $student = Student::query()->firstOrCreate(
+            ['user_usr_id' => $request->user_usr_id],
+            ['std_name' => $request->user?->usr_name ?? 'Aluno'],
+        );
+
+        $registrations = $student->registrations();
+
+        if ($courseCode !== null) {
+            $registrations->whereHas('course', fn ($q) => $q->where('crs_code', $courseCode));
+        }
+
+        $existing = $registrations->first();
+
+        if ($existing !== null) {
+            return $existing;
+        }
+
+        $entryTerm = $meta['entry_term'] ?? null;
+
+        if ($courseCode === null || $entryTerm === null || ! preg_match('#^(\d)/(\d{4})$#', (string) $entryTerm, $m)) {
+            throw ValidationException::withMessages([
+                'registration_id' => 'Não foi possível identificar o vínculo automaticamente a partir do documento. Informe registration_id.',
+            ]);
+        }
+
+        $courseModel = config('models.course');
+        $course = $courseModel::query()->where('crs_code', $courseCode)->first();
+
+        if ($course === null) {
+            throw ValidationException::withMessages([
+                'registration_id' => "O curso \"{$courseCode}\" do documento não está no catálogo desta instituição.",
+            ]);
+        }
+
+        $termModel = config('models.term');
+        $term = $termModel::query()->firstOrCreate(
+            ['trm_year' => (int) $m[2], 'trm_period' => (int) $m[1]],
+            ['trm_status' => 'closed'],
+        );
+
+        return (new CreateRegistrationAction)->execute([
+            'student_id' => $student->std_id,
+            'course_id' => $course->crs_id,
+            'entry_term_id' => $term->trm_id,
+            'number' => (string) ($meta['registration_number'] ?? $request->user?->usr_registration_number ?? $student->std_id),
+        ]);
     }
 }

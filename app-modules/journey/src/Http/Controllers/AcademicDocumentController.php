@@ -73,7 +73,7 @@ final class AcademicDocumentController
      *
      * @authenticated
      *
-     * @bodyParam registration_id string required O vínculo que recebe as matrículas.
+     * @bodyParam registration_id string O vínculo que recebe as matrículas. Omitido, nasce do cabeçalho do documento (curso, RA, ingresso).
      * @bodyParam lines object[] required As linhas conferidas.
      * @bodyParam lines[].code string required Código da disciplina. Example: ARC102
      * @bodyParam lines[].year integer required Example: 2023

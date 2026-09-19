@@ -209,6 +209,102 @@ it('SÓ a confirmação cria matrícula — e a barra de progresso anda', functi
     expect((new ProgressReadModel)->for($this->registration)['overall']['completed_hours'])->toBe(60);
 });
 
+it('sem registration_id, o vínculo nasce do cabeçalho que a IA leu', function () {
+    $semVinculo = User::factory()->create();
+
+    $doc = EnrollmentRequest::factory()->create([
+        'user_usr_id' => $semVinculo->usr_id,
+        'erq_status' => DocumentRequestStatus::Parsed,
+        'erq_extraction' => [
+            'meta' => [
+                'registration_number' => '9999999',
+                'course_code' => '25',
+                'curriculum_code' => '45',
+                'entry_term' => '1/2023',
+            ],
+        ],
+    ]);
+
+    $this->actingAs($semVinculo)
+        ->postJson("/api/v1/me/academic-documents/{$doc->erq_id}/confirm", [
+            'lines' => [
+                ['code' => 'ARC102', 'year' => 2023, 'period' => 1,
+                    'status' => 'Aprovado Por Nota/Frequência', 'grade' => 8.5, 'attendance' => 91.2],
+            ],
+        ])
+        ->assertOk()
+        ->assertJsonPath('imported', 1);
+
+    $student = Student::query()->where('user_usr_id', $semVinculo->usr_id)->firstOrFail();
+    $registration = Registration::query()->where('student_std_id', $student->std_id)->firstOrFail();
+
+    expect($registration->reg_number)->toBe('9999999')
+        ->and($registration->course_crs_id)->toBe(Course::query()->where('crs_code', '25')->value('crs_id'))
+        ->and($registration->curriculum_cur_id)->toBe(Curriculum::query()->where('cur_code', '45')->value('cur_id'))
+        ->and($doc->refresh()->registration_reg_id)->toBe($registration->reg_id)
+        ->and(SubjectEnrollment::query()->where('registration_reg_id', $registration->reg_id)->count())->toBe(1);
+});
+
+it('sem registration_id, reaproveita o vínculo que o aluno já tem no mesmo curso', function () {
+    $doc = EnrollmentRequest::factory()->create([
+        'user_usr_id' => $this->user->usr_id,
+        'erq_status' => DocumentRequestStatus::Parsed,
+        'erq_extraction' => ['meta' => ['course_code' => '25', 'entry_term' => '1/2023']],
+    ]);
+
+    $this->actingAs($this->user)
+        ->postJson("/api/v1/me/academic-documents/{$doc->erq_id}/confirm", [
+            'lines' => [
+                ['code' => 'ARC102', 'year' => 2023, 'period' => 1, 'status' => 'Aprovado Por Nota/Frequência'],
+            ],
+        ])
+        ->assertOk();
+
+    // Nenhum vínculo novo — o do beforeEach foi reaproveitado.
+    expect(Registration::query()->where('student_std_id', $this->student->std_id)->count())->toBe(1)
+        ->and($doc->refresh()->registration_reg_id)->toBe($this->registration->reg_id);
+});
+
+it('sem registration_id e sem cabeçalho suficiente, pede o vínculo explicitamente', function () {
+    $semVinculo = User::factory()->create();
+
+    $doc = EnrollmentRequest::factory()->create([
+        'user_usr_id' => $semVinculo->usr_id,
+        'erq_status' => DocumentRequestStatus::Parsed,
+        'erq_extraction' => ['meta' => []],
+    ]);
+
+    $this->actingAs($semVinculo)
+        ->postJson("/api/v1/me/academic-documents/{$doc->erq_id}/confirm", [
+            'lines' => [['code' => 'ARC102', 'year' => 2023, 'period' => 1, 'status' => 'Aprovado']],
+        ])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('registration_id');
+});
+
+it('situação impressa mais longa que 64 caracteres vira pendência, não derruba a confirmação', function () {
+    $doc = EnrollmentRequest::factory()->create([
+        'user_usr_id' => $this->user->usr_id,
+        'erq_status' => DocumentRequestStatus::Parsed,
+    ]);
+
+    // Ex.: "Enade - Estudante Dispensado De Realização Do Enade, Em Razão Da
+    // Natureza Do Curso" no histórico real — texto administrativo, não uma
+    // situação acadêmica reconhecida.
+    $situacaoLonga = 'Situação Administrativa Extraordinária Não Prevista No Vocabulário Do Documento Oficial';
+
+    $r = $this->actingAs($this->user)
+        ->postJson("/api/v1/me/academic-documents/{$doc->erq_id}/confirm", [
+            'registration_id' => $this->registration->reg_id,
+            'lines' => [
+                ['code' => 'ARC102', 'year' => 2023, 'period' => 1, 'status' => $situacaoLonga],
+            ],
+        ])->assertOk();
+
+    expect($r->json('imported'))->toBe(0)
+        ->and($r->json('pending.0.code'))->toBe('ARC102');
+});
+
 it('disciplina fora do catálogo vira pendência, não erro fatal', function () {
     $doc = EnrollmentRequest::factory()->create([
         'user_usr_id' => $this->user->usr_id,
