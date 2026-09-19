@@ -142,6 +142,25 @@
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-tarefas-da-turma" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="tarefas-da-turma">
+                    <a href="#tarefas-da-turma">Tarefas da turma</a>
+                </li>
+                                    <ul id="tocify-subheader-tarefas-da-turma" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="tarefas-da-turma-GETapi-v1-me-agenda">
+                                <a href="#tarefas-da-turma-GETapi-v1-me-agenda">Minha agenda</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="tarefas-da-turma-POSTapi-v1-tasks">
+                                <a href="#tarefas-da-turma-POSTapi-v1-tasks">Criar tarefa</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="tarefas-da-turma-POSTapi-v1-tasks--task_tsk_id--adopt">
+                                <a href="#tarefas-da-turma-POSTapi-v1-tasks--task_tsk_id--adopt">Adotar tarefa da turma</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="tarefas-da-turma-PATCHapi-v1-tasks--task_tsk_id--status">
+                                <a href="#tarefas-da-turma-PATCHapi-v1-tasks--task_tsk_id--status">Mudar o status</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
             </div>
 
     <ul class="toc-footer" id="toc-footer">
@@ -2325,7 +2344,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "kind=transcript"\
-    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpbklldgsl124u5gIyoW7" </code></pre></div>
+    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpr00d1rmedfl21TvVIX0" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -2460,7 +2479,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpbklldgsl124u5gIyoW7</code></p>
+<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpr00d1rmedfl21TvVIX0</code></p>
         </div>
         </form>
 
@@ -2875,6 +2894,689 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>Frequência em %. Example: <code>91.2</code></p>
                     </div>
                                     </details>
+        </div>
+        </form>
+
+                <h1 id="tarefas-da-turma">Tarefas da turma</h1>
+
+    <p>B6 do desafio 5.2: uma pessoa cadastra um prazo na oferta, a turma inteira
+enxerga na própria agenda (<code>GET /me/agenda</code>) e decide se adota.</p>
+
+                                <h2 id="tarefas-da-turma-GETapi-v1-me-agenda">Minha agenda</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Pendências próprias mais as tarefas que a turma compartilhou nas
+ofertas em que você está matriculado <strong>no termo corrente</strong>, ainda não
+adotadas (<code>adopted: false</code>) — ordenado por prazo.</p>
+
+<span id="example-requests-GETapi-v1-me-agenda">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/me/agenda" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/me/agenda"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-me-agenda">
+            <blockquote>
+            <p>Example response (200, com tarefa da turma pendente de adoção):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;id&quot;: &quot;01a0&hellip;&quot;,
+            &quot;title&quot;: &quot;Prova 2&quot;,
+            &quot;due_at&quot;: &quot;2026-10-14T23:59:00-03:00&quot;,
+            &quot;visibility&quot;: &quot;offering&quot;,
+            &quot;adopted&quot;: false
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-me-agenda" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-me-agenda"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-me-agenda"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-me-agenda" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-me-agenda">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-me-agenda" data-method="GET"
+      data-path="api/v1/me/agenda"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-me-agenda', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-me-agenda"
+                    onclick="tryItOut('GETapi-v1-me-agenda');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-me-agenda"
+                    onclick="cancelTryOut('GETapi-v1-me-agenda');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-me-agenda"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/me/agenda</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-me-agenda"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-me-agenda"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="tarefas-da-turma-POSTapi-v1-tasks">Criar tarefa</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Ao contrário da nota, a tarefa não nasce sempre privada: informe
+<code>visibility: offering</code> + <code>offering_id</code> para já cadastrar direto na
+turma.</p>
+
+<span id="example-requests-POSTapi-v1-tasks">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/tasks" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"title\": \"Prova 2\",
+    \"description_md\": \"architecto\",
+    \"kind\": \"exam\",
+    \"due_at\": \"2026-10-14T23:59:00-03:00\",
+    \"visibility\": \"architecto\",
+    \"subject_id\": \"architecto\",
+    \"offering_id\": \"architecto\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tasks"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "title": "Prova 2",
+    "description_md": "architecto",
+    "kind": "exam",
+    "due_at": "2026-10-14T23:59:00-03:00",
+    "visibility": "architecto",
+    "subject_id": "architecto",
+    "offering_id": "architecto"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-tasks">
+            <blockquote>
+            <p>Example response (201, criada na turma):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;title&quot;: &quot;Prova 2&quot;,
+        &quot;visibility&quot;: &quot;offering&quot;
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-tasks" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-tasks"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-tasks"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-tasks" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-tasks">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-tasks" data-method="POST"
+      data-path="api/v1/tasks"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-tasks', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-tasks"
+                    onclick="tryItOut('POSTapi-v1-tasks');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-tasks"
+                    onclick="cancelTryOut('POSTapi-v1-tasks');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-tasks"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/tasks</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-tasks"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-tasks"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>title</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="title"                data-endpoint="POSTapi-v1-tasks"
+               value="Prova 2"
+               data-component="body">
+    <br>
+<p>Example: <code>Prova 2</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>description_md</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="description_md"                data-endpoint="POSTapi-v1-tasks"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Conteúdo em markdown. Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>kind</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="kind"                data-endpoint="POSTapi-v1-tasks"
+               value="exam"
+               data-component="body">
+    <br>
+<p>exam, assignment, reading ou personal. Example: <code>exam</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>due_at</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="due_at"                data-endpoint="POSTapi-v1-tasks"
+               value="2026-10-14T23:59:00-03:00"
+               data-component="body">
+    <br>
+<p>Data limite (ISO 8601). Example: <code>2026-10-14T23:59:00-03:00</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>visibility</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="visibility"                data-endpoint="POSTapi-v1-tasks"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>private, offering, subject, course ou institution. Default: private. Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>subject_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="subject_id"                data-endpoint="POSTapi-v1-tasks"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>A disciplina, se houver. Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>offering_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="offering_id"                data-endpoint="POSTapi-v1-tasks"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>A turma — obrigatório se visibility=offering. Example: <code>architecto</code></p>
+        </div>
+        </form>
+
+                    <h2 id="tarefas-da-turma-POSTapi-v1-tasks--task_tsk_id--adopt">Adotar tarefa da turma</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Cria uma cópia privada apontando pra origem — sem afetar a tarefa
+original nem quem mais adotou.</p>
+
+<span id="example-requests-POSTapi-v1-tasks--task_tsk_id--adopt">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/tasks/architecto/adopt" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tasks/architecto/adopt"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "POST",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-tasks--task_tsk_id--adopt">
+            <blockquote>
+            <p>Example response (200, adotada):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;visibility&quot;: &quot;private&quot;,
+        &quot;origin_task_id&quot;: &quot;01a0&hellip;&quot;
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (403, não compartilhada):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Esta tarefa n&atilde;o foi compartilhada com a turma.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-tasks--task_tsk_id--adopt" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-tasks--task_tsk_id--adopt"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-tasks--task_tsk_id--adopt"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-tasks--task_tsk_id--adopt" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-tasks--task_tsk_id--adopt">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-tasks--task_tsk_id--adopt" data-method="POST"
+      data-path="api/v1/tasks/{task_tsk_id}/adopt"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-tasks--task_tsk_id--adopt', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-tasks--task_tsk_id--adopt"
+                    onclick="tryItOut('POSTapi-v1-tasks--task_tsk_id--adopt');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-tasks--task_tsk_id--adopt"
+                    onclick="cancelTryOut('POSTapi-v1-tasks--task_tsk_id--adopt');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-tasks--task_tsk_id--adopt"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/tasks/{task_tsk_id}/adopt</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-tasks--task_tsk_id--adopt"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-tasks--task_tsk_id--adopt"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>task_tsk_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="task_tsk_id"                data-endpoint="POSTapi-v1-tasks--task_tsk_id--adopt"
+               value="architecto"
+               data-component="url">
+    <br>
+<p>The ID of the task tsk. Example: <code>architecto</code></p>
+            </div>
+                    </form>
+
+                    <h2 id="tarefas-da-turma-PATCHapi-v1-tasks--task_tsk_id--status">Mudar o status</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Só o dono da tarefa (a cópia adotada é sua desde a adoção).</p>
+
+<span id="example-requests-PATCHapi-v1-tasks--task_tsk_id--status">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PATCH \
+    "http://localhost/api/v1/tasks/architecto/status" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"status\": \"done\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/tasks/architecto/status"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "status": "done"
+};
+
+fetch(url, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PATCHapi-v1-tasks--task_tsk_id--status">
+            <blockquote>
+            <p>Example response (200, concluída):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;status&quot;: &quot;done&quot;
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (403, não é o dono):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Esta tarefa n&atilde;o &eacute; sua.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-PATCHapi-v1-tasks--task_tsk_id--status" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PATCHapi-v1-tasks--task_tsk_id--status"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PATCHapi-v1-tasks--task_tsk_id--status"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PATCHapi-v1-tasks--task_tsk_id--status" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PATCHapi-v1-tasks--task_tsk_id--status">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PATCHapi-v1-tasks--task_tsk_id--status" data-method="PATCH"
+      data-path="api/v1/tasks/{task_tsk_id}/status"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PATCHapi-v1-tasks--task_tsk_id--status', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PATCHapi-v1-tasks--task_tsk_id--status"
+                    onclick="tryItOut('PATCHapi-v1-tasks--task_tsk_id--status');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PATCHapi-v1-tasks--task_tsk_id--status"
+                    onclick="cancelTryOut('PATCHapi-v1-tasks--task_tsk_id--status');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PATCHapi-v1-tasks--task_tsk_id--status"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-purple">PATCH</small>
+            <b><code>api/v1/tasks/{task_tsk_id}/status</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PATCHapi-v1-tasks--task_tsk_id--status"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PATCHapi-v1-tasks--task_tsk_id--status"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>task_tsk_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="task_tsk_id"                data-endpoint="PATCHapi-v1-tasks--task_tsk_id--status"
+               value="architecto"
+               data-component="url">
+    <br>
+<p>The ID of the task tsk. Example: <code>architecto</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="status"                data-endpoint="PATCHapi-v1-tasks--task_tsk_id--status"
+               value="done"
+               data-component="body">
+    <br>
+<p>todo, doing ou done. Example: <code>done</code></p>
         </div>
         </form>
 
