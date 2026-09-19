@@ -1,7 +1,7 @@
 {
     "version": 1,
-    "project": "laravel-modular-template",
-    "current_release": "v0.0.1",
+    "project": "campusos",
+    "current_release": "v0.1.0",
     "last_sync": {
         "at": "2026-07-07",
         "by": "claude-opus-4-8",
@@ -42,6 +42,23 @@
             "touches": [
                 "docs/reports/SISTEMA.md",
                 "CLAUDE.md"
+            ]
+        },
+        {
+            "id": "v0.1.0/feat_fundacao_catalogo_e_acesso",
+            "file": "docs/reports/v0.1.0/feat_fundacao_catalogo_e_acesso.md",
+            "title": "Fundação, catálogo acadêmico e acesso (B0+B1+B2 + docs de API + console)",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
+            "synced_at": null,
+            "note": "Report escrito retroativamente — as entregas foram feitas sem ele.",
+            "touches": [
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md",
+                "docs/arquitetura/BANCO.md",
+                "docs/arquitetura/MODULOS.md",
+                "docs/dominio/",
+                "docs/README.md"
             ]
         }
     ]
