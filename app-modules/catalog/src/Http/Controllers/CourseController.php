@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace CampusOs\Catalog\Http\Controllers;
 
 use CampusOs\Catalog\Enums\CurriculumStatus;
+use CampusOs\Catalog\Enums\TermStatus;
 use CampusOs\Catalog\Http\Resources\CourseResource;
 use CampusOs\Catalog\Http\Resources\CurriculumResource;
 use CampusOs\Catalog\Models\Course;
+use CampusOs\Catalog\Models\Offering;
+use CampusOs\Catalog\Models\Term;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
@@ -51,11 +55,21 @@ final class CourseController
      * **ortogonal** e por isso `extension_counts_in_total` é `false` — somá-las
      * inventaria horas que o aluno não precisa cursar.
      *
+     * `terms[].subjects[].available_this_term` só existe pras OPTATIVAS: nem
+     * toda optativa cadastrada roda todo semestre (há rotação), e
+     * "disponível" é literalmente "tem `offerings` para ela no termo
+     * consultado" — sem `term_id`, cai no termo `current` da instituição; sem
+     * termo corrente nenhum configurado, o campo some (`null`) em vez de
+     * mentir "indisponível". As disciplinas OBRIGATÓRIAS nunca ganham este
+     * campo — a matriz inteira continua aparecendo, nunca filtrada.
+     *
      * @urlParam course string required O id do curso. Example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
+     *
+     * @queryParam term_id string O termo pra checar disponibilidade de optativa. Omitido, usa o termo `current` da instituição. Example: 01a0b860-2f64-70fb-8c67-f15096cdb2de
      *
      * @response 404 scenario="curso sem matriz ativa" {"message":"Curso não tem matriz ativa."}
      */
-    public function curriculum(Course $course): CurriculumResource
+    public function curriculum(Request $request, Course $course): CurriculumResource
     {
         $curriculum = $course->curricula()
             ->where('cur_status', CurriculumStatus::Active)
@@ -69,6 +83,16 @@ final class CourseController
             ])
             ->firstOrFail();
 
-        return new CurriculumResource($curriculum);
+        $resource = new CurriculumResource($curriculum);
+
+        $termId = $request->query('term_id') ?? Term::query()->where('trm_status', TermStatus::Current)->value('trm_id');
+
+        if ($termId !== null) {
+            $resource->withAvailability(
+                Offering::query()->where('term_trm_id', $termId)->pluck('subject_sbj_id')
+            );
+        }
+
+        return $resource;
     }
 }

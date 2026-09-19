@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace CampusOs\Catalog\Http\Resources;
 
+use CampusOs\Catalog\Enums\SubjectNature;
 use CampusOs\Catalog\Models\Curriculum;
 use CampusOs\Catalog\Models\CurriculumSubject;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 /**
  * A matriz com as disciplinas agrupadas por período — o formato que a tela de
@@ -17,6 +19,26 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 final class CurriculumResource extends JsonResource
 {
+    /** @var ?Collection<int, string> subject_sbj_id de quem tem `offerings` no termo consultado */
+    private ?Collection $availableSubjectIds = null;
+
+    /**
+     * Optativa não é sempre oferecida — existe rotação, e "disponível este
+     * semestre" É literalmente "tem `offerings` para esta disciplina neste
+     * termo": zero tabela nova, zero flag pra alguém esquecer de manter em
+     * dia. `null` (não chamado) = pergunta não feita, nenhum campo aparece —
+     * a matriz inteira nunca é FILTRADA por isto, só anotada (o
+     * `matriz_curricular` do copiloto MCP depende da estrutura completa).
+     *
+     * @param  Collection<int, string>  $availableSubjectIds
+     */
+    public function withAvailability(Collection $availableSubjectIds): static
+    {
+        $this->availableSubjectIds = $availableSubjectIds;
+
+        return $this;
+    }
+
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
@@ -83,6 +105,9 @@ final class CurriculumResource extends JsonResource
                         'hours' => $cs->subject->sbj_hours,
                         'extension_hours' => $cs->subject->sbj_extension_hours,
                         'elective_group' => $cs->electiveGroup?->elg_code,
+                        'available_this_term' => $cs->cbs_nature === SubjectNature::Elective && $this->availableSubjectIds !== null
+                            ? $this->availableSubjectIds->contains($cs->subject_sbj_id)
+                            : null,
                         'prerequisites' => $cs->prerequisites
                             ->map(fn ($p): array => [
                                 'type' => $p->prq_type->value,

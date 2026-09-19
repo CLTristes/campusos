@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use CampusOs\Catalog\Database\Seeders\MatrizUtfprSeeder;
 use CampusOs\Catalog\Models\Course;
+use CampusOs\Catalog\Models\CurriculumSubject;
+use CampusOs\Catalog\Models\Offering;
+use CampusOs\Catalog\Models\Term;
 use CampusOs\Tenancy\Models\Campus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -79,6 +82,48 @@ it('expõe o conjunto de optativas com a CHS por período', function () {
         ->assertJsonPath('data.elective_groups.0.code', '941')
         ->assertJsonPath('data.elective_groups.0.required_hours', 210)
         ->assertJsonPath('data.elective_groups.0.weekly_hours_per_term', 3.5);
+});
+
+it('optativa sem oferta no termo corrente vem available_this_term=false; obrigatória nunca ganha o campo', function () {
+    $course = Course::query()->where('crs_code', '25')->firstOrFail();
+    // MatrizUtfprSeeder já semeia um termo `current` — reaproveita em vez de
+    // criar outro (a coluna é única por ano+período na instituição).
+    $termoAtual = Term::query()->where('trm_status', 'current')->firstOrFail();
+
+    $optativa = CurriculumSubject::query()->where('cbs_nature', 'elective')->with('subject')->firstOrFail();
+    Offering::factory()->create([
+        'subject_sbj_id' => $optativa->subject_sbj_id,
+        'term_trm_id' => $termoAtual->trm_id,
+        'campus_cps_id' => Campus::query()->where('cps_code', 'FB')->value('cps_id'),
+    ]);
+
+    $r = $this->getJson("/api/v1/courses/{$course->crs_id}/curriculum", $this->headers)->assertOk();
+
+    $subjects = collect($r->json('data.terms'))->pluck('subjects')->flatten(1);
+    $comOferta = $subjects->firstWhere('code', $optativa->subject->sbj_code);
+    $semOferta = $subjects->first(fn ($s) => $s['nature'] === 'elective' && $s['code'] !== $optativa->subject->sbj_code);
+    $obrigatoria = $subjects->firstWhere('nature', 'mandatory');
+
+    expect($comOferta['available_this_term'])->toBeTrue()
+        ->and($semOferta['available_this_term'])->toBeFalse()
+        ->and($obrigatoria['available_this_term'])->toBeNull();
+});
+
+it('term_id explícito na query sobrepõe o termo current', function () {
+    $course = Course::query()->where('crs_code', '25')->firstOrFail();
+    $outroTermo = Term::factory()->create(['trm_year' => 2099, 'trm_period' => 1]);
+
+    $optativa = CurriculumSubject::query()->where('cbs_nature', 'elective')->with('subject')->firstOrFail();
+    Offering::factory()->create([
+        'subject_sbj_id' => $optativa->subject_sbj_id,
+        'term_trm_id' => $outroTermo->trm_id,
+        'campus_cps_id' => Campus::query()->where('cps_code', 'FB')->value('cps_id'),
+    ]);
+
+    $r = $this->getJson("/api/v1/courses/{$course->crs_id}/curriculum?term_id={$outroTermo->trm_id}", $this->headers)->assertOk();
+
+    $subjects = collect($r->json('data.terms'))->pluck('subjects')->flatten(1);
+    expect($subjects->firstWhere('code', $optativa->subject->sbj_code)['available_this_term'])->toBeTrue();
 });
 
 it('sem tenant na borda, a leitura do catálogo é recusada', function () {

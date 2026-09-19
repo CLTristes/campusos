@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Mcp\Tools;
 
 use App\Mcp\Tools\Concerns\ResolvesRegistration;
+use CampusOs\Catalog\Enums\TermStatus;
 use CampusOs\Catalog\Http\Resources\CurriculumResource;
+use CampusOs\Catalog\Models\Offering;
+use CampusOs\Catalog\Models\Term;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -36,7 +39,21 @@ final class MatrizCurricularTool extends Tool
             ->with(['electiveGroups', 'complementaryCategories', 'curriculumSubjects.subject', 'curriculumSubjects.electiveGroup', 'curriculumSubjects.prerequisites.required.subject'])
             ->firstOrFail();
 
-        return Response::structured(['data' => CurriculumResource::make($curriculum)->resolve()]);
+        $resource = CurriculumResource::make($curriculum);
+
+        // Sempre o termo `current` — o copiloto fala com o aluno sobre AGORA,
+        // nunca aceita um term_id arbitrário do modelo de IA (mesmo raciocínio
+        // de disciplinas_liberadas/minha_progressao: nada de parâmetro que
+        // deixe a IA escolher de qual termo falar).
+        $currentTermId = Term::query()->where('trm_status', TermStatus::Current)->value('trm_id');
+
+        if ($currentTermId !== null) {
+            $resource->withAvailability(
+                Offering::query()->where('term_trm_id', $currentTermId)->pluck('subject_sbj_id')
+            );
+        }
+
+        return Response::structured(['data' => $resource->resolve()]);
     }
 
     /** @return array<string, mixed> */
