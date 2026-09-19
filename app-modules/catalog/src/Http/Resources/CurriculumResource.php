@@ -47,6 +47,17 @@ final class CurriculumResource extends JsonResource
                 'max_weekly_deficit' => $this->cur_max_weekly_deficit,
             ],
 
+            // B7: o teto por categoria de atividade complementar. Puramente
+            // informativo — não entra em `workload` (ver
+            // docs/dominio/HORAS_COMPLEMENTARES.md).
+            'complementary_categories' => $this->whenLoaded('complementaryCategories', fn () => $this->complementaryCategories
+                ->map(fn ($c): array => [
+                    'id' => $c->ccg_id,
+                    'name' => $c->ccg_name,
+                    'max_hours' => $c->ccg_max_hours,
+                    'conversion_note' => $c->ccg_conversion_note,
+                ])->values()),
+
             'elective_groups' => $this->whenLoaded('electiveGroups', fn () => $this->electiveGroups
                 ->map(fn ($g): array => [
                     'code' => $g->elg_code,

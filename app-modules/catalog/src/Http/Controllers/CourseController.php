@@ -62,6 +62,7 @@ final class CourseController
             ->orderByDesc('cur_effective_from')
             ->with([
                 'electiveGroups',
+                'complementaryCategories',
                 'curriculumSubjects.subject',
                 'curriculumSubjects.electiveGroup',
                 'curriculumSubjects.prerequisites.required.subject',

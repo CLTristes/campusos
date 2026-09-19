@@ -73,6 +73,12 @@ final class Registration extends Model
         return $this->hasMany(SubjectEnrollment::class, 'registration_reg_id', 'reg_id');
     }
 
+    /** B7 — puramente informativo, nunca soma na progressão (ver ComplementaryHoursReadModel). */
+    public function complementaryActivities(): HasMany
+    {
+        return $this->hasMany(ComplementaryActivity::class, 'registration_reg_id', 'reg_id');
+    }
+
     protected static function newFactory(): RegistrationFactory
     {
         return RegistrationFactory::new();

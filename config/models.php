@@ -32,6 +32,7 @@ return [
     'subject' => CampusOs\Catalog\Models\Subject::class,
     'term' => CampusOs\Catalog\Models\Term::class,
     'offering' => CampusOs\Catalog\Models\Offering::class,
+    'complementary_category' => CampusOs\Catalog\Models\ComplementaryCategory::class,
 
     // journey — o lifeos e o insights leem estes por contrato/config.
     'student' => CampusOs\Journey\Models\Student::class,

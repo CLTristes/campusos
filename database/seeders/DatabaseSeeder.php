@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use CampusOs\Catalog\Database\Seeders\ComplementaryCategorySeeder;
 use CampusOs\Catalog\Database\Seeders\MatrizUtfprSeeder;
 use CampusOs\Core\Tenancy\TenantContext;
 use CampusOs\Tenancy\Enums\UserRole;
@@ -71,6 +72,10 @@ class DatabaseSeeder extends Seeder
             // O catálogo é dado mestre e nasce do documento da matriz — aqui ele
             // é semeado do CSV transcrito, que é a mesma informação.
             $this->call(MatrizUtfprSeeder::class);
+
+            // Fictício até a resolução real do curso — ver
+            // docs/dominio/HORAS_COMPLEMENTARES.md.
+            $this->call(ComplementaryCategorySeeder::class);
 
             $this->command?->info("  Instituição: {$utfpr->ent_name} (UTFPR)");
             $this->command?->info("  Câmpus: {$fb->cps_name} [{$fb->cps_code}]");

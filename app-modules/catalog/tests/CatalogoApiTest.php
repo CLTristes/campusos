@@ -39,6 +39,17 @@ it('devolve a matriz com o total calculado pela fórmula do documento', function
         ->assertJsonPath('data.workload.extension_counts_in_total', false);
 });
 
+it('expõe o teto por categoria de atividade complementar (B7), sem entrar no workload', function () {
+    $this->seed(CampusOs\Catalog\Database\Seeders\ComplementaryCategorySeeder::class);
+    $course = Course::query()->where('crs_code', '25')->firstOrFail();
+
+    $r = $this->getJson("/api/v1/courses/{$course->crs_id}/curriculum", $this->headers)->assertOk();
+
+    expect($r->json('data.complementary_categories'))->toHaveCount(6)
+        ->and(collect($r->json('data.complementary_categories'))->firstWhere('name', 'Participação em eventos')['max_hours'])->toBe(40)
+        ->and($r->json('data.workload'))->not->toHaveKey('complementary_hours');
+});
+
 it('agrupa as disciplinas por período, com os pré-requisitos de cada uma', function () {
     $course = Course::query()->where('crs_code', '25')->firstOrFail();
 

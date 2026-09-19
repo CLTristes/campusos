@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use CampusOs\Journey\Http\Controllers\AcademicDocumentController;
+use CampusOs\Journey\Http\Controllers\ComplementaryActivityController;
 use CampusOs\Journey\Http\Controllers\ProgressController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,4 +25,10 @@ Route::middleware(['api', 'auth:sanctum', 'tenant.user'])
             ->name('me.documents.show');
         Route::post('me/academic-documents/{document}/confirm', [AcademicDocumentController::class, 'confirm'])
             ->name('me.documents.confirm');
+
+        // B7 — horas complementares e certificados.
+        Route::get('me/complementary-activities', [ComplementaryActivityController::class, 'index'])
+            ->name('me.complementary-activities.index');
+        Route::post('me/complementary-activities', [ComplementaryActivityController::class, 'store'])
+            ->name('me.complementary-activities.store');
     });

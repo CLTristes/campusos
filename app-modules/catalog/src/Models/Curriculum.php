@@ -85,6 +85,12 @@ final class Curriculum extends Model
         return $this->hasMany(ElectiveGroup::class, 'curriculum_cur_id', 'cur_id');
     }
 
+    /** Os tetos por categoria de atividade complementar (B7) — dado mestre. */
+    public function complementaryCategories(): HasMany
+    {
+        return $this->hasMany(ComplementaryCategory::class, 'curriculum_cur_id', 'cur_id');
+    }
+
     protected static function newFactory(): CurriculumFactory
     {
         return CurriculumFactory::new();
