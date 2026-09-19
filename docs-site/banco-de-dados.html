@@ -115,6 +115,15 @@
     </div>
   </header>
 
+  <div class="callout warn" style="margin-bottom:1.75rem">
+    <b>Revisado em 19/09 às 02:40, contra os documentos reais do portal da UTFPR.</b>
+    O histórico escolar e o requerimento de matrícula derrubaram três premissas desta página, todas já corrigidas nos cards abaixo:
+    as faixas de hora <b>não são cinco somáveis</b> (são duas + uma ortogonal); <b>CHEXT vive dentro</b> da carga das disciplinas,
+    não ao lado; e o <b>período do aluno é calculado</b> por déficit de carga horária semanal, não contado a partir do ingresso.
+    A estrutura completa dos dois documentos — colunas, vocabulário de situação, quadros de resumo e a grade de horários —
+    está em <code>docs/dominio/DOCUMENTOS_ACADEMICOS.md</code>, que <b>vence esta página</b> onde os dois divergirem.
+  </div>
+
   <div class="legend">
     <div class="legend-item"><span class="status-pill mvp">⚑ MVP · hoje</span><p>Precisa existir até as 16:00. Sem ela a demo não fecha.</p></div>
     <div class="legend-item"><span class="status-pill stretch">◎ esticada</span><p>Entra se sobrar tempo. Melhora o pitch, não sustenta a demo.</p></div>
@@ -401,22 +410,27 @@ flowchart LR
           <li><span class="key-tag uk">UK</span><code>cur_code</code><span class="type">string — "2023/1", por curso</span></li>
           <li><span class="key-tag"></span><code>cur_effective_from</code><span class="type">date</span></li>
           <li><span class="key-tag"></span><code>cur_is_active</code><span class="type">boolean</span></li>
-          <li><span class="key-tag"></span><code>cur_mandatory_hours</code><span class="type">integer</span></li>
-          <li><span class="key-tag"></span><code>cur_elective_hours</code><span class="type">integer</span></li>
-          <li><span class="key-tag"></span><code>cur_complementary_hours</code><span class="type">integer</span></li>
-          <li><span class="key-tag"></span><code>cur_internship_hours</code><span class="type">integer</span></li>
-          <li><span class="key-tag"></span><code>cur_capstone_hours</code><span class="type">integer</span></li>
-          <li><span class="key-tag"></span><code>cur_expected_terms</code><span class="type">smallint</span></li>
+          <li><span class="key-tag"></span><code>cur_mandatory_hours</code><span class="type">integer — 2.730 na UTFPR</span></li>
+          <li><span class="key-tag"></span><code>cur_elective_hours</code><span class="type">integer — 210</span></li>
+          <li><span class="key-tag"></span><code>cur_extension_hours</code><span class="type">integer — 300, ortogonal</span></li>
+          <li><span class="key-tag"></span><code>cur_expected_terms</code><span class="type">smallint — 8</span></li>
           <li><span class="key-tag"></span><code>cur_max_terms</code><span class="type">smallint</span></li>
+          <li><span class="key-tag"></span><code>cur_max_term_hours</code><span class="type">integer — 390/semestre</span></li>
+          <li><span class="key-tag"></span><code>cur_max_weekly_deficit</code><span class="type">smallint — 16 CHS</span></li>
           <li><span class="key-tag"></span><code>cur_created_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>cur_updated_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>cur_deleted_at</code><span class="type">timestamp nullable</span></li>
         </ul>
         <div class="tcard-note">
-          <b>A tabela que define o que "formar" significa.</b> As cinco colunas de hora são as <b>regras de integralização</b> viradas
-          dado — é delas que sai a barra de progresso inteira, e é por isso que ela funciona para qualquer curso sem uma linha de
-          código nova. <b>Não existe <code>cur_total_hours</code></b> de propósito: total é a soma das cinco, e duas fontes para o mesmo
-          número sempre acabam discordando. <code>cur_max_terms</code> é o prazo de integralização — alimenta o alerta de jubilamento.
+          <b>A tabela que define o que "formar" significa.</b> As colunas de hora são as <b>regras de integralização</b> viradas dado —
+          é delas que sai a barra de progresso inteira, e é por isso que ela funciona para qualquer curso sem uma linha de código nova.
+          <b>Corrigido em 19/09 contra o histórico real:</b> não são cinco faixas somáveis. São <b>duas</b> que somam o total
+          (2.730 + 210 = 2.940 h) e <b>uma ortogonal</b>, a extensionista (300 h), que vive <i>dentro</i> das outras e é verificada em
+          paralelo — somá-la daria 3.240 h e inventaria 300 horas que o aluno não precisa cursar. Estágio, TCC e atividades
+          complementares <b>não são faixas</b>: são disciplinas obrigatórias da matriz (<code>EST501</code>, <code>TCC704</code>/<code>TCC804</code>,
+          <code>ATV001</code>). <b>Não existe <code>cur_total_hours</code></b> de propósito: total é a soma das duas primeiras, e duas fontes para
+          o mesmo número sempre acabam discordando. <code>cur_max_weekly_deficit</code> (16 CHS) é o que decide se o aluno avança de período — ver
+          <a href="#">DOCUMENTOS_ACADEMICOS.md §3</a>. <code>cur_max_terms</code> é o prazo de integralização — alimenta o alerta de jubilamento.
           Matriz é <b>versionada</b> (<code>cur_code</code> + <code>cur_effective_from</code>) porque um aluno de 2021 se forma pela matriz de 2021,
           não pela vigente — ignorar isso é o erro clássico de sistema acadêmico.
         </div>
@@ -429,7 +443,9 @@ flowchart LR
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag uk">UK</span><code>sbj_code</code><span class="type">string — "ES42B", por entity</span></li>
           <li><span class="key-tag"></span><code>sbj_name</code><span class="type">string</span></li>
-          <li><span class="key-tag"></span><code>sbj_hours</code><span class="type">integer</span></li>
+          <li><span class="key-tag"></span><code>sbj_weekly_hours</code><span class="type">smallint — CHS</span></li>
+          <li><span class="key-tag"></span><code>sbj_hours</code><span class="type">integer — CHT</span></li>
+          <li><span class="key-tag"></span><code>sbj_extension_hours</code><span class="type">integer — CHEXT</span></li>
           <li><span class="key-tag"></span><code>sbj_credits</code><span class="type">smallint nullable</span></li>
           <li><span class="key-tag"></span><code>sbj_syllabus</code><span class="type">text nullable</span></li>
           <li><span class="key-tag"></span><code>sbj_created_at</code><span class="type">timestamp</span></li>
@@ -440,6 +456,9 @@ flowchart LR
           Global na instituição, <b>não por curso</b> — é o que faz a nota do veterano de Engenharia aparecer pro calouro de Química
           que cursa a mesma Cálculo 1. Se <code>subjects</code> fosse por curso, o desafio 5.2 perderia metade do alcance
           de graça, e ninguém perceberia até a demo. <b>Esta é a tabela na qual o acervo se pendura</b> (ver <code>notes</code>).
+          <b>Três colunas de hora, não uma</b> (corrigido em 19/09 contra o documento real): <b>CHS</b> é a carga
+          <i>semanal</i> — é dela, e só dela, que sai o cálculo do período em que o aluno está; <b>CHT</b> é o total;
+          <b>CHEXT</b> é a parcela extensionista contida no CHT, nunca somada a ele.
         </div>
       </article>
 
@@ -592,6 +611,7 @@ flowchart LR
           <li><span class="key-tag">FK</span><code>entry_term_trm_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag uk">UK</span><code>reg_number</code><span class="type">string — o RA, por entity</span></li>
           <li><span class="key-tag"></span><code>reg_status</code><span class="type">enum — active | locked | graduated | dismissed</span></li>
+          <li><span class="key-tag"></span><code>reg_number</code><span class="type">o RA — "2567857"</span></li>
           <li><span class="key-tag"></span><code>reg_graduated_at</code><span class="type">date nullable</span></li>
           <li><span class="key-tag"></span><code>reg_created_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>reg_updated_at</code><span class="type">timestamp</span></li>
@@ -615,7 +635,8 @@ flowchart LR
           <li><span class="key-tag">FK</span><code>subject_sbj_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>term_trm_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>offering_ofr_id</code><span class="type">uuid nullable</span></li>
-          <li><span class="key-tag"></span><code>sen_status</code><span class="type">enum — 6 valores</span></li>
+          <li><span class="key-tag"></span><code>sen_status</code><span class="type">enum — 10 valores reais</span></li>
+          <li><span class="key-tag"></span><code>sen_class_type</code><span class="type">enum — R | F | E | D | S | I</span></li>
           <li><span class="key-tag"></span><code>sen_grade</code><span class="type">decimal(5,2) nullable</span></li>
           <li><span class="key-tag"></span><code>sen_attendance</code><span class="type">smallint nullable (%)</span></li>
           <li><span class="key-tag"></span><code>sen_hours_earned</code><span class="type">integer</span></li>
@@ -627,9 +648,12 @@ flowchart LR
         </ul>
         <div class="tcard-note">
           <b>A tabela mais importante do sistema</b> — dela saem as duas coisas: a progressão (5.1) e quem tem direito de ver o quê (5.2).
-          <code>sen_status</code>: <code>enrolled</code> · <code>approved</code> · <code>failed_grade</code> ·
-          <code>failed_absence</code> · <code>withdrawn</code> · <code>exempted</code>. Separar reprovação por nota de reprovação por falta
-          não é preciosismo: são causas diferentes, e a coordenação trata cada uma de um jeito.
+          <b>Corrigido em 19/09:</b> o vocabulário não é inventado, é o que o histórico real imprime — <b>10 valores</b>, todos observados:
+          <code>enrolled</code> · <code>approved</code> · <code>approved_exam</code> (exame de suficiência, com tabela própria no documento) ·
+          <code>credited</code> (crédito consignado por <b>mudança de matriz</b>) · <code>exempted</code> (dispensa/ENADE) ·
+          <code>failed_grade</code> · <code>failed_absence</code> · <code>failed_both</code> · <code>withdrawn</code> · <code>cancelled</code>.
+          Separar reprovação por nota de reprovação por falta não é preciosismo: são causas diferentes, e a coordenação trata cada uma de um jeito.
+          <code>credited</code> é a prova de que o congelamento da matriz não é teórico — o aluno do documento real trocou de matriz e carregou equivalências.
           <code>offering_ofr_id</code> é <b>nullable</b> porque o histórico importado traz disciplinas de 2019 cuja turma ninguém cadastrou —
           sem a turma a progressão funciona igual, só o "meus colegas daquele semestre" não. A UK impede matricular duas vezes na mesma
           disciplina no mesmo semestre, mas <b>permite</b> cursar de novo em semestre diferente: é assim que reprovação vira a linha extra.

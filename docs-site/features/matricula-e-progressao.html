@@ -70,6 +70,14 @@
     </div>
   </header>
 
+  <div class="callout warn">
+    <b>Revisado em 19/09 às 02:45, contra o histórico e o requerimento reais da UTFPR.</b>
+    As faixas de hora, o vocabulário de situação e o cálculo do período mudaram — a estrutura completa dos dois documentos
+    está em <code>docs/dominio/DOCUMENTOS_ACADEMICOS.md</code>, que <b>vence esta página</b> onde os dois divergirem.
+    Uma pendência nova e importante: <b>o histórico não traz pré-requisito nenhum</b>, então as Fases 5 e 6 desta página
+    dependem de um segundo documento ou de cadastro manual.
+  </div>
+
   <div class="callout grifo view-business">
     <b>A ideia em uma frase:</b> o sistema não pergunta ao aluno o que ele já cursou — ele lê o documento que a universidade
     já emitiu. Todo o resto do desafio 5.1 é consequência aritmética disso.
@@ -391,32 +399,26 @@ final class AcademicDocument implements StructuredOutputModel
 
       <div class="progress-demo">
         <div class="pg-title">
-          <h4>Engenharia de Software · matriz 2023/1</h4>
-          <span>2.860 / 4.200 h · 68%</span>
+          <h4>Sistemas de Informação · matriz 45 · Câmpus Francisco Beltrão</h4>
+          <span>2.415 / 2.940 h · 82%</span>
         </div>
         <div class="pg-row">
-          <div class="pg-lbl"><span>Obrigatórias</span><b>2.420 / 3.000 h</b></div>
-          <div class="pg-bar"><div class="pg-fill ok" style="width:81%"></div></div>
+          <div class="pg-lbl"><span>Obrigatórias</span><b>2.325 / 2.730 h</b></div>
+          <div class="pg-bar"><div class="pg-fill ok" style="width:85%"></div></div>
         </div>
         <div class="pg-row">
-          <div class="pg-lbl"><span>Optativas</span><b>240 / 360 h</b></div>
-          <div class="pg-bar"><div class="pg-fill mid" style="width:67%"></div></div>
+          <div class="pg-lbl"><span>Optativas</span><b>90 / 210 h</b></div>
+          <div class="pg-bar"><div class="pg-fill low" style="width:43%"></div></div>
         </div>
         <div class="pg-row">
-          <div class="pg-lbl"><span>Complementares</span><b>120 / 240 h</b></div>
-          <div class="pg-bar"><div class="pg-fill mid" style="width:50%"></div></div>
-        </div>
-        <div class="pg-row">
-          <div class="pg-lbl"><span>Estágio obrigatório</span><b>0 / 400 h</b></div>
-          <div class="pg-bar"><div class="pg-fill low" style="width:0%"></div></div>
-        </div>
-        <div class="pg-row">
-          <div class="pg-lbl"><span>TCC</span><b>80 / 200 h</b></div>
-          <div class="pg-bar"><div class="pg-fill low" style="width:40%"></div></div>
+          <div class="pg-lbl"><span>Extensionista (CHEXT) · <i>dentro das acima</i></span><b>180 / 300 h</b></div>
+          <div class="pg-bar"><div class="pg-fill mid" style="width:60%"></div></div>
         </div>
       </div>
       <p style="font-size:0.86rem;color:var(--ink-faint);max-width:70ch;">
-        Um aluno "68% formado" com <b>zero</b> das 400 horas de estágio. O número consolidado esconde a verdade; as cinco faixas a contam.
+        <b>Números reais</b>, do histórico de um aluno de 8º período da UTFPR. Um aluno "82% formado" que ainda precisa de
+        <b>120 h de optativa</b> e <b>120 h de extensão</b> — o consolidado esconde as duas coisas que de fato travam a formatura.
+        Repare na terceira faixa: ela é <b>ortogonal</b>, mora dentro das duas de cima, e por isso não entra no total.
         Esta é a tela da demo — dê a ela o dobro do capricho das outras.
       </p>
 
@@ -431,23 +433,25 @@ final class AcademicDocument implements StructuredOutputModel
     <div class="view-code">
       <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/progress</span><span class="status-pill mvp">⚑ B3 · o endpoint mais importante</span></div>
       <pre><code>{
-  "registration": { "number": "2043210", "course": "Engenharia de Software",
-                    "curriculum": "2023/1", "entry_term": "2023/1",
-                    "current_term": 6, "status": "active" },
-  "overall": { "completed_hours": 2860, "required_hours": 4200,
-               "in_progress_hours": 300, "percentage": 68.1 },
+  "registration": { "number": "2567857", "course": "Sist. Informação",
+                    "curriculum": "45 - Sistemas De Informação 02",
+                    "entry_term": "2023/1", "current_term": 8,
+                    "status": "active", "campus": "Francisco Beltrão" },
+  "overall": { "completed_hours": 2415, "required_hours": 2940,
+               "in_progress_hours": 180, "percentage": 82.1 },
   "tracks": [
-    { "kind": "mandatory",     "completed": 2420, "required": 3000, "in_progress": 300 },
-    { "kind": "elective",      "completed":  240, "required":  360, "in_progress": 0 },
-    { "kind": "complementary", "completed":  120, "required":  240, "in_progress": 0 },
-    { "kind": "internship",    "completed":    0, "required":  400, "in_progress": 0 },
-    { "kind": "capstone",      "completed":   80, "required":  200, "in_progress": 0 }
+    { "kind": "mandatory", "completed": 2325, "required": 2730, "in_progress": 180 },
+    { "kind": "elective",  "completed":   90, "required":  210, "in_progress": 0 }
   ],
-  "pending_subjects": [ { "code": "ES52C", "name": "...", "term": 7, "hours": 60,
-                          "nature": "mandatory", "blocked_by": [] } ],
-  "forecast": { "avg_hours_per_term": 402, "remaining_terms": 4,
-                "expected_graduation": "2028/2",
-                "terms_until_deadline": 8, "at_risk": false }
+  "extension": { "completed": 180, "required": 300, "orthogonal": true,
+                 "from_subjects": 180, "from_cce": 0 },
+  "pending_subjects": [ { "code": "MAT032", "name": "Tópicos De Pesquisa Operacional",
+                          "term": 6, "hours": 30, "weekly_hours": 2,
+                          "nature": "mandatory", "is_dependency": true,
+                          "blocked_by": [] } ],
+  "forecast": { "weekly_deficit": 21.0, "max_weekly_deficit": 16,
+                "advances_term": false, "expected_graduation": "2026/2",
+                "terms_until_deadline": 6, "at_risk": false }
 }</code></pre>
       <div class="code-path"><span>app-modules/journey/src/ReadModels/ProgressReadModel.php</span></div>
       <pre><code>// Calculado, nunca armazenado. Um percentual em coluna fica velho no
