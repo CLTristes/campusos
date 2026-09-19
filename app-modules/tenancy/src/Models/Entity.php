@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $ent_id
  * @property string $ent_name
  * @property ?string $ent_email
+ * @property ?string $ent_email_domain domínio que autoriza o cadastro livre do aluno
  */
 #[ObservedBy([EntityObserver::class])]
 final class Entity extends Model

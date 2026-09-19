@@ -30,6 +30,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $usr_email
  * @property UserRole $usr_role
  * @property ?string $usr_registration_number
+ * @property ?\Illuminate\Support\Carbon $usr_email_verified_at
  */
 #[ObservedBy([UserObserver::class])]
 final class User extends Authenticatable implements FilamentUser, HasName
@@ -57,7 +58,7 @@ final class User extends Authenticatable implements FilamentUser, HasName
     protected $guarded = [];
 
     /** Fora de toda serialização — o observer trata o diff de auditoria à parte. */
-    protected $hidden = ['usr_password', 'remember_token'];
+    protected $hidden = ['usr_password', 'remember_token', 'usr_verification_code'];
 
     /** A coluna de senha segue o prefixo da tabela, não o 'password' do framework. */
     public function getAuthPasswordName(): string
@@ -106,6 +107,9 @@ final class User extends Authenticatable implements FilamentUser, HasName
             'usr_role' => UserRole::class,
             'usr_password' => 'hashed',
             'usr_email_verified_at' => 'datetime',
+            // Mesmo tratamento da senha: nunca em claro no banco.
+            'usr_verification_code' => 'hashed',
+            'usr_verification_code_expires_at' => 'datetime',
             'usr_enabled_modules' => 'array',
         ];
     }

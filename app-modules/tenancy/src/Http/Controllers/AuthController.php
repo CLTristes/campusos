@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace CampusOs\Tenancy\Http\Controllers;
 
 use CampusOs\Tenancy\Actions\LoginAction;
+use CampusOs\Tenancy\Actions\ResendVerificationCodeAction;
+use CampusOs\Tenancy\Actions\SignupAction;
+use CampusOs\Tenancy\Actions\VerifyEmailAction;
 use CampusOs\Tenancy\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +21,76 @@ use Illuminate\Http\Request;
  */
 final class AuthController
 {
+    /**
+     * Cadastrar (aluno)
+     *
+     * Cadastro livre — sem escolher universidade numa lista. A instituição é
+     * resolvida pelo **domínio do e-mail**; sem um domínio habilitado para
+     * aquele endereço, o cadastro é recusado. Devolve o token **imediatamente**
+     * (acesso já liberado) e dispara um e-mail com um código de 6 dígitos para
+     * confirmar o endereço — que não bloqueia nada, é só a camada de segurança.
+     *
+     * @unauthenticated
+     *
+     * @bodyParam name string required Nome completo. Example: Felipe Kurt Pohling
+     * @bodyParam email string required E-mail institucional do aluno. Example: aluno@alunos.utfpr.edu.br
+     * @bodyParam password string required Mínimo 8 caracteres. Example: senha-forte-123
+     * @bodyParam password_confirmation string required Repita a senha. Example: senha-forte-123
+     * @bodyParam device string Rótulo do token. Example: iphone-felipe
+     *
+     * @response 201 scenario="cadastrado" {"data":{"id":"01a0…","name":"Felipe Kurt Pohling","email":"aluno@alunos.utfpr.edu.br","role":"student","email_verified":false},"token":"1|abc…"}
+     * @response 422 scenario="domínio não habilitado" {"message":"Use seu e-mail institucional — este domínio não está habilitado para cadastro.","errors":{"email":["Use seu e-mail institucional — este domínio não está habilitado para cadastro."]}}
+     */
+    public function signup(Request $request, SignupAction $action): JsonResponse
+    {
+        /** @var array{user: \CampusOs\Tenancy\Models\User, token: string} $result */
+        $result = $action->execute($request->only(['name', 'email', 'password', 'password_confirmation', 'device']));
+
+        return UserResource::make($result['user'])
+            ->additional(['token' => $result['token']])
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    /**
+     * Confirmar e-mail
+     *
+     * Verifica o código de 6 dígitos enviado no cadastro. Não bloqueia acesso —
+     * é uma marca de segurança, não um portão.
+     *
+     * @authenticated
+     *
+     * @bodyParam code string required O código de 6 dígitos recebido por e-mail. Example: 482913
+     *
+     * @response 200 scenario="verificado" {"data":{"id":"01a0…","email_verified":true}}
+     * @response 422 scenario="código inválido" {"message":"Código inválido.","errors":{"code":["Código inválido."]}}
+     */
+    public function verifyEmail(Request $request, VerifyEmailAction $action): UserResource
+    {
+        $user = $action->execute([
+            'user_id' => $request->user()->usr_id,
+            'code' => $request->input('code'),
+        ]);
+
+        return UserResource::make($user);
+    }
+
+    /**
+     * Reenviar código de verificação
+     *
+     * O código anterior pode ter expirado (15 minutos) — gera um novo e reenvia.
+     *
+     * @authenticated
+     *
+     * @response 204 scenario="reenviado" {}
+     */
+    public function resendVerification(Request $request, ResendVerificationCodeAction $action): JsonResponse
+    {
+        $action->execute(['user_id' => $request->user()->usr_id]);
+
+        return response()->json(status: 204);
+    }
+
     /**
      * Entrar
      *

@@ -15,5 +15,5 @@ use CampusOs\Core\Observers\AuditObserver;
 final class UserObserver extends AuditObserver
 {
     /** @var list<string> */
-    protected array $hidden = ['usr_password', 'remember_token'];
+    protected array $hidden = ['usr_password', 'remember_token', 'usr_verification_code'];
 }

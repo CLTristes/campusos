@@ -31,7 +31,12 @@ class DatabaseSeeder extends Seeder
     {
         $utfpr = Entity::query()->firstOrCreate(
             ['ent_name' => 'Universidade Tecnológica Federal do Paraná'],
-            ['ent_email' => 'contato@utfpr.edu.br'],
+            [
+                'ent_email' => 'contato@utfpr.edu.br',
+                // Domínio do e-mail DO ALUNO (não o da coordenação) — é o que
+                // habilita o cadastro livre em SignupAction.
+                'ent_email_domain' => 'alunos.utfpr.edu.br',
+            ],
         );
 
         // CLI não tem sessão HTTP: o contexto de tenant é restaurado à mão

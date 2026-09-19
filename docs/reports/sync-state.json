@@ -1,7 +1,7 @@
 {
     "version": 1,
     "project": "campusos",
-    "current_release": "v0.3.0",
+    "current_release": "v0.4.0",
     "last_sync": {
         "at": "2026-09-19",
         "by": "claude-sonnet-5",
@@ -106,6 +106,18 @@
                 "docs/reports/SISTEMA.md",
                 "CLAUDE.md",
                 "docs-site/features/matricula-e-progressao.html"
+            ]
+        },
+        {
+            "id": "v0.4.0/feat_cadastro_aluno_com_verificacao_de_email",
+            "file": "docs/reports/v0.4.0/feat_cadastro_aluno_com_verificacao_de_email.md",
+            "title": "Cadastro livre do aluno por domínio de e-mail, com verificação por código (acesso imediato)",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
+            "touches": [
+                "docs/dominio/ACESSO.md",
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md"
             ]
         }
     ]

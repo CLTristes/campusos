@@ -19,8 +19,16 @@ Route::middleware('api')->prefix('api/v1')->group(function (): void {
         ->middleware('throttle:6,1')
         ->name('auth.login');
 
+    Route::post('auth/signup', [AuthController::class, 'signup'])
+        ->middleware('throttle:6,1')
+        ->name('auth.signup');
+
     Route::middleware(['auth:sanctum', 'tenant.user'])->group(function (): void {
         Route::get('auth/me', [AuthController::class, 'me'])->name('auth.me');
         Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+        Route::post('auth/verify-email', [AuthController::class, 'verifyEmail'])->name('auth.verify-email');
+        Route::post('auth/verify-email/resend', [AuthController::class, 'resendVerification'])
+            ->middleware('throttle:3,10')
+            ->name('auth.verify-email.resend');
     });
 });

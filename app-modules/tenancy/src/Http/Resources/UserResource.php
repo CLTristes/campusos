@@ -27,6 +27,7 @@ final class UserResource extends JsonResource
             'role' => $this->usr_role->value,
             'role_label' => $this->usr_role->label(),
             'registration_number' => $this->usr_registration_number,
+            'email_verified' => $this->usr_email_verified_at !== null,
             'entity_id' => $this->entity_ent_id,
             'campus' => $this->whenLoaded('campus', fn (): ?array => $this->campus === null ? null : [
                 'id' => $this->campus->cps_id,

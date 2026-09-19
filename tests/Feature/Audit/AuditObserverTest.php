@@ -51,8 +51,8 @@ it('registra o diff real (antes/depois) em updated', function () {
         ->and($audit->aud_after['usr_name'])->toBe('Nome Novo');
 });
 
-it('o hash da senha nunca entra no diff de auditoria', function () {
-    $user = User::factory()->create(['usr_password' => 'senha-secreta']);
+it('o hash da senha e o código de verificação nunca entram no diff de auditoria', function () {
+    $user = User::factory()->create(['usr_password' => 'senha-secreta', 'usr_verification_code' => '482913']);
 
     $trail = AuditLog::query()
         ->where('aud_table', 'users')
@@ -64,7 +64,9 @@ it('o hash da senha nunca entra no diff de auditoria', function () {
     foreach ($trail as $audit) {
         expect($audit->aud_after ?? [])->not->toHaveKey('usr_password')
             ->and($audit->aud_after ?? [])->not->toHaveKey('remember_token')
-            ->and($audit->aud_before ?? [])->not->toHaveKey('usr_password');
+            ->and($audit->aud_after ?? [])->not->toHaveKey('usr_verification_code')
+            ->and($audit->aud_before ?? [])->not->toHaveKey('usr_password')
+            ->and($audit->aud_before ?? [])->not->toHaveKey('usr_verification_code');
     }
 });
 
