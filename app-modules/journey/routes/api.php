@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use CampusOs\Journey\Http\Controllers\AcademicDocumentController;
 use CampusOs\Journey\Http\Controllers\ComplementaryActivityController;
+use CampusOs\Journey\Http\Controllers\EligibilityController;
 use CampusOs\Journey\Http\Controllers\ProgressController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,4 +32,8 @@ Route::middleware(['api', 'auth:sanctum', 'tenant.user'])
             ->name('me.complementary-activities.index');
         Route::post('me/complementary-activities', [ComplementaryActivityController::class, 'store'])
             ->name('me.complementary-activities.store');
+
+        // B8 (esticada 1) — elegibilidade e simulação de reprovação.
+        Route::get('me/next-term', [EligibilityController::class, 'nextTerm'])->name('me.next-term');
+        Route::post('me/simulate', [EligibilityController::class, 'simulate'])->name('me.simulate');
     });
