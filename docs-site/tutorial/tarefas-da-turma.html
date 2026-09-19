@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial 05 · Tarefas da turma · CampusOS</title>
+<meta name="description" content="Uma pessoa cadastra um prazo já na turma, quarenta recebem na própria agenda, e adotar sempre copia — nunca compartilha uma linha só. Requests, respostas e o que mostrar em cada passo.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 1.75rem 5rem; }
+  .page-head { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); }
+  .page-head .kicker { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.85rem; }
+  .page-head h1 { font-size: clamp(1.9rem, 5vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 0.85rem; text-wrap: balance; }
+  .page-head p.lede { max-width: 66ch; color: var(--ink-soft); font-size: 1.02rem; }
+
+  .screen { margin: 2.25rem 0; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; background: var(--surface); }
+  .screen-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.1rem; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .screen-num { font-family: var(--font-mono); font-weight: 700; font-size: 0.75rem; color: #fff; background: var(--ink-faint); width: 1.6rem; height: 1.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .screen-title { font-family: var(--font-serif); font-weight: 600; font-size: 1.1rem; }
+  .screen-body { padding: 1.2rem 1.3rem; }
+  .screen-body p { color: var(--ink-soft); margin: 0 0 0.9rem; font-size: 0.93rem; }
+  .screen-body p:last-child { margin-bottom: 0; }
+
+  .code-block { margin: 0.9rem 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .code-path { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.85rem; background: var(--surface-2); border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); }
+  .code-block pre { margin: 0; padding: 0.9rem 1rem; overflow-x: auto; background: var(--surface); }
+  .code-block code { font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink); white-space: pre; }
+
+  .callout { margin: 1.2rem 0; border: 1px solid var(--border-strong); border-left: 3px solid var(--brand-500); background: var(--brand-50); border-radius: 4px; padding: 0.85rem 1.05rem; font-size: 0.88rem; color: var(--ink-soft); }
+  .callout b { color: var(--ink); }
+  .callout.warn { border-left-color: var(--rust-500); background: var(--rust-50); }
+  .callout.good { border-left-color: var(--leaf-500); background: var(--leaf-50); }
+
+  .tut-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.78rem; }
+  .tut-nav a { text-decoration: none; color: var(--ink-soft); }
+  .tut-nav a:hover { color: var(--brand-700); }
+  .tut-nav .step-count { color: var(--ink-faint); }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 0 1.1rem 4rem; }
+    .page-head { padding: 2.25rem 0 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="brand" href="../index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="../index.html">docs-site</a><span class="sep">/</span>tutorial<span class="sep">/</span>tarefas-da-turma.html</span>
+</header>
+
+<div class="page-head">
+  <div class="wrap">
+    <div class="kicker">tutorial frontend · 05 de 07 · colaboração</div>
+    <h1>Tarefas da turma</h1>
+    <p class="lede">Ao contrário da nota, uma tarefa não nasce sempre privada — cadastrar já com <code>visibility: offering</code> é o próprio ato de compartilhar com a turma. Quem recebe decide se <b>adota</b>: a adoção sempre copia, nunca compartilha a linha original.</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="callout" style="margin: 1.5rem 0 2rem;">
+    <b>Adotar copia, nunca compartilha.</b> Se todo mundo marcasse a mesma linha como feita, o primeiro a concluir concluiria pela turma inteira. Por isso adotar cria uma cópia própria — sempre <code>private</code>, sempre <code>todo</code>.
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">1</span><span class="screen-title">Criar uma tarefa — pessoal ou já compartilhada</span></div>
+    <div class="screen-body">
+      <p>Uma tarefa pessoal (padrão) e uma tarefa da turma são o MESMO endpoint — o que muda é <code>visibility</code> na hora de criar:</p>
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/tasks</div>
+        <pre><code>// request — já cadastrando direto pra turma inteira
+{
+  "title": "Prova 2 — 14/10",
+  "kind": "exam",
+  "due_at": "2026-10-14T23:59:00-03:00",
+  "visibility": "offering",
+  "subject_id": "01a0b8...",
+  "offering_id": "01a0b8..."
+}
+
+// 201 Created
+{
+  "data": {
+    "id": "01a0b8...",
+    "title": "Prova 2 — 14/10",
+    "description_md": null,
+    "status": "todo", "status_label": "A fazer",
+    "kind": "exam", "kind_label": "Prova",
+    "visibility": "offering", "visibility_label": "Minha turma",
+    "due_at": "2026-10-14T23:59:00-03:00",
+    "subject_id": "01a0b8...", "offering_id": "01a0b8...",
+    "origin_task_id": null,
+    "owner": { "id": "01a0b8...", "name": "Um Colega" },
+    "created_at": "2026-09-19T10:00:00+00:00"
+  }
+}
+
+// 422 — pedir "offering" sem informar a turma
+{ "errors": { "offering_id": ["Informe a turma antes de compartilhar a tarefa com ela."] } }</code></pre>
+      </div>
+      <p>Sem <code>visibility</code> no request, a tarefa nasce <code>private</code> — o organizador pessoal do aluno é a mesma tabela.</p>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">2</span><span class="screen-title">Minha agenda</span></div>
+    <div class="screen-body">
+      <p>Pendências próprias mais o que a turma compartilhou nas ofertas em que o aluno está matriculado <b>no termo corrente</b>, ainda não adotado:</p>
+      <div class="code-block">
+        <div class="code-path">GET /api/v1/me/agenda</div>
+        <pre><code>// 200 — ordenado por prazo
+{ "data": [
+  { "id": "01a0b8...", "title": "Ler capítulo 4", "status": "todo",
+    "kind": "reading", "due_at": "2026-09-22T23:59:00-03:00",
+    "origin_task_id": null, "owner": { "id": "01a0b8...", "name": "Você" },
+    "adopted": true },
+  { "id": "01a0b8...", "title": "Prova 2 — 14/10", "status": "todo",
+    "kind": "exam", "due_at": "2026-10-14T23:59:00-03:00",
+    "visibility": "offering", "origin_task_id": null,
+    "owner": { "id": "01a0b8...", "name": "Um Colega" },
+    "adopted": false }
+] }</code></pre>
+      </div>
+      <p>
+        <code>adopted: false</code> é o gatilho pro botão "adotar" na tela — <code>adopted: true</code> marca tanto as tarefas
+        próprias quanto as já adotadas (a partir daí elas são indistinguíveis: viraram sua). Note que o filtro por
+        <b>termo corrente</b> aqui é de propósito — ao contrário do acervo de notas, prazo de turma passada é ruído, não
+        produto.
+      </p>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">3</span><span class="screen-title">Adotar — a cópia é sua a partir daqui</span></div>
+    <div class="screen-body">
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/tasks/{task}/adopt</div>
+        <pre><code>// 200 — a cópia, sempre private/todo, com origin_task_id apontando pra origem
+{ "data": { "id": "01a0b9...", "title": "Prova 2 — 14/10",
+  "visibility": "private", "status": "todo",
+  "origin_task_id": "01a0b8...", "owner": { "id": "01a0b8...", "name": "Você" } } }
+
+// duplo clique — devolve a MESMA cópia, nunca cria uma segunda
+// (mesmo 200, mesmo "id")
+
+// 403 — a tarefa de origem não foi compartilhada (é private de outra pessoa)
+{ "message": "Esta tarefa não foi compartilhada com a turma." }</code></pre>
+      </div>
+      <p>
+        Depois de adotar, a tarefa original SOME da sua agenda como "compartilhada" — o item que aparece agora é a sua cópia,
+        com <code>adopted: true</code>. Não precisa remover nada da lista na mão: uma nova chamada em
+        <code>GET /me/agenda</code> já reflete isso.
+      </p>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">4</span><span class="screen-title">Marcar como feita</span></div>
+    <div class="screen-body">
+      <div class="code-block">
+        <div class="code-path">PATCH /api/v1/tasks/{task}/status</div>
+        <pre><code>{ "status": "done" }
+
+// 200
+{ "data": { "id": "01a0b9...", "status": "done", "status_label": "Concluída" } }
+
+// 403 — só o dono da tarefa muda o status
+{ "message": "Esta tarefa não é sua." }</code></pre>
+      </div>
+      <p>
+        Só funciona na SUA cópia (a original ou a adotada) — quem só recebeu a tarefa na agenda sem adotar recebe 403 ao
+        tentar. É por isso que o botão "adotar" precisa vir antes do botão "marcar como feita" na tela.
+      </p>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <b>Quem cadastrou é um colega, não a coordenação.</b> Mostre sempre <code>owner.name</code> na tarefa da turma —
+    tarefa compartilhada é colaboração, e a interface precisa deixar isso claro. A data continua sendo responsabilidade
+    de cada um: adotar não gera lembrete nenhum automático além do que já existe na agenda.
+  </div>
+
+  <div class="tut-nav">
+    <a href="acervo-do-veterano.html">← acervo do veterano</a>
+    <span class="step-count">05 / 07</span>
+    <a href="horas-e-certificados.html">próximo: horas complementares →</a>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <p><a href="../index.html">← voltar ao mapa do sistema</a> · <a href="../features/acervo-compartilhado.html">parte da feature: O acervo do veterano</a></p>
+</footer>
+
+<script src="../assets/site-chrome.js" defer></script>
+</body>
+</html>
