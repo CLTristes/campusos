@@ -79,7 +79,7 @@ endpoints:
         name: course_crs_id
         description: 'The ID of the course crs.'
         required: true
-        example: 01a0b83e-ba3e-7117-add7-60a85d35e982
+        example: 01a0b856-a519-706d-a77a-8d597f58bc7f
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -97,7 +97,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      course_crs_id: 01a0b83e-ba3e-7117-add7-60a85d35e982
+      course_crs_id: 01a0b856-a519-706d-a77a-8d597f58bc7f
       course: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
     queryParameters: []
     cleanQueryParameters: []

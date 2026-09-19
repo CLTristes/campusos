@@ -8,12 +8,15 @@ use CampusOs\Core\Models\Concerns\Entityable;
 use CampusOs\Tenancy\Database\Factories\UserFactory;
 use CampusOs\Tenancy\Enums\UserRole;
 use CampusOs\Tenancy\Observers\UserObserver;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * Quem entra no sistema. Model de domínio com escopo de tenant e auditoria —
@@ -28,9 +31,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property ?string $usr_registration_number
  */
 #[ObservedBy([UserObserver::class])]
-final class User extends Authenticatable
+final class User extends Authenticatable implements FilamentUser
 {
     use Entityable;
+    use HasApiTokens;
     use HasFactory;
     use HasUuids;
     use SoftDeletes;
@@ -58,6 +62,23 @@ final class User extends Authenticatable
     public function getAuthPasswordName(): string
     {
         return 'usr_password';
+    }
+
+    /**
+     * Quem entra no console de dados. Ferramenta de dev/QA: só coordenação e
+     * gestão da instituição — estudante NUNCA, mesmo sendo um usuário válido
+     * da API. O painel não tem escopo de curso, então quem entra vê a
+     * instituição inteira.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return in_array($this->usr_role, [UserRole::Coordinator, UserRole::InstitutionAdmin], true);
+    }
+
+    /** Nome exibido no canto do painel. */
+    public function getFilamentName(): string
+    {
+        return $this->usr_name;
     }
 
     public function campus(): BelongsTo

@@ -104,7 +104,7 @@
     <div class="eyebrow">hackathon · 14 horas e 15 minutos</div>
     <h1>Plano de ataque</h1>
     <p class="lede">
-      <b style="color:var(--leaf-700)">Atualizado 03:20 — B0, B1 e B2 fechados, cerca de uma hora adiantado.</b><br>
+      <b style="color:var(--leaf-700)">Atualizado 04:05 — B0, B1 e B2 fechados (login Sanctum e console de dados inclusos), cerca de duas horas adiantado.</b><br>
       São <strong>01:45</strong>. A entrega é <strong>hoje às 16:00</strong>. Isso são <strong>14h15</strong> de relógio, das quais
       aproximadamente 13 são de código — o resto é a demo, e a demo não se improvisa.
       Esta página existe por um motivo só: às 05:30 da manhã ninguém decide prioridade direito,
@@ -145,8 +145,9 @@
         <p>A <code>Entity</code> do template passa a significar <b>a instituição de ensino</b>. Não renomeie a tabela: <code>Entityable</code> e <code>EntityScope</code> do core dependem de <code>entity_ent_id</code>, e trocar isso custa uma hora que não existe.</p>
         <ul>
           <li>Migrations: <code>campuses</code>, <code>users</code> (com <code>usr_role</code> e <code>usr_registration_number</code>).</li>
-          <li><code>LoginAction</code> + Sanctum em <code>POST /api/v1/auth/login</code>; middleware <code>tenant.user</code>.</li>
-          <li>Seeder de dev: UTFPR + 1 campus + 1 aluno + 1 coordenador.</li>
+          <li><code>LoginAction</code> + Sanctum em <code>POST /api/v1/auth/login</code>; middleware <code>tenant.user</code>. <b>✅ feito</b> — mais <code>/auth/me</code> e <code>/auth/logout</code>, com <i>rate limit</i> de 6/min e mensagem idêntica para senha errada e e-mail inexistente.</li>
+          <li>Seeder de dev: UTFPR + 1 campus + 1 aluno + 1 coordenador. <b>✅ feito</b></li>
+          <li><b>Extra:</b> console de dados Filament em <code>/data-console</code> — 10 recursos, <code>ResolveTenantFromUser</code> no <code>authMiddleware</code> para o painel não abrir vazio.</li>
         </ul>
         <div class="done-when"><b>Pronto quando:</b> login devolve token e uma rota autenticada responde com o tenant correto no <code>TenantContext</code>.</div>
       </div>

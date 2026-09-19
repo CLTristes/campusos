@@ -2,7 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "cltristes/campusos",
     "type": "project",
-    "description": "CampusOS — gestao da graduacao (progressao, pre-requisitos, horas) e acervo academico compartilhado entre veteranos e calouros. Laravel 12 modular, multi-tenant por instituicao.",
+    "description": "CampusOS \u2014 gestao da graduacao (progressao, pre-requisitos, horas) e acervo academico compartilhado entre veteranos e calouros. Laravel 12 modular, multi-tenant por instituicao.",
     "keywords": [
         "laravel",
         "template",
@@ -12,18 +12,20 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "campus-os/catalog": "*",
+        "campus-os/core": "*",
+        "campus-os/insights": "*",
+        "campus-os/integrations": "*",
+        "campus-os/journey": "*",
+        "campus-os/lifeos": "*",
+        "campus-os/tenancy": "*",
+        "filament/filament": "^5.8",
         "internachi/modular": "^3.0",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.47",
+        "laravel/sanctum": "^4.3",
         "laravel/tinker": "^2.10.1",
-        "predis/predis": "^3.5",
-        "campus-os/core": "*",
-        "campus-os/tenancy": "*",
-        "campus-os/catalog": "*",
-        "campus-os/journey": "*",
-        "campus-os/lifeos": "*",
-        "campus-os/insights": "*",
-        "campus-os/integrations": "*"
+        "predis/predis": "^3.5"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -73,7 +75,8 @@
         "lint:check": "vendor/bin/pint --test",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
