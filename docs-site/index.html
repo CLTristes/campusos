@@ -155,8 +155,8 @@
 <div class="wrap">
 
   <div class="dateline">
-    <span>v0.0.0 · <b>desenho</b> · 0 linhas de código</span>
-    <span>escrito 2026-09-19 01:45 · <span class="clock">entrega hoje 16:00</span></span>
+    <span>v0.2.0 · <b>tenancy + catalog em código</b> · 40 testes verdes</span>
+    <span>atualizado 2026-09-19 03:20 · <span class="clock">entrega hoje 16:00</span></span>
   </div>
 
   <div class="section-rule"><span class="label">O problema</span></div>
@@ -199,7 +199,7 @@
   <div class="statuskey">
     <div>
       <span class="status-pill built">✅ em código</span>
-      <p>Migration, model e teste existem. Enquanto o hackathon não começa a codar, nada tem esta marca.</p>
+      <p>Migration, model, observer, factory e teste existem em <code>main</code>. Hoje: as 12 tabelas de <code>tenancy</code> e <code>catalog</code>.</p>
     </div>
     <div>
       <span class="status-pill mvp">⚑ MVP · hoje</span>
@@ -238,8 +238,8 @@
           <span>
             <span class="card-category">Banco de dados</span>
             <h3 class="card-title">Modelo de dados (DER)</h3>
-            <p class="card-desc">As 24 tabelas do sistema, agrupadas pelos 6 módulos que as possuem — do catálogo acadêmico (curso, matriz, disciplina, pré-requisito, oferta) à camada colaborativa (nota, tarefa, evento) — com colunas, chaves e o porquê de cada decisão de modelagem.</p>
-            <span class="card-tags"><span class="tag">24 tabelas</span><span class="tag">6 módulos</span><span class="tag">ER navegável</span><span class="tag">multi-tenant</span></span>
+            <p class="card-desc">As 25 tabelas do sistema, agrupadas pelos 6 módulos que as possuem — do catálogo acadêmico (curso, matriz, disciplina, pré-requisito, oferta) à camada colaborativa (nota, tarefa, evento) — com colunas, chaves e o porquê de cada decisão de modelagem.</p>
+            <span class="card-tags"><span class="tag">25 tabelas · 12 em código</span><span class="tag">6 módulos</span><span class="tag">ER navegável</span><span class="tag">multi-tenant</span></span>
           </span>
           <span class="card-arrow">abrir →</span>
         </span>
@@ -342,9 +342,9 @@
         <span class="card-body">
           <span>
             <span class="card-category">API</span>
-            <h3 class="card-title">Documentação interativa</h3>
-            <p class="card-desc">Todos os endpoints gerados a partir do código (Scribe), testáveis no navegador. Vale instalar cedo: é o que o colega do front vai abrir em vez de te perguntar no WhatsApp.</p>
-            <span class="card-tags"><span class="tag">/docs/api</span><span class="tag">openapi.yaml</span><span class="tag">◎ esticada</span></span>
+            <h3 class="card-title">Documentação interativa da API</h3>
+            <p class="card-desc">Todos os endpoints gerados a partir das rotas e Controllers <b>reais</b> pelo Scribe, com UI Scalar e botão de testar — é o que o colega do front abre em vez de te perguntar no WhatsApp. Ela não desatualiza sozinha: ou reflete o código, ou o <code>composer docs</code> não rodou.</p>
+            <span class="card-tags"><span class="tag">✅ em código</span><span class="tag">/docs/api</span><span class="tag">openapi.yaml</span><span class="tag">postman.json</span></span>
           </span>
           <span class="card-arrow">abrir →</span>
         </span>

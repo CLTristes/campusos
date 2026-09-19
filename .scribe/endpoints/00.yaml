@@ -1,0 +1,130 @@
+name: 'Catálogo acadêmico'
+description: |-
+
+  Curso, matriz curricular e as disciplinas por período. Dado mestre da
+  instituição: muda por resolução de colegiado, nunca por ação de aluno.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/courses
+    metadata:
+      custom: []
+      groupName: 'Catálogo acadêmico'
+      groupDescription: |-
+
+        Curso, matriz curricular e as disciplinas por período. Dado mestre da
+        instituição: muda por resolução de colegiado, nunca por ação de aluno.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Listar cursos'
+      description: 'Todos os cursos da instituição, com o câmpus de cada um.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":[{"id":"01a0…","code":"25","name":"Bacharelado em Sistemas de Informação","degree":"bachelor","degree_label":"Bacharelado","shift":"evening","shift_label":"Noturno","campus":{"id":"01a0…","code":"FB","name":"Francisco Beltrão"}}]}'
+        headers: []
+        description: UTFPR
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/courses/{course_crs_id}/curriculum'
+    metadata:
+      custom: []
+      groupName: 'Catálogo acadêmico'
+      groupDescription: |-
+
+        Curso, matriz curricular e as disciplinas por período. Dado mestre da
+        instituição: muda por resolução de colegiado, nunca por ação de aluno.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Matriz curricular do curso'
+      description: |-
+        A matriz ATIVA do curso, com as disciplinas agrupadas por período, os
+        pré-requisitos de cada uma e o bloco de cargas horárias.
+
+        `workload.total_hours` é **calculado**, não armazenado:
+        `mandatory + elective + standalone_extension`. As horas extensionistas
+        embutidas nas disciplinas (`extension_hours`) são uma exigência
+        **ortogonal** e por isso `extension_counts_in_total` é `false` — somá-las
+        inventaria horas que o aluno não precisa cursar.
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      course_crs_id:
+        custom: []
+        name: course_crs_id
+        description: 'The ID of the course crs.'
+        required: true
+        example: 01a0b83e-ba3e-7117-add7-60a85d35e982
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      course:
+        custom: []
+        name: course
+        description: 'O id do curso.'
+        required: true
+        example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      course_crs_id: 01a0b83e-ba3e-7117-add7-60a85d35e982
+      course: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: |-
+          {
+              "message": "Informe o header X-Tenant-Id (placeholder de autentica\u00e7\u00e3o do template)."
+          }
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+      -
+        custom: []
+        status: 404
+        content: '{"message":"Curso não tem matriz ativa."}'
+        headers: []
+        description: 'curso sem matriz ativa'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

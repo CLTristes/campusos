@@ -104,6 +104,7 @@
     <div class="eyebrow">hackathon · 14 horas e 15 minutos</div>
     <h1>Plano de ataque</h1>
     <p class="lede">
+      <b style="color:var(--leaf-700)">Atualizado 03:20 — B0, B1 e B2 fechados, cerca de uma hora adiantado.</b><br>
       São <strong>01:45</strong>. A entrega é <strong>hoje às 16:00</strong>. Isso são <strong>14h15</strong> de relógio, das quais
       aproximadamente 13 são de código — o resto é a demo, e a demo não se improvisa.
       Esta página existe por um motivo só: às 05:30 da manhã ninguém decide prioridade direito,
@@ -125,7 +126,7 @@
     <div class="blk critical">
       <div class="blk-time">01:45<small>1h00</small></div>
       <div class="blk-card">
-        <div class="blk-head"><span class="blk-id">B0</span><h3>Fundação — prontuário express</h3></div>
+        <div class="blk-head"><span class="blk-id">B0</span><span class="status-pill built">✅ feito</span><h3>Fundação — prontuário express</h3></div>
         <p>Transformar o template genérico no CampusOS. É o passo que dá vontade de pular e que, pulado, cobra juros a noite inteira.</p>
         <ul>
           <li>Renomear namespace <code>Modules\</code> → <code>CampusOs\</code> (<code>config/app-modules.php</code>, os <code>composer.json</code> de cada módulo, busca-e-troca no código, <code>ArchTest</code>).</li>
@@ -140,7 +141,7 @@
     <div class="blk">
       <div class="blk-time">02:45<small>1h30</small></div>
       <div class="blk-card">
-        <div class="blk-head"><span class="blk-id">B1</span><h3>tenancy — instituição, campus, usuário, login</h3></div>
+        <div class="blk-head"><span class="blk-id">B1</span><span class="status-pill built">✅ feito</span><h3>tenancy — instituição, campus, usuário, login</h3></div>
         <p>A <code>Entity</code> do template passa a significar <b>a instituição de ensino</b>. Não renomeie a tabela: <code>Entityable</code> e <code>EntityScope</code> do core dependem de <code>entity_ent_id</code>, e trocar isso custa uma hora que não existe.</p>
         <ul>
           <li>Migrations: <code>campuses</code>, <code>users</code> (com <code>usr_role</code> e <code>usr_registration_number</code>).</li>
@@ -154,7 +155,7 @@
     <div class="blk critical">
       <div class="blk-time">04:15<small>1h45</small></div>
       <div class="blk-card">
-        <div class="blk-head"><span class="blk-id">B2</span><h3>catalog — o esqueleto acadêmico</h3></div>
+        <div class="blk-head"><span class="blk-id">B2</span><span class="status-pill built">✅ feito</span><h3>catalog — o esqueleto acadêmico</h3></div>
         <p>Curso, matriz, disciplina, pré-requisito, semestre e oferta. <b>Tudo depende disto</b> — é o bloco que não pode atrasar, e o único cujo trabalho pesado não é código, é dado.</p>
         <ul>
           <li>7 migrations + models: <code>courses</code>, <code>curricula</code>, <code>subjects</code>, <code>curriculum_subjects</code>, <code>prerequisites</code>, <code>terms</code>, <code>offerings</code>.</li>

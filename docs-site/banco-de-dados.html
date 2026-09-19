@@ -57,6 +57,7 @@
   .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 1rem; }
 
   .tcard { border: 1px solid var(--border); border-radius: 5px; background: var(--surface); overflow: hidden; }
+  .tcard.built { border-top: 3px solid var(--st-built-line); }
   .tcard.mvp { border-top: 3px solid var(--st-mvp-line); }
   .tcard.stretch { border-top: 3px solid var(--st-stretch-line); }
   .tcard.planned { border-top: 3px dashed var(--st-planned-line); }
@@ -102,13 +103,13 @@
     <div class="eyebrow">CampusOS · modelo de dados</div>
     <h1>Diagrama Entidade‑Relacionamento</h1>
     <p class="lede">
-      <strong>24 tabelas em 6 módulos</strong>, nenhuma ainda em código. Convenções do template modular sem exceção:
+      <strong>25 tabelas em 6 módulos</strong>, <strong>12 delas já em código</strong> (tenancy e catalog completos). Convenções do template modular sem exceção:
       prefixo de 3 letras em toda coluna, PK UUID gerada na aplicação, <code>SoftDeletes</code> em tudo que é transacional,
       FK no formato <code>{tabela_singular}_{pk}</code>, e <code>entity_ent_id</code> em toda tabela com escopo de tenant.
       Cada card traz a <strong>razão</strong> da modelagem — num hackathon, a decisão esquecida às 4 da manhã custa mais que a tabela errada.
     </p>
     <div class="meta-row">
-      <span><b>Código:</b> nenhum ainda</span>
+      <span><b>Código:</b> main @ 5c82b54 — tenancy + catalog</span>
       <span><b>API:</b> /api/v1</span>
       <span><b>Tenant:</b> entities = a instituição</span>
       <span><b>Escrito:</b> 2026-09-19 01:45</span>
@@ -130,7 +131,7 @@
     <div class="legend-item"><span class="status-pill mvp">⚑ MVP · hoje</span><p>Precisa existir até as 16:00. Sem ela a demo não fecha.</p></div>
     <div class="legend-item"><span class="status-pill stretch">◎ esticada</span><p>Entra se sobrar tempo. Melhora o pitch, não sustenta a demo.</p></div>
     <div class="legend-item"><span class="status-pill planned">◇ planejado</span><p>Desenhada aqui, fora do escopo de hoje. Roadmap honesto na apresentação.</p></div>
-    <div class="legend-item"><span class="status-pill built">✅ em código</span><p>Migration, model e teste existem. <b>Nada tem esta marca ainda</b> — vire os pills conforme a noite andar.</p></div>
+    <div class="legend-item"><span class="status-pill built">✅ em código</span><p><b>Nada tem esta marca ainda</b> — vire os pills conforme a noite andar.</p></div>
   </div>
 
   <div class="diagram-key">
@@ -269,7 +270,7 @@ flowchart LR
 
   <!-- TENANCY -->
   <section class="module">
-    <div class="module-head"><h2>tenancy</h2><span class="module-tag">a instituição e quem entra · 3 tabelas</span></div>
+    <div class="module-head"><h2>tenancy</h2><span class="module-tag">a instituição e quem entra · 3 tabelas · ✅ em código</span></div>
     <p class="module-intro">
       A <code>Entity</code> do template passa a significar <b>a instituição de ensino</b>. Não renomeamos a tabela: <code>Entityable</code> e
       <code>EntityScope</code> do <code>core</code> dependem literalmente de <code>entity_ent_id</code>, e trocar isso é uma hora de refactor
@@ -279,8 +280,8 @@ flowchart LR
     </p>
     <div class="card-grid">
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">entities</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">entities</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>ent_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag"></span><code>ent_name</code><span class="type">string</span></li>
@@ -299,8 +300,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">campuses</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">campuses</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>cps_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
@@ -317,8 +318,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">users</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">users</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>usr_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid nullable</span></li>
@@ -352,8 +353,8 @@ flowchart LR
     <div class="module-head"><h2>core</h2><span class="module-tag">shared kernel · 1 tabela</span></div>
     <p class="module-intro">Vem pronto do template. Não precisa ser tocado durante o hackathon — só herdado.</p>
     <div class="card-grid">
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">audit_logs</span><span class="status-pill mvp">⚑ do template</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">audit_logs</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>aud_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag"></span><code>entity_ent_id</code><span class="type">uuid (sem FK)</span></li>
@@ -377,7 +378,7 @@ flowchart LR
 
   <!-- CATALOG -->
   <section class="module">
-    <div class="module-head"><h2>catalog</h2><span class="module-tag">o esqueleto acadêmico · 8 tabelas</span></div>
+    <div class="module-head"><h2>catalog</h2><span class="module-tag">o esqueleto acadêmico · 9 tabelas · ✅ em código</span></div>
     <p class="module-intro">
       Dados <b>mestres</b>: mudam por resolução de colegiado, não por ação de aluno. É o módulo que o aluno nunca escreve e do qual tudo depende —
       por isso é o primeiro a ser semeado e o mais caro em tempo de digitação, não de código. A separação entre <code>subjects</code>
@@ -387,8 +388,8 @@ flowchart LR
     </p>
     <div class="card-grid">
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">courses</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">courses</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>crs_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
@@ -404,8 +405,8 @@ flowchart LR
         <div class="tcard-note">O curso é <b>por campus</b> — "Engenharia de Software em Dois Vizinhos" e a homônima em outro campus são registros distintos, com matrizes distintas.</div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">curricula</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">curricula</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>cur_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>course_crs_id</code><span class="type">uuid</span></li>
@@ -443,8 +444,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">subjects</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">subjects</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>sbj_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
@@ -471,8 +472,35 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">curriculum_subjects</span><span class="status-pill mvp">⚑ MVP</span></div>
+
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">elective_groups</span><span class="status-pill built">✅ em código</span></div>
+        <ul class="cols">
+          <li><span class="key-tag pk">PK</span><code>elg_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>curriculum_cur_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag uk">UK</span><code>elg_code</code><span class="type">string — "941", por matriz</span></li>
+          <li><span class="key-tag"></span><code>elg_name</code><span class="type">string — "Optativas"</span></li>
+          <li><span class="key-tag"></span><code>elg_required_hours</code><span class="type">integer — 210</span></li>
+          <li><span class="key-tag"></span><code>elg_weekly_hours</code><span class="type">decimal — 14</span></li>
+          <li><span class="key-tag"></span><code>elg_first_term</code><span class="type">smallint — 5</span></li>
+          <li><span class="key-tag"></span><code>elg_last_term</code><span class="type">smallint — 8</span></li>
+          <li><span class="key-tag"></span><code>elg_created_at</code><span class="type">timestamp</span></li>
+          <li><span class="key-tag"></span><code>elg_updated_at</code><span class="type">timestamp</span></li>
+        </ul>
+        <div class="tcard-note">
+          <b>Tabela nova, descoberta no documento da matriz.</b> A UTFPR não lista optativas soltas: agrupa num
+          <b>conjunto</b> com código próprio, carga horária a cumprir e uma janela de períodos —
+          <code>[941] Optativas · 05/08 · CH 210 · CH semanal 14</code>. O detalhe que obriga a tabela a existir:
+          a CHS do conjunto é dividida pelos períodos em que ele se distribui, dando <b>3,5 CHS por período</b> —
+          número não inteiro que o histórico usa literalmente no quadro de cálculo do período do aluno. Sem o conjunto
+          modelado, esse 3,5 não tem de onde sair. <code>curriculum_subjects.elective_group_elg_id</code> aponta pra cá;
+          nulo significa obrigatória.
+        </div>
+      </article>
+
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">curriculum_subjects</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>cbs_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>curriculum_cur_id</code><span class="type">uuid</span></li>
@@ -491,8 +519,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">prerequisites</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">prerequisites</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>prq_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>curriculum_subject_cbs_id</code><span class="type">uuid</span></li>
@@ -515,8 +543,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">terms</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">terms</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>trm_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
@@ -537,8 +565,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">offerings</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">offerings</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>ofr_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
