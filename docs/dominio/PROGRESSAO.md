@@ -150,6 +150,29 @@ ouvir.
 Toda leitura passa pelo `EntityScope`. Regra herdada, mas que aqui tem peso
 extra: histórico escolar é dado pessoal sensível.
 
+### 13. Pré-requisito tem quatro tipos, cada um checado do seu jeito (B8)
+
+`prerequisites.prq_type` distingue: **`subject`** (a disciplina exigida
+precisa estar aprovada), **`corequisite`** (aprovada OU cursando agora, pode
+ser simultânea), **`minimum_hours`** (horas totais aprovadas >= um piso —
+não observado na matriz 45 real), **`minimum_term`** (o aluno precisa estar
+a partir de um período — o caso real é `EST501`, "Período: 5"). `journey`
+nunca importa `CampusOs\Catalog\Enums\PrerequisiteType`: o tipo é sempre
+comparado pelo `->value` do enum que já veio junto na relação Eloquent, nunca
+pela classe (`EligibilityReadModel`).
+
+### 14. A simulação nunca escreve — clona o cenário em memória
+
+"E se eu reprovar em X?" não precisa de Action nem de transação: remove o
+código informado do conjunto de disciplinas aprovadas e recalcula, sobre o
+MESMO grafo de pré-requisitos, a "primeira oportunidade" (o período mais cedo
+possível) de cada disciplina pendente — comparando o cenário real contra o
+simulado. Um pré-requisito tipo `subject` empurra um período pra frente
+(precisa terminar antes); um `corequisite` não empurra nada (pode ser
+simultâneo). É por isso que reprovar uma disciplina no meio de uma cadeia
+longa (`LIP201 → POO303 → WBE501` na matriz real) atrasa TODAS as
+disciplinas a jusante, não só a reprovada.
+
 ## ⚠️ Pendências do dono do produto
 
 1. **`ISI604` contradiz a regra 5 — registrado, não resolvido.** No histórico
@@ -181,6 +204,29 @@ extra: histórico escolar é dado pessoal sensível.
    duas vezes (uma como `ATV001` na importação, outra como faixa nova) sem uma
    regra de conciliação — e o desafio pede o estudante *acompanhar* atividades
    complementares, não uma segunda fonte de verdade para o total de horas.
+4. **A regra 10 (déficit de CHS) não está implementada — `EligibilityReadModel`
+   usa uma aproximação.** "Período atual" para checar pré-requisitos
+   `minimum_term` (B8) é `termsAttended` — o número de semestres reais
+   distintos que o aluno já cursou — não o déficit acumulado do documento.
+
+   **Por que a aproximação, e por que ela é honesta:** validei a fórmula
+   completa (obrigatórias + optativas) contra o histórico real do dono do
+   produto — bate exatamente (déficit final de −21,00 CHS, "permanecerá no
+   8º Período"). A PARTE DE OBRIGATÓRIAS reconstrói perfeitamente com o
+   schema atual (`curriculum_subjects.cbs_term` × `EnrollmentStatus`). A
+   parte de OPTATIVAS não: o documento atribui cada matrícula de eletiva
+   aprovada a um "slot" de período da matriz-conjunto (`elective_groups`),
+   e nosso schema não modela isso — uma optativa não carrega o período em
+   que "contou" para o déficit, só o termo real em que foi cursada. Sem um
+   segundo histórico real para desempatar entre hipóteses de atribuição,
+   reconstruir essa parte seria adivinhar uma regra não validável. Para
+   ESTE aluno (`termsAttended = 8`), a aproximação bate com o "Período: 8"
+   impresso — mas isso é coincidência de este aluno não ter tido nenhum
+   trancamento nem lacuna entre semestres, não prova de que a aproximação
+   sempre bate.
+   **Quando revisitar:** se `registrations.reg_current_term` virar coluna de
+   verdade (a regra 10 sendo implementada de fato), `EligibilityReadModel`
+   deve passar a consultá-la em vez de calcular `termsAttended` sozinho.
 
 ## Mapa de código
 
@@ -191,5 +237,8 @@ extra: histórico escolar é dado pessoal sensível.
 | 4 | `journey/src/Enums/EnrollmentStatus.php` | `EnrollmentStatusTest` |
 | 5, 6 | `journey/src/Support/ApprovalPolicy.php` | `ApprovalPolicyTest` |
 | 7, 8, 9 | `journey/src/ReadModels/ProgressReadModel.php` | `ProgressoTest` |
-| 10, 11 | `journey/src/ReadModels/ProgressReadModel.php` | `ProgressoTest` |
+| 10 | **não implementada** — ver ⚠️ pendência 4; `EligibilityReadModel` usa `termsAttended` como aproximação | — |
+| 11 | `journey/src/ReadModels/ProgressReadModel.php` | `ProgressoTest` |
 | 12 | `core` (`Entityable` + `EntityScope`) | `ProgressoTest` |
+| 13 | `journey/src/ReadModels/EligibilityReadModel.php::blockedReasons` | `EligibilidadeESimulacaoTest` |
+| 14 | `journey/src/ReadModels/EligibilityReadModel.php::simulate` | `EligibilidadeESimulacaoTest` — "simular reprovação empurra em cascata..." |

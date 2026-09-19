@@ -60,7 +60,7 @@
       <span><b>Módulos:</b> catalog + journey</span>
       <span><b>Tabelas:</b> 8 + 5</span>
       <span><b>Blocos do plano:</b> B2, B3, B4</span>
-      <span><b>Status:</b> Fases 0–4 <span class="status-pill built">✅ em código</span> · 5–6 <span class="status-pill mvp">⚑ MVP</span></span>
+      <span><b>Status:</b> Fases 0–6 <span class="status-pill built">✅ em código</span></span>
     </div>
     <div class="switch-bar">
       <div class="view-switch" role="group" aria-label="Nível de detalhe">
@@ -513,7 +513,7 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
 
   <!-- FASE 5 -->
   <section class="step" id="fase-5">
-    <div class="step-head"><span class="step-num">5</span><h2>O que libera e o que trava</h2></div>
+    <div class="step-head"><span class="step-num">5</span><h2>O que libera e o que trava</h2><span class="status-pill built">✅ em código</span></div>
 
     <div class="view-business">
       <p>
@@ -544,23 +544,25 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
     </div>
 
     <div class="view-code">
-      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/next-term</span><span class="status-pill mvp">⚑ B3/B8</span></div>
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/next-term</span><span class="status-pill built">✅ em código</span></div>
       <pre><code>// app-modules/journey/src/ReadModels/EligibilityReadModel.php
-// Para cada curriculum_subject ainda não cumprido:
-//   prerequisite  → a exigida está cumprida? (EnrollmentStatus::countsAsCompleted)
-//   corequisite   → cumprida OU cursando no mesmo termo
-//   minimum_hours → horas cumpridas >= prq_min_hours
-// Devolve { eligible: bool, blocked_by: [{ type, subject, reason }] }.
+// Para cada curriculum_subject ainda não cumprido nem cursando agora:
+//   subject       → a exigida está aprovada? (EnrollmentStatus::countsAsCompleted)
+//   corequisite   → aprovada OU cursando agora (pode ser simultânea)
+//   minimum_hours → horas totais aprovadas >= prq_min_hours
+//   minimum_term  → período atual >= prq_min_term (o caso real: EST501)
+// Devolve { current_period, eligible: [...], blocked: [{ code, name, blocked_by: [{ type, subject, reason }] }] }.
 //
 // Grafo pequeno (dezenas de arestas por matriz): resolve em memória, em
-// uma passada, sem recursão e sem CTE. Se um dia virar milhares, aí sim.</code></pre>
-      <div class="callout"><b>Ciclo em pré-requisito existe na vida real</b> (erro de cadastro no colegiado). Proteja a travessia com um conjunto de visitados — descobrir isso via <i>stack overflow</i> em produção é caro; via <code>if</code>, é grátis.</div>
+// uma passada, sem recursão sem guarda e sem CTE.</code></pre>
+      <div class="callout"><b>Ciclo em pré-requisito existe na vida real</b> (erro de cadastro no colegiado). A travessia é protegida com um conjunto de visitados — descobrir isso via <i>stack overflow</i> em produção é caro; via <code>if</code>, é grátis.</div>
+      <div class="callout warn"><b>"Período atual" é uma aproximação deliberada:</b> o número de semestres reais que o aluno já cursou (<code>termsAttended</code>), não o déficit de CHS acumulado que <a href="../dominio/DOCUMENTOS_ACADEMICOS.md">§3</a> documenta. A parte de obrigatórias do déficit reconstrói perfeitamente contra o histórico real; a de optativas exigiria atribuir cada matrícula de eletiva a um "slot" de período que este schema não modela — ver <a href="../dominio/PROGRESSAO.md">PROGRESSAO.md</a> pendência 4.</div>
     </div>
   </section>
 
   <!-- FASE 6 -->
   <section class="step" id="fase-6">
-    <div class="step-head"><span class="step-num">6</span><h2>E se eu reprovar? — a pergunta que ninguém responde</h2></div>
+    <div class="step-head"><span class="step-num">6</span><h2>E se eu reprovar? — a pergunta que ninguém responde</h2><span class="status-pill built">✅ em código</span></div>
 
     <div class="view-business">
       <p>
@@ -580,20 +582,29 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
     </div>
 
     <div class="view-code">
-      <div class="code-path"><span><span class="method post">POST</span>/api/v1/me/simulate</span><span class="status-pill stretch">◎ B8 · a primeira esticada</span></div>
-      <pre><code>// entrada: { "fail": ["MA72B"] }  — e se eu reprovar nestas?
+      <div class="code-path"><span><span class="method post">POST</span>/api/v1/me/simulate</span><span class="status-pill built">✅ em código</span></div>
+      <pre><code>// entrada: { "fail": ["MAT034"] }  — e se eu reprovar nestas?
 //
-// 1. clonar o histórico em memória, marcando as citadas como FailedGrade
-// 2. rodar a mesma EligibilityReadModel sobre o histórico clonado
-// 3. diff contra o cenário real: quais disciplinas mudaram de termo
-//    de primeira oportunidade, e quanto a previsão de formatura andou
+// 1. remove os códigos citados do conjunto de aprovadas (em memória)
+// 2. recalcula, sobre o MESMO grafo de pré-requisitos, a "primeira
+//    oportunidade" (earliestPeriod) de cada disciplina pendente
+// 3. diff contra o cenário real: quais disciplinas mudaram de período
+//    de primeira oportunidade, e por quantos períodos
 //
-// Sem escrita no banco. Sem Action. É read model puro rodando duas vezes —
-// e é por isso que ele é barato: a lógica de elegibilidade já existe.</code></pre>
+// Sem escrita no banco. É read model puro rodando duas vezes — e é por
+// isso que ele é barato: a lógica de elegibilidade já existe.</code></pre>
       <div class="callout">
-        <b>O desenho que torna isto barato:</b> a elegibilidade nunca lê o banco direto, ela recebe uma coleção de matrículas.
-        Escrever assim na Fase 5 custa zero e transforma a simulação em "chamar a mesma função com outro argumento".
-        Escrever acoplado ao banco custa, na Fase 6, um refactor às 13h da tarde.
+        <b>O desenho que tornou isto barato:</b> a elegibilidade nunca lê o banco direto, ela recebe uma coleção de matrículas
+        (e um conjunto de aprovadas). Escrever assim na Fase 5 transformou a simulação em "chamar a mesma função com outro
+        conjunto" — nenhum refactor foi preciso na Fase 6.
+      </div>
+      <div class="callout warn">
+        <b>A própria disciplina reprovada nunca aparece em <code>affected_subjects</code></b> — ela é a entrada da simulação,
+        não um efeito colateral. O que a resposta mostra é quem DEPENDE dela, direta ou transitivamente (o exemplo real da
+        matriz: <code>LIP201 → POO303 → WBE501</code> — reprovar `LIP201` atrasa as três seguintes por um período cada).
+        `estimated_graduation_delay_terms` é o maior atraso entre as disciplinas afetadas — não um máximo global sobre a
+        matriz inteira, que uma disciplina alheia à cadeia (um `minimum_term` fixo, por exemplo) mascararia nos dois cenários
+        igualmente.
       </div>
     </div>
   </section>
@@ -611,13 +622,14 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
         <tr><td>Organização de documentos acadêmicos</td><td>Fase 2 + <a href="horas-e-certificados.html">certificados</a></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
         <tr><td>Acompanhamento de atividades complementares</td><td><a href="horas-e-certificados.html">Horas e certificados</a></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
         <tr><td>Conhecimento dos prazos e requisitos para formação</td><td>Fase 4 — <code>forecast.terms_until_deadline</code></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Impactos de reprovações ou atrasos</td><td>Fase 6 — simulação</td><td><span class="status-pill stretch">◎ esticada</span></td></tr>
+        <tr><td>Impactos de reprovações ou atrasos</td><td>Fase 6 — simulação</td><td><span class="status-pill built">✅ em código</span></td></tr>
         <tr><td>Orientações acadêmicas claras e centralizadas</td><td><a href="acervo-compartilhado.html">Acervo</a> + <a href="copiloto-mcp.html">copiloto</a></td><td><span class="status-pill mvp">⚑ MVP</span> + <span class="status-pill stretch">◎</span></td></tr>
       </tbody>
     </table>
     <div class="callout good">
-      <b>Oito de nove no MVP</b>, e o nono é a primeira esticada. A cobertura do desafio não é acidente de escopo:
-      ela é consequência de ter modelado a matriz como dado e o histórico como fato — feito isso, cada bullet vira uma consulta.
+      <b>Nove de nove em código</b> — a última esticada (B8, simulação de reprovação) fechou o desafio 5.1 inteiro.
+      A cobertura não é acidente de escopo: é consequência de ter modelado a matriz como dado e o histórico como fato —
+      feito isso, cada bullet vira uma consulta.
     </div>
   </section>
 
