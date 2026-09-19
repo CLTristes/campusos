@@ -11,8 +11,8 @@ funcionar em qualquer instituição sem negociar acesso. São três entradas:
 
 | Quem | Documento | O que o sistema ganha | Quando |
 | --- | --- | --- | --- |
-| **Coordenação** | Documento da matriz (ver §4) | O catálogo: curso, matriz, disciplinas, períodos, carga horária | Na implantação, uma vez por matriz |
-| **Aluno** | **Histórico escolar** | Todo o passado dele: o que cursou, a situação de cada disciplina, as horas integralizadas | No primeiro acesso |
+| **Coordenação** | **Consulta Curso e Matriz Curricular** (§4) | O catálogo inteiro: curso, matriz, disciplinas, períodos, carga horária, CHEXT e **os pré-requisitos** | Na implantação, uma vez por matriz |
+| **Aluno** | **Histórico escolar** (§1) | Todo o passado dele: o que cursou, a situação de cada disciplina, as horas integralizadas | No primeiro acesso |
 | **Aluno** | **Requerimento de matrícula** | O semestre corrente: disciplinas, turma, sala e a grade de horários | Todo semestre, após a matrícula |
 
 A ordem importa e é uma regra: **sem catálogo não há o que importar**. O
@@ -112,7 +112,10 @@ colapsa em `curricula.cur_elective_hours`; `elective_groups` fica
 | --- | --- | --- | --- | --- |
 | Obrigatórias | 2.730 | 2.400 | 2.325 | 405 |
 | Optativas | 210 | 90 | 0 | 210 |
-| **Geral** | **2.940** | 2.490 | 2.325 | 615 |
+| **Soma das disciplinas** | **2.940** | 2.490 | 2.325 | 615 |
+
+> ⚠️ **2.940 NÃO é o total para formar.** Esse quadro soma só disciplinas. O total
+> real é **3.000 h** e sai de uma fórmula que só o documento da matriz traz — ver §4.3.
 
 **Quadro Resumo Atividades Extensionistas** — ver §2.
 
@@ -138,9 +141,10 @@ PEX405 Práticas Extensionistas 2   CHT 60   CHEXT 60
 HSA003 Gestão Econômica            CHT 45   CHEXT 45
 ```
 
-A prova aritmética: CHT geral do curso 2.940 e CHEXT geral 300. Se fossem
-somáveis, o total seria 3.240 — e o documento traz os dois em quadros separados,
-justamente porque um está **contido** no outro.
+A prova aritmética: CHT geral das disciplinas 2.940 e CHEXT geral 300. Se fossem
+somáveis, o total seria 3.240 (e o documento da matriz **imprime esse 3.240** como
+`SOMACH`, justamente para depois descartá-lo). Um está **contido** no outro — mas
+não inteiramente, e é aí que mora a sutileza que eu tinha errado: ver §4.3.
 
 | Exigência extensionista | CHEXT | Cursada | Faltante |
 | --- | --- | --- | --- |
@@ -181,11 +185,178 @@ Limite correspondente na matriz: `cur_max_weekly_deficit` (16 na UTFPR).
 
 ---
 
-## 4. O requerimento de matrícula — de onde saem as ofertas
+## 4. O documento da matriz — "Consulta Curso e Matriz Curricular"
+
+Seis páginas, emitidas pelo portal. **É o documento mais importante dos três**:
+dele sai o catálogo inteiro, e ele é o único que traz **pré-requisito**.
+
+Cabeçalho: `Câmpus: Francisco Beltrão` · `Curso(s): Sist. Informação (25)` ·
+`Matriz: 45 - Sistemas De Informação 02` · `Matriz Curricular - Versão 2`.
+
+### 4.1 As colunas
+
+| Coluna | Vai para |
+| --- | --- |
+| `Período` | `curriculum_subjects.cbs_term` |
+| `[OPT]` | código do conjunto de optativas (`941`) — vazio ⇒ obrigatória |
+| `Código` · `Disciplina` | `subjects.sbj_code` · `sbj_name` |
+| `Modelo de disciplina` | `subjects.sbj_model` — classificação do PPC (§4.2) |
+| `Aulas teóricas` + `práticas semanais` | detalhe → `sbj_workload_breakdown` (json) |
+| **`Total de aulas semanais`** | **`subjects.sbj_weekly_hours` (CHS)** |
+| `APS` · `APCC` · `AD` · `CHEAD` | detalhe → `sbj_workload_breakdown` (zerados nesta matriz) |
+| **`Total de horas de CHEXT`** | **`subjects.sbj_extension_hours`** |
+| **`Carga horária total`** | **`subjects.sbj_hours` (CHT)** |
+| **`Pré-requisito(s)`** | **`prerequisites`** — ver §4.4 |
+| `Equivalência(s)` | ⚠️ **truncada na margem direita do PDF** — ver §6 |
+
+### 4.2 `Modelo de disciplina` — 8 valores observados
+
+`FORMAÇÃO BÁSICA E CIENTÍFICA` · `FORMAÇÃO PROFISSIONAL` · `HUMANIDADES - NOVA` ·
+`ESTÁGIO` · `ATIVIDADES COMPLEMENTARES` · `TRABALHO DE CONCLUSÃO` ·
+`ENADE CONCLUINTE` · `ENADE INGRESSANTE`.
+
+Confirma o que o histórico já sugeria: **estágio, TCC, atividades complementares e
+até o ENADE são linhas da matriz**, não faixas de hora paralelas. `ATV001`
+(Atividades Complementares) tem 90 h e modelo próprio; `EST501` (Estágio) tem
+450 h; `TCC804` tem 120 h; as duas linhas de ENADE têm **0 h**.
+
+### 4.3 O total do curso é 3.000 h — e o documento imprime a fórmula
+
+O rodapé traz o bloco de fechamento da matriz, literal:
+
+```
+CHTOBRIGATORIASMATRIZ: 2730      CHEXT_DISCOBRIGATORIAS: 240
+CHTOPTATIVASMATRIZ:     210      CHEXT_DISCOPTATIVAS:    315
+CHEXTENSAO:             300      TEMA_OBRIGARORIA:        60
+CHELETIVA:                0      SOMA_EXT_DISC_TEMA:     615
+SOMACH:                3240      TIPOCHTOTALPPC:           3
+SOMACHSEMEXT:          2940      CHTOTALPPC:            3000
+
+{CHTOTALPPC := SomaCHSemExt + (CHEXTENSAO - chext_discObrigatorias)}
+{CHTOTALPPC := 2940 + (300 - 240)}
+{CHTOTALPPC := 3000}
+```
+
+**Lendo em português:** as disciplinas somam 2.940 h. Dentro dessas 2.940 já
+existem **240 h de extensão** embutidas (HSA003 45 + HSA005 45 + PEX304 30 +
+PEX405 60 + HCH023 60). Mas o curso exige **300 h** de extensão. As **60 h que
+faltam não cabem em disciplina nenhuma** — têm de vir de um **Componente
+Curricular Extensionista (CCE)** autônomo, que no caso real é *"Projetos de
+Extensão em Sistemas de Informação"*. Logo o total a integralizar é
+**2.940 + 60 = 3.000 h**.
+
+> **Eu tinha errado dos dois lados.** Primeiro modelei extensão como faixa
+> somável (daria 3.240 — que o documento calcula e **descarta**). Depois corrigi
+> para "totalmente ortogonal, não soma" (daria 2.940). A verdade é o meio: a
+> extensão é ortogonal **até onde cabe dentro das disciplinas**, e o que sobra
+> vira exigência autônoma que **soma**. `SOMACH` e `SOMACHSEMEXT` existem no
+> documento exatamente porque os dois extremos estão errados.
+
+**Consequência no modelo — `curricula`:**
+
+| Coluna | Valor | Origem |
+| --- | --- | --- |
+| `cur_mandatory_hours` | 2730 | `CHTOBRIGATORIASMATRIZ` |
+| `cur_elective_hours` | 210 | `CHTOPTATIVASMATRIZ` |
+| `cur_extension_hours` | 300 | `CHEXTENSAO` — exigência total, ortogonal |
+| `cur_standalone_extension_hours` | 60 | `TEMA_OBRIGARORIA` — a parcela que **soma** |
+| `cur_max_weekly_deficit` | 16 | regra do §3 |
+| `cur_max_term_hours` | 390 | requerimento, §5.1 |
+
+`cur_total_hours` **continua não existindo como coluna**: é
+`mandatory + elective + standalone_extension`. O princípio se manteve; só a
+fórmula ficou mais interessante do que eu supunha.
+
+**A barra de progresso, então, tem TRÊS faixas** (não cinco, não duas):
+
+| Faixa | Felipe hoje |
+| --- | --- |
+| Obrigatórias | 2.325 / 2.730 h |
+| Optativas | 90 / 210 h |
+| Extensão autônoma (CCE) | 0 / 60 h |
+| **Total** | **2.415 / 3.000 h — 80,5 %** |
+
+Mais o indicador **ortogonal** de extensão: 180 / 300 h (180 vindas de
+disciplinas já aprovadas; faltam 60 de `HCH023`, que ele cursa agora, e 60 do CCE).
+
+> **Validação cruzada:** os três documentos fecham entre si na casa da unidade.
+> 45+45+30+60 = 180 de CHEXT cursada, batendo com o quadro do histórico; as 60
+> restantes são exatamente `HCH023`, que aparece em *Disciplinas Obrigatórias
+> Faltantes* **e** em *Disciplinas Matriculadas 2026/2*. Quando a importação
+> reproduzir esses números, ela está certa.
+
+### 4.4 Pré-requisitos — o furo fechado
+
+A coluna existe e é legível. O grafo completo das obrigatórias:
+
+| Disciplina | Exige |
+| --- | --- |
+| `BDD301` Banco de Dados | `MAT029` |
+| `MOS302` Modelagem de Software | `REQ203` |
+| `POO303` Prog. Orientada a Objetos | `LIP201` |
+| `CVM401` Construção/Validação/Manutenção | `MOS302` |
+| `EDD404` Estrutura de Dados | `LIP201` |
+| `PEX405` Práticas Extensionistas 2 | `PEX304` |
+| `ARS502` Arquitetura de Software | `CVM401` |
+| `EST501` Estágio Curricular Obrigatório | **`Período: 5`** |
+| `WBE501` Desenv. Web Back-End | `POO303` **e** `WFE402` |
+| `ISI604` Infraestrutura para SI | `RED202` |
+| `MAT032` Tópicos de Pesquisa Operacional | `MAT034` |
+| `PIN603` Projeto Integrador CT&I 2 | `PIN503` |
+| `SDU601` Sistemas Distribuídos e Ubíquos | `LIP201` **e** `RED202` |
+| `INC702` Inteligência Computacional | `LIP201` |
+| `TCC704` Trabalho de Conclusão 1 | `MEP602` |
+| `MID801` Mineração de Dados | `BDD301` |
+| `TCC804` Trabalho de Conclusão 2 | `TCC704` |
+
+Optativas com pré-requisito: `API003` ← `LIP201`+`RED202` · `API004` ← `ARS502` ·
+`API005` ← `POO303` · `MAT033` ← `EST003`+`MAT032` · `NEO001` ← `LIP201` ·
+`NEO002` ← `BDD301`+`HSA005` · `NEO004` ← `LIP201` · e a cadeia de inglês
+`HLA004 → HLA005 → HLA006 → HLA007 → HLA008 → HLA009`.
+
+**Dois tipos, não um.** Além do pré-requisito por disciplina, `EST501` usa
+`Período: 5` — **período mínimo**, não carga horária mínima. Então:
+
+```php
+enum PrerequisiteType: string {
+    case Subject     = 'subject';       // exige outra disciplina cumprida
+    case MinimumTerm = 'minimum_term';  // exige estar no Nº período (EST501)
+    case Corequisite = 'corequisite';   // ◇ não observado nesta matriz
+    case MinimumHours = 'minimum_hours';// ◇ não observado nesta matriz
+}
+```
+
+`prerequisites.required_cbs_id` é nullable e `prq_min_term` entra como coluna —
+`MinimumTerm` não aponta para disciplina nenhuma.
+
+> **A cadeia mais longa da matriz** — `LIP201 → POO303 → WBE501` e
+> `MEP602 → TCC704 → TCC804` — é o que faz a simulação de reprovação (Fase 6)
+> ter o que mostrar. Reprovar em `LIP201` no 2º período trava `POO303`, `EDD404`,
+> `SDU601`, `INC702`, `NEO001`, `NEO004` e, em cascata, `WBE501`.
+
+### 4.5 O conjunto de optativas, completo
+
+```
+[941] Optativas · Período inicial/final: 05/08 · Carga horária: 210 · CH semanal: 14
+Distribuição por período: 05→04  06→04  07→04  08→04
+```
+
+A CHS semanal do conjunto (14) é dividida pelos 4 períodos em que ele se
+distribui — **3,5 CHS por período**, e o histórico confirma esse número não
+inteiro no quadro de cálculo do período. Vira a tabela `elective_groups`
+(`elg_code` 941, `elg_required_hours` 210, `elg_weekly_hours` 14,
+`elg_first_term` 5, `elg_last_term` 8) com
+`curriculum_subjects.elective_group_elg_id` nullable apontando para ela.
+São ~90 optativas no conjunto — de `Cálculo 1` a `Canto Coral` e
+`Instrumento musical - Violino 3`.
+
+---
+
+## 5. O requerimento de matrícula — de onde saem as ofertas
 
 Documento de 1 página, emitido na matrícula de cada semestre.
 
-### 4.1 Disciplinas requeridas
+### 5.1 Disciplinas requeridas
 
 | Câmpus | Disciplina | Nome | Turma | Enquadramento | CHS | CHT | Vaga |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -203,7 +374,7 @@ Carga horária máxima permitida: 390
 → `curricula.cur_max_term_hours` (390). O sistema passa a poder avisar
 *"você está a 150 h do teto do semestre"* antes de o portal recusar a matrícula.
 
-### 4.2 A grade de horários — o calendário que se monta sozinho
+### 5.2 A grade de horários — o calendário que se monta sozinho
 
 Uma matriz de horário × dia da semana, com células no formato
 `DISCIPLINA-TURMA/SALA`:
@@ -226,30 +397,41 @@ aparecer preenchido no instante em que ele confirma a importação.
 
 ---
 
-## 5. ⚠️ Pendências do dono do produto
+## 6. ⚠️ Pendências do dono do produto
 
-1. **O histórico não traz pré-requisito nenhum.** Ele lista disciplinas e
-   períodos, mas não o grafo de dependências — e as Fases 5 e 6 do
-   [card de matrícula e progressão](../../docs-site/features/matricula-e-progressao.html)
-   (o que libera, o que trava, a simulação de reprovação) **dependem dele**.
-   Precisa de um segundo documento do portal (a matriz/grade curricular com
-   pré-requisitos) ou de cadastro manual pela coordenação. **Enquanto não
-   houver, `prerequisites` nasce vazia e as duas features não funcionam.**
-2. **O histórico de um aluno ≠ a matriz do curso.** Funciona como fonte da
-   matriz *neste caso específico* porque o Felipe está no último período e
-   cursou tudo. Para um aluno de 2º período o documento cobriria uma fração da
-   grade. O caminho certo é a coordenação subir o documento da matriz; usar o
-   histórico é o atalho de hackathon — **e precisa ser dito assim na
-   apresentação.**
-3. **Atividades complementares são uma DISCIPLINA** (`ATV001`), não uma faixa de
-   horas: aparece em *Disciplinas Obrigatórias Faltantes*, período 8. O mesmo
-   vale para estágio (`EST501`, CHT 450, turma `ESTAGIO`) e TCC (`TCC704`,
-   `TCC804`). Decidir: a tabela `complementary_activities` continua existindo
-   como **acervo de evidência** que justifica a aprovação de `ATV001`, ou o
-   produto trata tudo como disciplina e abre mão do contador por categoria?
-   *Palpite: manter — o contador por categoria é a feature; `ATV001` é só como a
-   universidade registra o desfecho.*
-4. **Escala de nota confirmada:** 0,0–10,0 (média 6,0 em RED202 aprovado por
-   exame; 0,0 em MAT032 reprovado). **Frequência mínima não aparece explícita** —
-   MAT032 tem 47,1% e NEO001 tem 52,9% com aprovação por nota. Precisa da
-   resolução para cravar o mínimo.
+### ✅ Fechadas pelo documento da matriz (19/09, 02:35)
+
+1. ~~**O histórico não traz pré-requisito nenhum.**~~ **Resolvido.** O documento
+   da matriz traz a coluna `Pré-requisito(s)` completa — §4.4. As Fases 5 e 6 do
+   card de matrícula (o que libera, o que trava, simulação de reprovação) saem do
+   papel.
+2. ~~**O histórico de um aluno ≠ a matriz do curso.**~~ **Resolvido, e melhor do
+   que se pedia.** A matriz tem documento próprio, emitido por curso e não por
+   aluno — é exatamente o que a coordenação sobe na implantação. O histórico volta
+   a ter uma função só: o passado de UM aluno. **O atalho de hackathon deixou de
+   ser necessário, e isso muda o pitch**: o fluxo demonstrado é o real.
+
+### Abertas
+
+3. ⚠️ **A coluna `Equivalência(s)` está truncada no PDF.** O documento é mais
+   largo que a página e a última coluna sai cortada — dá para ver `AC3…`, `IS3…`,
+   `LP3…`, `BD3…`, mas não o código inteiro. É ela que explica o
+   `Crédito Consignado` do histórico (equivalência por mudança de matriz).
+   **Impacto:** a importação funciona sem ela; o que não funciona é resolver
+   automaticamente uma disciplina cursada na matriz antiga. *Precisa de um
+   re-export em paisagem, ou da mesma consulta em HTML.* **Não bloqueia o B2.**
+4. **Atividades complementares são uma DISCIPLINA** (`ATV001`, 90 h, modelo
+   `ATIVIDADES COMPLEMENTARES`), confirmado pela matriz. Decidir: a tabela
+   `complementary_activities` continua como **acervo de evidência** que justifica
+   a aprovação de `ATV001` (com o contador por categoria), ou o produto trata tudo
+   como disciplina e abre mão do contador? *Palpite: manter — o contador por
+   categoria é a feature; `ATV001` é só como a universidade registra o desfecho.*
+   **Ainda falta a resolução do curso com os tetos por categoria.**
+5. **Frequência mínima não aparece em documento nenhum.** A escala de nota está
+   confirmada (0,0–10,0), mas `MAT032` reprovou com 47,1 % e `NEO001` **aprovou**
+   com 52,9 % — então não é um corte simples em 75 %. Precisa da resolução para
+   cravar, ou o sistema simplesmente **repete a situação impressa** no documento e
+   não recalcula nada (o que é mais seguro e é o que o MVP faz).
+6. **Uma matriz, um câmpus.** Este documento cobre Francisco Beltrão / matriz 45.
+   O produto suporta N por construção, mas a demo terá uma só — e vale dizer isso
+   na banca em vez de deixar parecer que há mais.

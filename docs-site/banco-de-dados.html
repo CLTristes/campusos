@@ -120,8 +120,10 @@
     O histórico escolar e o requerimento de matrícula derrubaram três premissas desta página, todas já corrigidas nos cards abaixo:
     as faixas de hora <b>não são cinco somáveis</b> (são duas + uma ortogonal); <b>CHEXT vive dentro</b> da carga das disciplinas,
     não ao lado; e o <b>período do aluno é calculado</b> por déficit de carga horária semanal, não contado a partir do ingresso.
-    A estrutura completa dos dois documentos — colunas, vocabulário de situação, quadros de resumo e a grade de horários —
-    está em <code>docs/dominio/DOCUMENTOS_ACADEMICOS.md</code>, que <b>vence esta página</b> onde os dois divergirem.
+    <b>Revisado de novo às 02:35</b>, com o documento da matriz curricular: ele trouxe os <b>pré-requisitos</b> (que eram a pendência
+    que travava duas features) e corrigiu o total do curso — <b>3.000 h, não 2.940</b>. A estrutura completa dos <b>três</b> documentos —
+    colunas, vocabulário de situação, quadros de resumo, o grafo de pré-requisitos e a grade de horários — está em
+    <code>docs/dominio/DOCUMENTOS_ACADEMICOS.md</code>, que <b>vence esta página</b> onde os dois divergirem.
   </div>
 
   <div class="legend">
@@ -412,7 +414,8 @@ flowchart LR
           <li><span class="key-tag"></span><code>cur_is_active</code><span class="type">boolean</span></li>
           <li><span class="key-tag"></span><code>cur_mandatory_hours</code><span class="type">integer — 2.730 na UTFPR</span></li>
           <li><span class="key-tag"></span><code>cur_elective_hours</code><span class="type">integer — 210</span></li>
-          <li><span class="key-tag"></span><code>cur_extension_hours</code><span class="type">integer — 300, ortogonal</span></li>
+          <li><span class="key-tag"></span><code>cur_extension_hours</code><span class="type">integer — 300, exigência total</span></li>
+          <li><span class="key-tag"></span><code>cur_standalone_extension_hours</code><span class="type">integer — 60, a parcela que soma</span></li>
           <li><span class="key-tag"></span><code>cur_expected_terms</code><span class="type">smallint — 8</span></li>
           <li><span class="key-tag"></span><code>cur_max_terms</code><span class="type">smallint</span></li>
           <li><span class="key-tag"></span><code>cur_max_term_hours</code><span class="type">integer — 390/semestre</span></li>
@@ -424,11 +427,15 @@ flowchart LR
         <div class="tcard-note">
           <b>A tabela que define o que "formar" significa.</b> As colunas de hora são as <b>regras de integralização</b> viradas dado —
           é delas que sai a barra de progresso inteira, e é por isso que ela funciona para qualquer curso sem uma linha de código nova.
-          <b>Corrigido em 19/09 contra o histórico real:</b> não são cinco faixas somáveis. São <b>duas</b> que somam o total
-          (2.730 + 210 = 2.940 h) e <b>uma ortogonal</b>, a extensionista (300 h), que vive <i>dentro</i> das outras e é verificada em
-          paralelo — somá-la daria 3.240 h e inventaria 300 horas que o aluno não precisa cursar. Estágio, TCC e atividades
-          complementares <b>não são faixas</b>: são disciplinas obrigatórias da matriz (<code>EST501</code>, <code>TCC704</code>/<code>TCC804</code>,
-          <code>ATV001</code>). <b>Não existe <code>cur_total_hours</code></b> de propósito: total é a soma das duas primeiras, e duas fontes para
+          <b>Corrigido duas vezes em 19/09, contra o histórico e depois contra o documento da matriz.</b> Não são cinco faixas somáveis
+          (daria 3.240 h — número que a própria matriz calcula como <code>SOMACH</code> e <b>descarta</b>), nem duas com a extensão
+          totalmente ortogonal (daria 2.940 h). São <b>três</b>: obrigatórias 2.730 + optativas 210 + <b>extensão autônoma 60</b> =
+          <b>3.000 h</b>. A extensão é ortogonal <i>até onde cabe dentro das disciplinas</i> (240 h embutidas em HSA003, HSA005, PEX304,
+          PEX405 e HCH023); as 60 h que sobram para fechar as 300 exigidas <b>não cabem em disciplina nenhuma</b> e viram Componente
+          Curricular Extensionista autônomo — que soma. O documento imprime a fórmula:
+          <code>CHTOTALPPC := SomaCHSemExt + (CHEXTENSAO − chext_discObrigatorias) = 2940 + (300 − 240) = 3000</code>.
+          Estágio, TCC, atividades complementares e até o ENADE <b>não são faixas</b>: são linhas da matriz
+          (<code>EST501</code> 450 h, <code>TCC704</code>/<code>TCC804</code>, <code>ATV001</code> 90 h, <code>ENADE CE</code>/<code>IE</code> 0 h). <b>Não existe <code>cur_total_hours</code></b> de propósito: total é a soma das duas primeiras, e duas fontes para
           o mesmo número sempre acabam discordando. <code>cur_max_weekly_deficit</code> (16 CHS) é o que decide se o aluno avança de período — ver
           <a href="#">DOCUMENTOS_ACADEMICOS.md §3</a>. <code>cur_max_terms</code> é o prazo de integralização — alimenta o alerta de jubilamento.
           Matriz é <b>versionada</b> (<code>cur_code</code> + <code>cur_effective_from</code>) porque um aluno de 2021 se forma pela matriz de 2021,
@@ -446,6 +453,8 @@ flowchart LR
           <li><span class="key-tag"></span><code>sbj_weekly_hours</code><span class="type">smallint — CHS</span></li>
           <li><span class="key-tag"></span><code>sbj_hours</code><span class="type">integer — CHT</span></li>
           <li><span class="key-tag"></span><code>sbj_extension_hours</code><span class="type">integer — CHEXT</span></li>
+          <li><span class="key-tag"></span><code>sbj_model</code><span class="type">enum — 8 valores do PPC</span></li>
+          <li><span class="key-tag"></span><code>sbj_workload_breakdown</code><span class="type">json nullable — teóricas/práticas/APS/APCC/AD/CHEAD</span></li>
           <li><span class="key-tag"></span><code>sbj_credits</code><span class="type">smallint nullable</span></li>
           <li><span class="key-tag"></span><code>sbj_syllabus</code><span class="type">text nullable</span></li>
           <li><span class="key-tag"></span><code>sbj_created_at</code><span class="type">timestamp</span></li>
@@ -488,7 +497,8 @@ flowchart LR
           <li><span class="key-tag pk">PK</span><code>prq_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>curriculum_subject_cbs_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>required_cbs_id</code><span class="type">uuid nullable</span></li>
-          <li><span class="key-tag"></span><code>prq_type</code><span class="type">enum — prerequisite | corequisite | minimum_hours</span></li>
+          <li><span class="key-tag"></span><code>prq_type</code><span class="type">enum — subject | minimum_term | corequisite | minimum_hours</span></li>
+          <li><span class="key-tag"></span><code>prq_min_term</code><span class="type">smallint nullable</span></li>
           <li><span class="key-tag"></span><code>prq_min_hours</code><span class="type">integer nullable</span></li>
           <li><span class="key-tag"></span><code>prq_created_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>prq_updated_at</code><span class="type">timestamp</span></li>
@@ -496,9 +506,12 @@ flowchart LR
         <div class="tcard-note">
           Pré-requisito é <b>da matriz, não da disciplina</b> — a mesma Cálculo 2 pode exigir coisas diferentes em cursos diferentes,
           e apontar de <code>subject</code> para <code>subject</code> tornaria isso impossível de representar.
-          <code>required_cbs_id</code> é nullable porque <code>minimum_hours</code> não aponta pra disciplina nenhuma:
-          é a regra "só cursa TCC quem já integralizou 2400 horas", que existe em praticamente toda matriz de engenharia.
-          <b>Alimenta a simulação de reprovação</b> (ver <a href="features/matricula-e-progressao.html">Fase 5</a>).
+          <code>required_cbs_id</code> é nullable porque nem todo pré-requisito aponta pra disciplina: <b>confirmado na matriz real</b>,
+          <code>EST501</code> (Estágio) exige <code>Período: 5</code> — período mínimo, não disciplina e não carga horária.
+          <b>A coluna existe no documento da matriz e é legível</b> (revisão de 19/09 02:35): 17 arestas nas obrigatórias, mais as
+          optativas e a cadeia de inglês <code>HLA004→…→HLA009</code>. A cadeia mais longa é
+          <code>LIP201 → POO303 → WBE501</code> — reprovar em <code>LIP201</code> trava seis disciplinas em cascata, e é isso que a
+          <b>simulação de reprovação</b> mostra (ver <a href="features/matricula-e-progressao.html">Fases 5 e 6</a>).
         </div>
       </article>
 

@@ -74,8 +74,10 @@
     <b>Revisado em 19/09 às 02:45, contra o histórico e o requerimento reais da UTFPR.</b>
     As faixas de hora, o vocabulário de situação e o cálculo do período mudaram — a estrutura completa dos dois documentos
     está em <code>docs/dominio/DOCUMENTOS_ACADEMICOS.md</code>, que <b>vence esta página</b> onde os dois divergirem.
-    Uma pendência nova e importante: <b>o histórico não traz pré-requisito nenhum</b>, então as Fases 5 e 6 desta página
-    dependem de um segundo documento ou de cadastro manual.
+    <b>Revisado de novo às 02:35</b>, com o documento da matriz curricular: ele trouxe o <b>grafo de pré-requisitos completo</b>
+    (17 arestas nas obrigatórias, mais as optativas), então as Fases 5 e 6 desta página <b>deixaram de depender de pendência</b> —
+    e corrigiu o total do curso para <b>3.000 h</b>. Melhor ainda: a matriz tem documento próprio, emitido por curso, então o fluxo
+    de implantação demonstrado na Fase 0 passa a ser <b>o real</b>, não o atalho de hackathon.
   </div>
 
   <div class="callout grifo view-business">
@@ -110,7 +112,13 @@
         universidade no dia seguinte, sem uma linha de código nova. Se a grade estivesse escrita no código — que é o atalho tentador
         às 4 da manhã — o produto seria um sistema para um curso só, e todo o argumento de escala do pitch cairia na primeira pergunta do jurado.
       </div>
-      <p><b>Quem alimenta:</b> hoje, um seeder a partir da grade exportada. Amanhã, uma tela de coordenação ou a mesma leitura por IA usada no documento do aluno.</p>
+      <div class="callout good">
+        <b>Quem alimenta, confirmado em 19/09:</b> a própria coordenação, <b>na implantação</b>, subindo o documento
+        <i>"Consulta Curso e Matriz Curricular"</i> que o portal já emite. É o mesmo mecanismo do documento do aluno — mesma Action,
+        mesmo contrato de extração, outro tipo de documento. Ele traz tudo: período, código, nome, modelo do PPC, CHS, CHT, CHEXT,
+        <b>pré-requisitos</b>, o conjunto de optativas e o bloco de fechamento com as cargas horárias totais.
+        <b>Nenhuma grade é digitada à mão, e nenhuma é escrita em código.</b>
+      </div>
     </div>
 
     <div class="view-code">
@@ -400,7 +408,7 @@ final class AcademicDocument implements StructuredOutputModel
       <div class="progress-demo">
         <div class="pg-title">
           <h4>Sistemas de Informação · matriz 45 · Câmpus Francisco Beltrão</h4>
-          <span>2.415 / 2.940 h · 82%</span>
+          <span>2.415 / 3.000 h · 80,5%</span>
         </div>
         <div class="pg-row">
           <div class="pg-lbl"><span>Obrigatórias</span><b>2.325 / 2.730 h</b></div>
@@ -411,14 +419,20 @@ final class AcademicDocument implements StructuredOutputModel
           <div class="pg-bar"><div class="pg-fill low" style="width:43%"></div></div>
         </div>
         <div class="pg-row">
-          <div class="pg-lbl"><span>Extensionista (CHEXT) · <i>dentro das acima</i></span><b>180 / 300 h</b></div>
+          <div class="pg-lbl"><span>Extensão autônoma (CCE)</span><b>0 / 60 h</b></div>
+          <div class="pg-bar"><div class="pg-fill low" style="width:0%"></div></div>
+        </div>
+        <div class="pg-row" style="margin-top:1.1rem;padding-top:0.9rem;border-top:1px dashed var(--border-strong)">
+          <div class="pg-lbl"><span>Extensionista total · <i>ortogonal, não entra no total</i></span><b>180 / 300 h</b></div>
           <div class="pg-bar"><div class="pg-fill mid" style="width:60%"></div></div>
         </div>
       </div>
       <p style="font-size:0.86rem;color:var(--ink-faint);max-width:70ch;">
-        <b>Números reais</b>, do histórico de um aluno de 8º período da UTFPR. Um aluno "82% formado" que ainda precisa de
-        <b>120 h de optativa</b> e <b>120 h de extensão</b> — o consolidado esconde as duas coisas que de fato travam a formatura.
-        Repare na terceira faixa: ela é <b>ortogonal</b>, mora dentro das duas de cima, e por isso não entra no total.
+        <b>Números reais</b>, de um aluno de 8º período da UTFPR, batendo nos três documentos na casa da unidade.
+        Um aluno "80% formado" que ainda precisa de <b>120 h de optativa</b> e de <b>60 h de extensão autônoma</b> — o consolidado
+        esconde as duas coisas que de fato travam a formatura. A faixa abaixo da linha tracejada é a <b>verificação ortogonal</b>:
+        as 300 h de extensão do curso, das quais 240 moram <i>dentro</i> de disciplinas (por isso ela não entra no total) e 60 são a
+        faixa autônoma logo acima (por isso essa entra).
         Esta é a tela da demo — dê a ela o dobro do capricho das outras.
       </p>
 
@@ -433,18 +447,19 @@ final class AcademicDocument implements StructuredOutputModel
     <div class="view-code">
       <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/progress</span><span class="status-pill mvp">⚑ B3 · o endpoint mais importante</span></div>
       <pre><code>{
-  "registration": { "number": "2567857", "course": "Sist. Informação",
+  "registration": { "number": "2567857", "course": "Sist. Informação (25)",
                     "curriculum": "45 - Sistemas De Informação 02",
                     "entry_term": "2023/1", "current_term": 8,
                     "status": "active", "campus": "Francisco Beltrão" },
-  "overall": { "completed_hours": 2415, "required_hours": 2940,
-               "in_progress_hours": 180, "percentage": 82.1 },
+  "overall": { "completed_hours": 2415, "required_hours": 3000,
+               "in_progress_hours": 180, "percentage": 80.5 },
   "tracks": [
-    { "kind": "mandatory", "completed": 2325, "required": 2730, "in_progress": 180 },
-    { "kind": "elective",  "completed":   90, "required":  210, "in_progress": 0 }
+    { "kind": "mandatory",            "completed": 2325, "required": 2730, "in_progress": 180 },
+    { "kind": "elective",             "completed":   90, "required":  210, "in_progress": 0 },
+    { "kind": "standalone_extension", "completed":    0, "required":   60, "in_progress": 0 }
   ],
-  "extension": { "completed": 180, "required": 300, "orthogonal": true,
-                 "from_subjects": 180, "from_cce": 0 },
+  "extension": { "completed": 180, "required": 300, "counts_in_total": false,
+                 "from_subjects": 180, "from_standalone": 0 },
   "pending_subjects": [ { "code": "MAT032", "name": "Tópicos De Pesquisa Operacional",
                           "term": 6, "hours": 30, "weekly_hours": 2,
                           "nature": "mandatory", "is_dependency": true,

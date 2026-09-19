@@ -26,6 +26,5 @@ Thumbs.db
 # Documentos acadêmicos reais usados como referência para o extrator.
 # NÃO versionados: contêm nome completo, data de nascimento, nº de identidade,
 # RA, notas e frequências de uma pessoa real. Ver docs_referencia/README.md.
-/docs_referencia/*.pdf
 /docs_referencia/*.png
 /docs_referencia/*.jpg
