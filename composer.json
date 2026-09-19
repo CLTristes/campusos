@@ -23,6 +23,7 @@
         "internachi/modular": "^3.0",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.47",
+        "laravel/mcp": "^1.0",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^2.10.1",
         "predis/predis": "^3.5"
