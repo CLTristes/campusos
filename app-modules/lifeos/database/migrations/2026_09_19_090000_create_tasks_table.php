@@ -47,7 +47,6 @@ return new class extends Migration
             $table->foreign('owner_usr_id')->references('usr_id')->on('users');
             $table->foreign('subject_sbj_id')->references('sbj_id')->on('subjects');
             $table->foreign('offering_ofr_id')->references('ofr_id')->on('offerings');
-            $table->foreign('origin_tsk_id')->references('tsk_id')->on('tasks');
 
             // A leitura mais comum: "minha agenda" e "as tarefas desta oferta
             // que ainda não adotei" (índice cobre o whereIn de offering+visibility).
@@ -56,6 +55,17 @@ return new class extends Migration
 
             // Guarda de idempotência: duplo clique em "adotar" não gera duas cópias.
             $table->unique(['owner_usr_id', 'origin_tsk_id']);
+        });
+
+        // Auto-FK separada do create: a grammar do Postgres sempre emite o
+        // "add primary key" como a ÚLTIMA statement de um Schema::create,
+        // depois de qualquer foreign key declarada dentro do mesmo bloco — uma
+        // FK auto-referenciada (origin_tsk_id -> tasks.tsk_id) tentaria se
+        // ligar a uma tsk_id que ainda não tem constraint única nesse ponto e
+        // o Postgres recusa. Uma segunda Schema::table() só roda depois que o
+        // create (com a PK) já terminou por completo.
+        Schema::table('tasks', function (Blueprint $table): void {
+            $table->foreign('origin_tsk_id')->references('tsk_id')->on('tasks');
         });
     }
 
