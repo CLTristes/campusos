@@ -29,6 +29,8 @@ final class NoteResource extends JsonResource
             'kind_label' => $this->nte_kind->label(),
             'visibility' => $this->nte_visibility->value,
             'visibility_label' => $this->nte_visibility->label(),
+            'upvotes_count' => $this->nte_upvotes_count,
+            'voted_by_me' => $this->whenLoaded('votes', fn (): bool => $this->votes->isNotEmpty()),
             'author' => $this->whenLoaded('author', fn (): array => [
                 'id' => $this->author->usr_id,
                 'name' => $this->author->usr_name,

@@ -39,6 +39,8 @@ final class AcervoDaDisciplinaTool extends Tool
         $notes = Note::query()
             ->with(['author', 'term'])
             ->where('subject_sbj_id', $data['subject_id'])
+            // Mais votada primeiro — a curadoria contra slop (B5 esticada).
+            ->orderByDesc('nte_upvotes_count')
             ->orderByRaw('COALESCE(nte_published_at, nte_created_at) DESC')
             ->get();
 
@@ -48,6 +50,7 @@ final class AcervoDaDisciplinaTool extends Tool
             'body_md' => $note->nte_body_md,
             'kind' => $note->nte_kind->value,
             'visibility' => $note->nte_visibility->value,
+            'upvotes_count' => $note->nte_upvotes_count,
             'author' => $note->relationLoaded('author') ? ['id' => $note->author->usr_id, 'name' => $note->author->usr_name] : null,
             'term' => $note->term !== null ? ['year' => $note->term->trm_year, 'period' => $note->term->trm_period] : null,
             'published_at' => $note->nte_published_at?->toIso8601String(),

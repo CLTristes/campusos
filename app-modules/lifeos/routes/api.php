@@ -18,6 +18,7 @@ Route::middleware(['api', 'auth:sanctum', 'tenant.user'])
         Route::post('notes', [NoteController::class, 'store'])->name('notes.store');
         Route::get('notes/{note}', [NoteController::class, 'show'])->name('notes.show');
         Route::post('notes/{note}/visibility', [NoteController::class, 'updateVisibility'])->name('notes.visibility');
+        Route::post('notes/{note}/vote', [NoteController::class, 'vote'])->name('notes.vote');
 
         // B6 — tarefas da turma.
         Route::get('me/agenda', [AgendaController::class, 'me'])->name('me.agenda');

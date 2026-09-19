@@ -38,6 +38,8 @@ final class BuscarAnotacoesTool extends Tool
         $notes = Note::query()
             ->with(['author', 'term', 'subject'])
             ->where(fn ($q) => $q->where('nte_title', 'like', "%{$query}%")->orWhere('nte_body_md', 'like', "%{$query}%"))
+            // Mais votada primeiro — a curadoria contra slop (B5 esticada).
+            ->orderByDesc('nte_upvotes_count')
             ->orderByRaw('COALESCE(nte_published_at, nte_created_at) DESC')
             ->limit(20)
             ->get();
@@ -46,6 +48,7 @@ final class BuscarAnotacoesTool extends Tool
             'id' => $note->nte_id,
             'title' => $note->nte_title,
             'kind' => $note->nte_kind->value,
+            'upvotes_count' => $note->nte_upvotes_count,
             'subject_id' => $note->subject_sbj_id,
             'subject_name' => $note->relationLoaded('subject') ? $note->subject?->sbj_name : null,
             'author' => $note->relationLoaded('author') ? ['id' => $note->author->usr_id, 'name' => $note->author->usr_name] : null,

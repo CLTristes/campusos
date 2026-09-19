@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -96,6 +97,11 @@ final class Note extends Model
     public function term(): BelongsTo
     {
         return $this->belongsTo(config('models.term'), 'term_trm_id', 'trm_id');
+    }
+
+    public function votes(): HasMany
+    {
+        return $this->hasMany(NoteVote::class, 'note_nte_id', 'nte_id');
     }
 
     protected static function newFactory(): NoteFactory

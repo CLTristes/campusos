@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CampusOs\Lifeos\Http\Controllers;
 
 use CampusOs\Lifeos\Actions\CreateNoteAction;
+use CampusOs\Lifeos\Actions\ToggleNoteVoteAction;
 use CampusOs\Lifeos\Actions\UpdateNoteVisibilityAction;
 use CampusOs\Lifeos\Http\Resources\NoteResource;
 use CampusOs\Lifeos\Models\Note;
@@ -35,14 +36,18 @@ final class NoteController
      *
      * @queryParam subject_id string O acervo de uma disciplina específica. Example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
      *
-     * @response 200 scenario="acervo de uma disciplina" {"data":[{"id":"01a0…","title":"Resumo da P2","kind":"summary","visibility":"subject","author":{"id":"01a0…","name":"Um Veterano"},"term":{"year":2024,"period":1}}]}
+     * @response 200 scenario="acervo de uma disciplina" {"data":[{"id":"01a0…","title":"Resumo da P2","kind":"summary","visibility":"subject","upvotes_count":3,"author":{"id":"01a0…","name":"Um Veterano"},"term":{"year":2024,"period":1}}]}
      */
     public function index(Request $request): AnonymousResourceCollection
     {
         return NoteResource::collection(
             Note::query()
                 ->with(['author', 'term'])
+                ->with(['votes' => fn ($q) => $q->where('user_usr_id', $request->user()->usr_id)])
                 ->when($request->query('subject_id'), fn ($q, $subjectId) => $q->where('subject_sbj_id', $subjectId))
+                // Mais votada primeiro — a curadoria contra slop (B5 esticada).
+                // Empate desfaz por data, como sempre foi.
+                ->orderByDesc('nte_upvotes_count')
                 ->orderByRaw('COALESCE(nte_published_at, nte_created_at) DESC')
                 ->get()
         );
@@ -111,6 +116,29 @@ final class NoteController
         ]);
 
         return NoteResource::make($updated->load(['author', 'term']));
+    }
+
+    /**
+     * Votar / desfazer voto
+     *
+     * Alterna: primeira chamada vota, segunda desfaz. Só quem enxerga a nota
+     * (mesmo `NoteVisibilityScope` de sempre) e não é o autor pode votar.
+     *
+     * @authenticated
+     *
+     * @response 200 scenario="votou" {"data":{"id":"01a0…","upvotes_count":4},"voted":true}
+     * @response 422 scenario="a própria nota" {"message":"Você não pode votar na própria anotação."}
+     */
+    public function vote(Request $request, Note $note, ToggleNoteVoteAction $action): JsonResponse
+    {
+        $result = $action->execute([
+            'note_id' => $note->nte_id,
+            'user_id' => $request->user()->usr_id,
+        ]);
+
+        return NoteResource::make($result['note'])
+            ->additional(['voted' => $result['voted']])
+            ->response();
     }
 
     /**
