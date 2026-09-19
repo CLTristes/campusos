@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluxos multi-etapa · CampusOS</title>
+<meta name="description" content="Os pontos do sistema onde uma chamada dispara várias ações em cascata — sequência e máquina de estado dos seis fluxos mais importantes do CampusOS.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/feature.css">
+<style>
+  .diagram-frame { border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); padding: 1.1rem 1.2rem 0.6rem; margin: 1.2rem 0; overflow-x: auto; }
+  .diagram-label { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.4rem; }
+  /* pre {} do site.css pinta todo <pre> com fundo escuro de "terminal" — sem
+     isto, o <svg> que o Mermaid injeta dentro de pre.mermaid herdava aquele
+     fundo escuro por trás de formas e texto pensados pra fundo claro. Mesma
+     neutralização que .fig pre.mermaid já faz em feature.css. */
+  .diagram-frame pre.mermaid { background: transparent; color: inherit; padding: 0; margin: 0; min-width: 560px; }
+  .toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.6rem; margin: 1.5rem 0 0.5rem; }
+  .toc a { display: block; border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem 0.9rem; background: var(--surface); text-decoration: none; color: var(--ink-soft); font-size: 0.85rem; }
+  .toc a b { display: block; color: var(--ink); font-size: 0.92rem; margin-bottom: 0.2rem; }
+  .toc a:hover { border-color: var(--brand-500); }
+</style>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#e2f1e8',
+      primaryBorderColor: '#246842',
+      primaryTextColor: '#1b2231',
+      lineColor: '#808a9c',
+      secondaryColor: '#fbe4dd',
+      secondaryBorderColor: '#8b3522',
+      tertiaryColor: '#f3efe6',
+      tertiaryBorderColor: '#d5cfc1',
+      noteBkgColor: '#fdf3f0',
+      noteBorderColor: '#c9563a',
+      actorBkg: '#f3efe6',
+      actorBorder: '#d5cfc1',
+      actorTextColor: '#1b2231',
+      signalColor: '#4b5468',
+      signalTextColor: '#1b2231',
+      labelBoxBkgColor: '#e2f1e8',
+      labelBoxBorderColor: '#246842',
+      fontFamily: "'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace",
+      fontSize: '13px',
+    },
+  });
+</script>
+</head>
+<body data-view="business">
+
+<header class="site-nav">
+  <a class="brand" href="../index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="../index.html">docs-site</a><span class="sep">/</span>features/fluxos-multi-etapa.html</span>
+</header>
+
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">Referência técnica · pós-B8</div>
+    <h1>Fluxos multi-etapa, em diagrama</h1>
+    <p class="lede">
+      A maior parte do CampusOS não é CRUD — é uma chamada que dispara uma cascata. O exemplo mais rico é o envio do
+      histórico acadêmico: um <code>POST</code> vira upload, fila, leitura por IA, conferência humana e só então
+      matrícula de verdade, com pontos de decisão em cada etapa. Esta página traça, em sequência e em máquina de
+      estado, os seis fluxos onde entender "o que acontece por baixo de uma chamada só" é o que faz desenhar a tela
+      certa da primeira vez.
+    </p>
+    <div class="meta-row">
+      <span><b>Fonte:</b> código real, não o desenho original</span>
+      <span><b>Formato:</b> diagramas Mermaid (sequência + estado)</span>
+      <span><b>Status:</b> <span class="status-pill built">✅ v0.10.0</span></span>
+    </div>
+  </header>
+
+  <div class="toc">
+    <a href="#fluxo-1"><b>1 · Documento acadêmico</b>upload → fila → IA → conferência → matrícula</a>
+    <a href="#fluxo-2"><b>2 · Adoção de tarefa</b>copiar sem virar dono da linha do outro</a>
+    <a href="#fluxo-3"><b>3 · Escada de visibilidade</b>os 5 níveis de uma anotação</a>
+    <a href="#fluxo-4"><b>4 · Horas complementares</b>o corte por teto, agregado por categoria</a>
+    <a href="#fluxo-5"><b>5 · Elegibilidade e simulação</b>o grafo de pré-requisitos, duas vezes</a>
+    <a href="#fluxo-6"><b>6 · Copiloto MCP</b>duas checagens de permissão, uma Action</a>
+  </div>
+
+  <section class="step" id="fluxo-1">
+    <div class="step-head"><span class="step-num">1</span><h2>Documento acadêmico — a cascata mais longa do sistema</h2></div>
+    <p>
+      Um <code>POST</code> síncrono cria o registro e devolve <b>202</b> na hora — tudo que vem depois roda em fila,
+      em outro processo, sem o cliente esperando. É por isso que o front precisa fazer polling: não existe um único
+      "aguarde" que cubra da leitura por IA até a matrícula existir de fato.
+    </p>
+    <div class="diagram-frame">
+      <div class="diagram-label">sequência</div>
+      <pre class="mermaid">
+sequenceDiagram
+    actor Aluno
+    participant API as AcademicDocumentController
+    participant Upload as UploadAcademicDocumentAction
+    participant Fila as ParseAcademicDocumentJob (fila imports)
+    participant IA as AcademicDocumentExtractor
+    participant Confirm as ConfirmAcademicDocumentAction
+    participant DB as Banco (transação)
+
+    Aluno->>API: POST /me/academic-documents
+    API->>Upload: execute()
+    Upload->>DB: EnrollmentRequest (status=uploaded)
+    Upload-->>Fila: dispatch()
+    API-->>Aluno: 202 Accepted
+
+    activate Fila
+    Fila->>DB: status=processing
+    Fila->>IA: extract(arquivo)
+    alt indisponibilidade (5xx, 429, timeout, sem credencial)
+        IA-->>Fila: ExtractorUnavailableException
+        Fila->>DB: status=uploaded (reset)
+        Fila--xFila: relança — fila reprocessa (3 tries, backoff 10s/60s)
+    else recusa de negócio (não é documento acadêmico, sem disciplinas)
+        IA-->>Fila: ExtractedDocument::failed()
+        Fila->>DB: status=failed (final, sem retry)
+    else sucesso
+        IA-->>Fila: ExtractedDocument (lines[])
+        Fila->>DB: status=parsed + erq_extraction
+    end
+    deactivate Fila
+
+    Aluno->>API: GET /me/academic-documents/{id} (polling)
+    API-->>Aluno: status atual
+
+    Aluno->>API: POST .../confirm (lines conferidas)
+    API->>Confirm: execute()
+    activate Confirm
+    Confirm->>DB: BEGIN
+    loop cada linha
+        alt disciplina não catalogada OU status não reconhecido
+            Confirm-->>Confirm: entra em pending[], não aborta
+        else linha válida
+            Confirm->>DB: SubjectEnrollment (updateOrCreate)
+        end
+    end
+    Confirm->>DB: EnrollmentRequest status=confirmed
+    Confirm->>DB: COMMIT
+    deactivate Confirm
+    API-->>Aluno: 200 { imported, pending[] }
+      </pre>
+    </div>
+    <div class="diagram-frame">
+      <div class="diagram-label">máquina de estado — DocumentRequestStatus</div>
+      <pre class="mermaid">
+stateDiagram-v2
+    [*] --> uploaded: POST /me/academic-documents
+    uploaded --> processing: Job pega da fila
+    processing --> uploaded: exceção de transporte (relança, reprocessa)
+    processing --> failed: recusa de negócio (sem retry)
+    processing --> failed: esgotou 3 tries (falha do Job)
+    processing --> parsed: extração ok
+    parsed --> confirmed: POST .../confirm
+    confirmed --> [*]
+    failed --> [*]
+</pre>
+    </div>
+    <div class="callout warn">
+      <b>Confirmar duas vezes é 422, não um segundo import.</b> <code>ConfirmAcademicDocumentAction</code> recusa de
+      cara se <code>erq_status</code> já é <code>confirmed</code>. E dentro da transação, uma linha com disciplina
+      fora do catálogo ou status de histórico não reconhecido NUNCA aborta as outras — vira uma entrada em
+      <code>pending[]</code> pro aluno resolver, enquanto o resto da matrícula é criado normalmente.
+    </div>
+  </section>
+
+  <section class="step" id="fluxo-2">
+    <div class="step-head"><span class="step-num">2</span><h2>Adoção de tarefa da turma</h2></div>
+    <p>
+      O ponto central: <b>adotar cria uma cópia, nunca compartilha a linha original.</b> Sem isso, o primeiro aluno
+      que marcasse "concluída" concluiria a tarefa pra turma inteira.
+    </p>
+    <div class="diagram-frame">
+      <div class="diagram-label">sequência</div>
+      <pre class="mermaid">
+sequenceDiagram
+    actor Aluno
+    participant API as TaskController
+    participant Action as AdoptTaskAction
+    participant DB as Banco
+
+    Aluno->>API: POST /tasks/{id}/adopt
+    API->>Action: execute()
+    Action->>DB: Task::findOrFail(origem)
+    alt tarefa está private
+        Action-->>API: 403 — "não foi compartilhada com a turma"
+    else o próprio dono tentando adotar a si mesmo
+        Action-->>API: 422 — "você já é o dono desta tarefa"
+    else ok
+        Action->>DB: firstOrCreate(owner, origin_tsk_id) — cópia, visibility=private
+        Note over DB: índice único (owner, origin) é a rede de<br/>segurança contra corrida — a idempotência<br/>de aplicação já resolve o duplo clique comum
+        Action-->>API: 200, a cópia
+    end
+      </pre>
+    </div>
+    <div class="callout">
+      <b>Chamar duas vezes não gera duas cópias.</b> <code>firstOrCreate</code> procura por <code>(owner_usr_id,
+      origin_tsk_id)</code> antes de inserir — encontra a cópia já existente e devolve ela. O índice único do banco
+      é o que garante isso mesmo sob duas requisições simultâneas, quando a leitura de ambas ainda não viu a
+      inserção uma da outra.
+    </div>
+  </section>
+
+  <section class="step" id="fluxo-3">
+    <div class="step-head"><span class="step-num">3</span><h2>Escada de visibilidade da anotação</h2></div>
+    <p>
+      Cinco níveis, um vocabulário só (o mesmo enum <code>Visibility</code> que <code>Task</code> reaproveita). O
+      detalhe que surpreende: <b>não existe hierarquia de "só sobe".</b> Qualquer transição em qualquer direção é
+      permitida — a única guarda é não deixar a nota "presa" sem o dado que aquele nível exige.
+    </p>
+    <div class="diagram-frame">
+      <div class="diagram-label">máquina de estado — Visibility (Note e Task)</div>
+      <pre class="mermaid">
+stateDiagram-v2
+    [*] --> private: nasce (Note sempre; Task pode nascer em offering)
+    private --> offering: precisa de offering_id
+    private --> subject: precisa de subject_id
+    private --> course: precisa de course_id
+    private --> institution
+    offering --> subject
+    offering --> course
+    offering --> institution
+    offering --> private: despublicar — sempre permitido
+    subject --> course
+    subject --> institution
+    subject --> private
+    subject --> offering
+    course --> institution
+    course --> private
+    course --> offering
+    course --> subject
+    institution --> private
+    institution --> offering
+    institution --> subject
+    institution --> course
+</pre>
+    </div>
+    <div class="callout good">
+      <b>Despublicar nunca tem pré-condição.</b> Voltar pra <code>private</code> de qualquer nível sempre funciona —
+      as três validações (precisa de <code>offering</code>/<code>subject</code>/<code>course</code>) existem só pra
+      impedir "publicar sem endereço", nunca pra impedir recuar.
+    </div>
+  </section>
+
+  <section class="step" id="fluxo-4">
+    <div class="step-head"><span class="step-num">4</span><h2>Horas complementares — o corte por teto</h2></div>
+    <p>
+      Uma Action fina na escrita; o cálculo interessante mora inteiramente na leitura, recalculado a cada request —
+      nunca persistido.
+    </p>
+    <div class="diagram-frame">
+      <div class="diagram-label">sequência</div>
+      <pre class="mermaid">
+sequenceDiagram
+    actor Aluno
+    participant API as ComplementaryActivityController
+    participant Action as CreateComplementaryActivityAction
+    participant RM as ComplementaryHoursReadModel
+    participant DB as Banco
+
+    Aluno->>API: POST /me/complementary-activities
+    API->>Action: execute()
+    alt categoria de outra matriz
+        Action-->>API: 422 — "categoria não pertence à sua matriz"
+    else ok
+        Action->>DB: ComplementaryActivity (status=submitted, sempre)
+        API->>RM: summaryForCategory(registration, categoria)
+        RM-->>API: granted = min(claimed, max_hours)
+        API-->>Aluno: 201 { capped, hours_not_counted }
+    end
+      </pre>
+    </div>
+    <div class="callout warn">
+      <b>O corte é por categoria, nunca por certificado.</b> <code>granted = min(soma_declarada, teto)</code> agrega
+      TODAS as atividades não-rejeitadas da categoria — não existe uma regra de "qual certificado perde a hora" que
+      divida a perda entre linhas. <code>cac_hours_granted</code> na linha individual fica sempre <code>null</code>
+      nesta entrega (reservado pra homologação futura).
+    </div>
+  </section>
+
+  <section class="step" id="fluxo-5">
+    <div class="step-head"><span class="step-num">5</span><h2>Elegibilidade e simulação de reprovação</h2></div>
+    <p>
+      <code>GET /me/next-term</code> percorre o grafo de pré-requisitos uma vez. <code>POST /me/simulate</code>
+      percorre o MESMO grafo <b>duas vezes</b> — uma com o histórico real, outra com a reprovação hipotética — e
+      compara.
+    </p>
+    <div class="diagram-frame">
+      <div class="diagram-label">sequência</div>
+      <pre class="mermaid">
+sequenceDiagram
+    actor Aluno
+    participant API as EligibilityController
+    participant RM as EligibilityReadModel
+    participant Action as SimulateFailureAction
+
+    Aluno->>API: GET /me/next-term
+    API->>RM: nextTerm(registration)
+    loop cada disciplina não cursada
+        RM->>RM: blockedReasons() — subject / corequisite / minimum_term / minimum_hours
+    end
+    RM-->>API: { eligible[], blocked[] com motivo }
+
+    Aluno->>API: POST /me/simulate { fail: [códigos] }
+    API->>Action: execute()
+    Action->>RM: simulate(registration, fail[])
+    RM->>RM: earliestPeriods(cenário REAL) — longest-path memoizado no DAG
+    RM->>RM: earliestPeriods(cenário SEM as reprovadas)
+    RM->>RM: compara os dois — disciplinas cuja projeção PIOROU entram em affected_subjects
+    RM-->>API: { affected_subjects[], estimated_graduation_delay_terms }
+    Note over API,RM: Nada é escrito no banco — tudo em memória,<br/>dentro do mesmo request síncrono.
+      </pre>
+    </div>
+    <div class="callout">
+      <b>A disciplina reprovada nunca aparece como "afetada".</b> Ela é a ENTRADA da simulação, não um efeito —
+      <code>affected_subjects</code> só lista o que ficou pra depois POR CAUSA dela.
+      <code>minimum_hours</code> não entra na projeção de período (não dá pra prever quanta hora cada período vai
+      render), só nos bloqueios de <code>next-term</code>.
+    </div>
+  </section>
+
+  <section class="step is-final" id="fluxo-6">
+    <div class="step-head"><span class="step-num">6</span><h2>Chamada de tool via copiloto MCP</h2></div>
+    <p>
+      A mesma <code>CreateNoteAction</code> do REST, alcançada por um canal a mais — com uma camada de autorização
+      extra que só essa tool específica precisa.
+    </p>
+    <div class="diagram-frame">
+      <div class="diagram-label">sequência</div>
+      <pre class="mermaid">
+sequenceDiagram
+    participant Cliente as Cliente MCP
+    participant MW as auth:sanctum + tenant.user + abilities:mcp:read
+    participant Server as CampusOsServer
+    participant Tool as CriarAnotacaoTool
+    participant Action as CreateNoteAction
+
+    Cliente->>MW: POST /mcp (Bearer token)
+    alt sem token válido
+        MW-->>Cliente: 401
+    else token sem ability mcp:read
+        MW-->>Cliente: 403 — nenhuma tool roda
+    else ok
+        MW->>Server: despacha pra tool pedida
+        Server->>Tool: handle(request)
+        alt token sem ability mcp:write
+            Tool-->>Cliente: erro — "sem permissão de escrita"
+        else ok
+            Tool->>Action: execute() — MESMA Action do REST
+            Action-->>Tool: Note (sempre private)
+            Tool-->>Cliente: dado estruturado
+        end
+    end
+      </pre>
+    </div>
+    <div class="callout grifo">
+      <b>Duas checagens, não uma.</b> <code>abilities:mcp:read</code> na rota barra o grosso antes de qualquer tool
+      rodar; <code>tokenCan('mcp:write')</code> dentro do <code>handle()</code> de <code>criar_anotacao</code> é
+      defesa em profundidade — e a única forma de testar essa regra pelo harness rápido do pacote, que não passa
+      pelo middleware de rota de verdade.
+    </div>
+  </section>
+
+  <div class="callout" style="margin-top: 2.25rem;">
+    <b>Dois padrões que atravessam os seis fluxos.</b> Toda Action roda o mesmo template method —
+    <code>sanitize → validate → authorize → handle</code> (<code>AbstractAction::execute()</code>, no <code>core</code>).
+    E todo <code>AuditLog</code> é gravado <i>best-effort</i>: se a escrita da auditoria falhar, a transação de
+    negócio segue normalmente — auditoria nunca é motivo de a Action inteira falhar.
+  </div>
+
+  <div class="callout warn">
+    <b>Achado, não corrigido nesta consolidação:</b> não existe <code>TaskObserver</code> — ao contrário dos outros
+    cinco fluxos de escrita, adotar uma tarefa (Fluxo 2) não parece gerar <code>AuditLog</code>. Fica registrado
+    aqui como algo a decidir: lacuna ou decisão deliberada.
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  CampusOS · docs-site — o que acontece por baixo de uma chamada só
+  <span class="sig">Se o desenho da tela discordar de um destes diagramas, um dos dois está desatualizado — corrija o que divergiu do código.</span>
+</footer>
+
+<script src="../assets/site-chrome.js" defer></script>
+</body>
+</html>

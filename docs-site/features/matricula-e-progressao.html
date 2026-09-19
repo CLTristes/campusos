@@ -58,7 +58,7 @@
     </p>
     <div class="meta-row">
       <span><b>Módulos:</b> catalog + journey</span>
-      <span><b>Tabelas:</b> 8 + 5</span>
+      <span><b>Tabelas:</b> 10 + 5</span>
       <span><b>Blocos do plano:</b> B2, B3, B4</span>
       <span><b>Status:</b> Fases 0–6 <span class="status-pill built">✅ em código</span></span>
     </div>
@@ -122,7 +122,7 @@
     </div>
 
     <div class="view-code">
-      <div class="code-path"><span>app-modules/catalog/database/seeders/CurriculumSeeder.php</span><span class="status-pill mvp">⚑ B2</span></div>
+      <div class="code-path"><span>app-modules/catalog/database/seeders/CurriculumSeeder.php</span><span class="status-pill built">✅ B2</span></div>
       <p>Sete tabelas, semeadas nesta ordem (a ordem importa — cada uma depende da anterior):</p>
       <pre><code>courses          → 1 registro (curso × campus)
 curricula        → 1 registro ativo, com as 5 exigências de hora
@@ -185,7 +185,7 @@ final class Curriculum extends Model
     </div>
 
     <div class="view-code">
-      <div class="code-path"><span>app-modules/journey/src/Actions/CreateRegistrationAction.php</span><span class="status-pill mvp">⚑ B3</span></div>
+      <div class="code-path"><span>app-modules/journey/src/Actions/CreateRegistrationAction.php</span><span class="status-pill built">✅ B3</span></div>
       <div class="io"><span class="io-k">entrada</span><span class="io-v"><code>student_id</code>, <code>course_id</code>, <code>entry_term</code> — a matriz NÃO vem do cliente</span></div>
       <div class="io"><span class="io-k">regra</span><span class="io-v">a matriz é resolvida no servidor: a ativa do curso cuja <code>cur_effective_from</code> é a mais recente <b>não posterior</b> ao termo de ingresso</span></div>
       <div class="io"><span class="io-k">saída</span><span class="io-v"><code>Registration</code> com <code>curriculum_cur_id</code> congelado</span></div>
@@ -232,7 +232,7 @@ $curriculum = $this->curricula
     </div>
 
     <div class="view-code">
-      <div class="code-path"><span><span class="method post">POST</span>/api/v1/me/academic-documents → 202</span><span class="status-pill mvp">⚑ B4</span></div>
+      <div class="code-path"><span><span class="method post">POST</span>/api/v1/me/academic-documents → 202</span><span class="status-pill built">✅ B4</span></div>
       <p>Regra de ouro nº 7: operação demorada responde <b>202 + Job em fila nomeada</b>, nunca segura o request.</p>
       <pre><code>// app-modules/journey/src/Actions/UploadAcademicDocumentAction.php
 $request = EnrollmentRequest::create([
@@ -246,7 +246,7 @@ ParseAcademicDocumentJob::dispatch($request-&gt;erq_id)-&gt;onQueue('imports');
 
 return $request;  // controller devolve 202 + Location do recurso</code></pre>
 
-      <div class="code-path"><span>app-modules/core/src/Contracts/AcademicDocumentExtractor.php</span><span class="status-pill mvp">⚑ B4</span></div>
+      <div class="code-path"><span>app-modules/core/src/Contracts/AcademicDocumentExtractor.php</span><span class="status-pill built">✅ B4</span></div>
       <p>Contrato no <code>core</code>, implementação em <code>integrations</code> — <code>journey</code> não conhece a Anthropic.</p>
       <pre><code>interface AcademicDocumentExtractor
 {
@@ -309,7 +309,7 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
         3. Guard de idempotência no topo: se <code>erq_status</code> já é <code>parsed</code> ou <code>confirmed</code>, o Job retorna sem fazer nada. Fila reentrega.
       </div>
 
-      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/academic-documents/{id} · <span class="method post">POST</span>.../confirm</span><span class="status-pill mvp">⚑ B4</span></div>
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/academic-documents/{id} · <span class="method post">POST</span>.../confirm</span><span class="status-pill built">✅ B4</span></div>
       <p>
         O <code>GET</code> devolve <code>erq_status</code> + <code>erq_extraction</code> — é o que a tela de conferência consome,
         e o que o front usa em <i>polling</i> enquanto o status for <code>processing</code>.
@@ -385,7 +385,7 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
     </div>
 
     <div class="view-code">
-      <div class="code-path"><span>app-modules/journey/src/Enums/EnrollmentStatus.php</span><span class="status-pill mvp">⚑ B3</span></div>
+      <div class="code-path"><span>app-modules/journey/src/Enums/EnrollmentStatus.php</span><span class="status-pill built">✅ B3</span></div>
       <pre><code>enum EnrollmentStatus: string
 {
     case Enrolled      = 'enrolled';
@@ -471,7 +471,7 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
     </div>
 
     <div class="view-code">
-      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/progress</span><span class="status-pill mvp">⚑ B3 · o endpoint mais importante</span></div>
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/me/progress</span><span class="status-pill built">✅ B3 · o endpoint mais importante</span></div>
       <pre><code>{
   "registration": { "number": "2567857", "course": "Sist. Informação (25)",
                     "curriculum": "45 - Sistemas De Informação 02",
@@ -615,15 +615,15 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
     <table>
       <thead><tr><th>O que o desafio pede</th><th>Onde é resolvido</th><th>Status</th></tr></thead>
       <tbody>
-        <tr><td>Acompanhamento do progresso no curso</td><td>Fase 4 — <code>GET /me/progress</code>, cinco faixas</td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Identificação de disciplinas concluídas e pendentes</td><td>Fases 3 e 4 — <code>pending_subjects</code></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Compreensão dos pré-requisitos</td><td>Fase 5 — travada <b>com o motivo</b></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Planejamento dos próximos períodos</td><td>Fase 5 — <code>GET /me/next-term</code></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Organização de documentos acadêmicos</td><td>Fase 2 + <a href="horas-e-certificados.html">certificados</a></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Acompanhamento de atividades complementares</td><td><a href="horas-e-certificados.html">Horas e certificados</a></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
-        <tr><td>Conhecimento dos prazos e requisitos para formação</td><td>Fase 4 — <code>forecast.terms_until_deadline</code></td><td><span class="status-pill mvp">⚑ MVP</span></td></tr>
+        <tr><td>Acompanhamento do progresso no curso</td><td>Fase 4 — <code>GET /me/progress</code>, cinco faixas</td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Identificação de disciplinas concluídas e pendentes</td><td>Fases 3 e 4 — <code>pending_subjects</code></td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Compreensão dos pré-requisitos</td><td>Fase 5 — travada <b>com o motivo</b></td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Planejamento dos próximos períodos</td><td>Fase 5 — <code>GET /me/next-term</code></td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Organização de documentos acadêmicos</td><td>Fase 2 + <a href="horas-e-certificados.html">certificados</a></td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Acompanhamento de atividades complementares</td><td><a href="horas-e-certificados.html">Horas e certificados</a></td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Conhecimento dos prazos e requisitos para formação</td><td>Fase 4 — <code>forecast.terms_until_deadline</code></td><td><span class="status-pill built">✅ em código</span></td></tr>
         <tr><td>Impactos de reprovações ou atrasos</td><td>Fase 6 — simulação</td><td><span class="status-pill built">✅ em código</span></td></tr>
-        <tr><td>Orientações acadêmicas claras e centralizadas</td><td><a href="acervo-compartilhado.html">Acervo</a> + <a href="copiloto-mcp.html">copiloto</a></td><td><span class="status-pill mvp">⚑ MVP</span> + <span class="status-pill stretch">◎</span></td></tr>
+        <tr><td>Orientações acadêmicas claras e centralizadas</td><td><a href="acervo-compartilhado.html">Acervo</a> + <a href="copiloto-mcp.html">copiloto</a></td><td><span class="status-pill built">✅ em código</span> + <span class="status-pill built">✅ em código</span></td></tr>
       </tbody>
     </table>
     <div class="callout good">
