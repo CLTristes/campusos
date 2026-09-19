@@ -1,7 +1,7 @@
 {
     "version": 1,
     "project": "campusos",
-    "current_release": "v0.9.0",
+    "current_release": "v0.10.0",
     "last_sync": {
         "at": "2026-09-19",
         "by": "claude-sonnet-5",
@@ -200,6 +200,17 @@
             "delivered_at": "2026-09-19",
             "status": "synced",
             "synced_at": "2026-09-19",
+            "touches": [
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md"
+            ]
+        },
+        {
+            "id": "v0.10.0/feat_copiloto_mcp",
+            "file": "docs/reports/v0.10.0/feat_copiloto_mcp.md",
+            "title": "Copiloto MCP (B8, esticada 3) — sete tools sobre o mesmo Actions/read models, token separado do login com escopo de escrita opt-in",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
             "touches": [
                 "docs/reports/SISTEMA.md",
                 "CLAUDE.md"
