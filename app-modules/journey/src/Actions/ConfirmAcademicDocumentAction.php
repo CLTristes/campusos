@@ -101,6 +101,28 @@ final class ConfirmAcademicDocumentAction extends AbstractAction
                     continue;
                 }
 
+                // Histórico real pode imprimir duas linhas pra mesma disciplina/
+                // período — a matrícula regular E uma tentativa de exame de
+                // suficiência à parte (aprovada ou não) — e as duas caem na MESMA
+                // chave (registration, subject, term). Sem esta checagem, a
+                // ordem em que o documento lista as linhas decide silenciosamente
+                // qual fica valendo; aqui uma aprovação já registrada nunca é
+                // apagada por uma linha que não conta como cumprida.
+                $existing = SubjectEnrollment::query()
+                    ->where('registration_reg_id', $registrationId)
+                    ->where('subject_sbj_id', $subject->sbj_id)
+                    ->where('term_trm_id', $term->trm_id)
+                    ->first();
+
+                if ($existing !== null && $existing->sen_status->countsAsCompleted() && ! $status->countsAsCompleted()) {
+                    $pending[] = [
+                        'code' => $line['code'],
+                        'reason' => "Já existe aprovação registrada para esta disciplina neste período; a situação \"{$line['status']}\" não foi aplicada — confira manualmente.",
+                    ];
+
+                    continue;
+                }
+
                 SubjectEnrollment::query()->updateOrCreate(
                     [
                         'registration_reg_id' => $registrationId,

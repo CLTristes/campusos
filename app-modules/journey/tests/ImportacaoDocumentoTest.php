@@ -305,6 +305,36 @@ it('situação impressa mais longa que 64 caracteres vira pendência, não derru
         ->and($r->json('pending.0.code'))->toBe('ARC102');
 });
 
+it('uma linha reprovada não apaga aprovação já registrada na mesma disciplina/período', function () {
+    // Histórico real: a disciplina cursada normal (aprovada) E uma tentativa
+    // de exame de suficiência à parte (reprovada) para o MESMO ano/período —
+    // as duas linhas caem na mesma chave (registration, subject, term).
+    $doc = EnrollmentRequest::factory()->create([
+        'user_usr_id' => $this->user->usr_id,
+        'erq_status' => DocumentRequestStatus::Parsed,
+    ]);
+
+    $r = $this->actingAs($this->user)
+        ->postJson("/api/v1/me/academic-documents/{$doc->erq_id}/confirm", [
+            'registration_id' => $this->registration->reg_id,
+            'lines' => [
+                ['code' => 'ARC102', 'year' => 2023, 'period' => 1,
+                    'status' => 'Aprovado Por Nota/Frequência', 'grade' => 8.2, 'attendance' => 85.7],
+                ['code' => 'ARC102', 'year' => 2023, 'period' => 1,
+                    'status' => 'Reprovado em Exame de Suficiência', 'grade' => 3.3],
+            ],
+        ])->assertOk();
+
+    expect($r->json('imported'))->toBe(1)
+        ->and($r->json('pending.0.code'))->toBe('ARC102');
+
+    $matricula = SubjectEnrollment::query()->whereRelation('subject', 'sbj_code', 'ARC102')->firstOrFail();
+
+    expect($matricula->sen_status)->toBe(EnrollmentStatus::Approved)
+        ->and((float) $matricula->sen_grade)->toBe(8.2)
+        ->and($matricula->sen_hours_earned)->toBe(60);
+});
+
 it('disciplina fora do catálogo vira pendência, não erro fatal', function () {
     $doc = EnrollmentRequest::factory()->create([
         'user_usr_id' => $this->user->usr_id,
