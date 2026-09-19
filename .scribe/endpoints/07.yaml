@@ -402,3 +402,66 @@ endpoints:
     controller: null
     method: null
     route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/auth/mcp-token
+    metadata:
+      custom: []
+      groupName: Autenticação
+      groupDescription: |-
+
+        Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
+        `Authorization: Bearer <token>` de toda rota autenticada — e é dele que o
+        sistema descobre a instituição do usuário, nunca de um parâmetro do cliente.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Token do copiloto (B8)'
+      description: |-
+        Um token SEPARADO do login, com o menor escopo possível — `mcp:read`
+        sempre, `mcp:write` só se pedido (habilita a única tool de escrita,
+        `criar_anotacao`). Chamar de novo troca o token anterior: nunca existe
+        mais de um token de copiloto por vez.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      allow_write:
+        custom: []
+        name: allow_write
+        description: 'Habilita a tool de escrita. Default: false.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      allow_write: false
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"token":"2|xyz…","abilities":["mcp:read"]}'
+        headers: []
+        description: 'só leitura'
+      -
+        custom: []
+        status: 200
+        content: '{"token":"2|xyz…","abilities":["mcp:read","mcp:write"]}'
+        headers: []
+        description: 'leitura e escrita'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

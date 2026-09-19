@@ -108,6 +108,9 @@
                                                                                 <li class="tocify-item level-2" data-unique="autenticacao-POSTapi-v1-auth-verify-email-resend">
                                 <a href="#autenticacao-POSTapi-v1-auth-verify-email-resend">Reenviar código de verificação</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="autenticacao-POSTapi-v1-auth-mcp-token">
+                                <a href="#autenticacao-POSTapi-v1-auth-mcp-token">Token do copiloto (B8)</a>
+                            </li>
                                                                         </ul>
                             </ul>
                     <ul id="tocify-header-catalogo-academico" class="tocify-header">
@@ -1914,6 +1917,177 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                         </form>
 
+                    <h2 id="autenticacao-POSTapi-v1-auth-mcp-token">Token do copiloto (B8)</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Um token SEPARADO do login, com o menor escopo possível — <code>mcp:read</code>
+sempre, <code>mcp:write</code> só se pedido (habilita a única tool de escrita,
+<code>criar_anotacao</code>). Chamar de novo troca o token anterior: nunca existe
+mais de um token de copiloto por vez.</p>
+
+<span id="example-requests-POSTapi-v1-auth-mcp-token">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/auth/mcp-token" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"allow_write\": false
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/auth/mcp-token"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "allow_write": false
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-auth-mcp-token">
+            <blockquote>
+            <p>Example response (200, só leitura):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;token&quot;: &quot;2|xyz&hellip;&quot;,
+    &quot;abilities&quot;: [
+        &quot;mcp:read&quot;
+    ]
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (200, leitura e escrita):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;token&quot;: &quot;2|xyz&hellip;&quot;,
+    &quot;abilities&quot;: [
+        &quot;mcp:read&quot;,
+        &quot;mcp:write&quot;
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-auth-mcp-token" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-auth-mcp-token"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-auth-mcp-token"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-auth-mcp-token" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-auth-mcp-token">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-auth-mcp-token" data-method="POST"
+      data-path="api/v1/auth/mcp-token"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-auth-mcp-token', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-auth-mcp-token"
+                    onclick="tryItOut('POSTapi-v1-auth-mcp-token');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-auth-mcp-token"
+                    onclick="cancelTryOut('POSTapi-v1-auth-mcp-token');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-auth-mcp-token"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/auth/mcp-token</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-auth-mcp-token"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-auth-mcp-token"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>allow_write</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <label data-endpoint="POSTapi-v1-auth-mcp-token" style="display: none">
+            <input type="radio" name="allow_write"
+                   value="true"
+                   data-endpoint="POSTapi-v1-auth-mcp-token"
+                   data-component="body"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="POSTapi-v1-auth-mcp-token" style="display: none">
+            <input type="radio" name="allow_write"
+                   value="false"
+                   data-endpoint="POSTapi-v1-auth-mcp-token"
+                   data-component="body"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>Habilita a tool de escrita. Default: false. Example: <code>false</code></p>
+        </div>
+        </form>
+
                 <h1 id="catalogo-academico">Catálogo acadêmico</h1>
 
     <p>Curso, matriz curricular e as disciplinas por período. Dado mestre da
@@ -2698,7 +2872,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "title=Semana Acadêmica de Sistemas de Informação"\
     --form "hours_claimed=20"\
     --form "issued_at=architecto"\
-    --form "certificate=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php0e3lkhvpo376antOiC9" </code></pre></div>
+    --form "certificate=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpevk8tvak7op3a3CcmwC" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -2886,7 +3060,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>O certificado (PDF, PNG ou JPG). Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php0e3lkhvpo376antOiC9</code></p>
+<p>O certificado (PDF, PNG ou JPG). Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpevk8tvak7op3a3CcmwC</code></p>
         </div>
         </form>
 
@@ -3058,7 +3232,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "kind=transcript"\
-    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpbpeugscuniv8aiiZ8pV" </code></pre></div>
+    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php322fa5avjf3g7Cw991O" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -3193,7 +3367,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpbpeugscuniv8aiiZ8pV</code></p>
+<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php322fa5avjf3g7Cw991O</code></p>
         </div>
         </form>
 
