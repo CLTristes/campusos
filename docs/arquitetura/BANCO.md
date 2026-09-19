@@ -18,7 +18,7 @@ em `app-modules/<modulo>/database/`.
 | --- | --- | --- | --- |
 | `entities` | `ent_` | `ent_id` | `tenancy` — **o tenant: a instituição de ensino** |
 | `campuses` | `cps_` | `cps_id` | `tenancy` |
-| `users` | `usr_` | `usr_id` | `tenancy` |
+| `users` | `usr_` | `usr_id` | `tenancy` — `course_crs_id` nullable (B8): o curso que um `coordinator` coordena; `institution_admin` não preenche, enxerga a instituição inteira via `EntityScope` |
 | `audit_logs` | `aud_` | `aud_id` | `core` |
 | `courses` | `crs_` | `crs_id` | `catalog` |
 | `curricula` | `cur_` | `cur_id` | `catalog` |
@@ -43,7 +43,7 @@ em `app-modules/<modulo>/database/`.
 > — não as imite. O `users` do esqueleto do Laravel foi **removido**: no
 > CampusOS o usuário é model de domínio, com escopo de tenant e auditoria.
 
-**Sete decisões de modelagem que vale conhecer antes de mexer:**
+**Oito decisões de modelagem que vale conhecer antes de mexer:**
 
 1. **`subjects` é global na instituição, não por curso.** É o que faz a anotação
    do veterano de Engenharia chegar ao calouro de Química que cursa a mesma
@@ -72,6 +72,11 @@ em `app-modules/<modulo>/database/`.
    linha — dividir a perda entre certificados é ambíguo quando o teto corta
    no meio de um conjunto. A coluna existe pronta para a homologação manual
    futura da coordenação.
+8. **`users.course_crs_id` é nullable e vale só pra `coordinator` (B8).** Um
+   curso só — nenhuma coordenação multi-curso existe no piloto. FK cruza pra
+   `catalog.courses` (schema, não import de classe — a fronteira modular
+   protege código, não FK de banco). `institution_admin` nunca preenche:
+   enxerga a instituição inteira via `EntityScope`, sem precisar de curso.
 
 ## Convenção de nomenclatura
 

@@ -1,7 +1,7 @@
 {
     "version": 1,
     "project": "campusos",
-    "current_release": "v0.8.0",
+    "current_release": "v0.9.0",
     "last_sync": {
         "at": "2026-09-19",
         "by": "claude-sonnet-5",
@@ -191,6 +191,18 @@
                 "CLAUDE.md",
                 "docs-site/plano-de-ataque.html",
                 "docs-site/features/matricula-e-progressao.html"
+            ]
+        },
+        {
+            "id": "v0.9.0/feat_painel_da_coordenacao",
+            "file": "docs/reports/v0.9.0/feat_painel_da_coordenacao.md",
+            "title": "Painel da coordenação (B8, esticada 2) — as quatro perguntas agregadas, RBAC de borda, piso de anonimato",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
+            "synced_at": null,
+            "touches": [
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md"
             ]
         }
     ]

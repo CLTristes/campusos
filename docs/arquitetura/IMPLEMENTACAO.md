@@ -289,3 +289,31 @@ idempotência (`ref`) opcional. O padrão (real, em `PlaceOrderAction`):
 
 Refs nulas não colidem (múltiplos NULL passam pelo índice único) — a
 idempotência é opt-in por requisição.
+
+## `DB::table()` não aplica `EntityScope` — agregação exige filtro manual
+
+`EntityScope` é um **global scope do Eloquent**. Ele intercepta `Model::query()`,
+nunca `DB::table()`. Um read model que agrega em SQL puro (regra de ouro nº 7
+"agregação em SQL, não em PHP" — ver `AcademicStatsProvider`/
+`JourneyAcademicStatsProvider` do painel da coordenação, B8) precisa filtrar
+`entity_ent_id` na mão, com `TenantContext::id()`:
+
+```php
+DB::table('registrations')
+    ->where('registrations.entity_ent_id', TenantContext::id()) // <- sem isso, vaza
+    ->join(/* ... */)
+    ->groupBy(/* ... */)
+    ->get();
+```
+
+**Bug real, pego por teste antes do merge** (não é hipotético): a primeira
+versão do painel da coordenação esqueceu esse filtro em duas queries. Como o
+escopo de `institution_admin` passa `courseId = null` (institution-wide, de
+propósito — ver regra 6 de `docs/dominio/PAINEL_COORDENACAO.md`), a ausência
+do filtro de tenant significava agregar a tabela **inteira, de todas as
+instituições**, não só a de quem pediu. Um teste de isolamento entre tenants
+pegou antes do merge — mas o padrão de detecção (esquecer o filtro não quebra
+NADA em dev com um tenant só) é traiçoeiro o bastante pra valer o registro
+aqui: toda vez que uma query usa `DB::table()`/`DB::raw()` em vez de um Model
+com `Entityable`, pergunte "isto tem `entity_ent_id` na cláusula `WHERE`?"
+antes de considerar pronto.

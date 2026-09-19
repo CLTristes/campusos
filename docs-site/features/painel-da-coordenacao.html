@@ -47,7 +47,7 @@
     <div class="meta-row">
       <span><b>Módulo:</b> insights · 0 tabelas</span>
       <span><b>Bloco:</b> B8 · segunda esticada</span>
-      <span><b>Status:</b> <span class="status-pill stretch">◎ esticada</span></span>
+      <span><b>Status:</b> <span class="status-pill built">✅ em código</span></span>
     </div>
     <div class="switch-bar">
       <div class="view-switch" role="group" aria-label="Nível de detalhe">
@@ -93,29 +93,40 @@
       </ol>
     </div>
     <div class="view-code">
-      <div class="code-path"><span><span class="method get">GET</span>/api/v1/staff/insights/{bottlenecks,cohorts,at-risk,demand}</span><span class="status-pill stretch">◎ B8</span></div>
+      <div class="code-path"><span><span class="method get">GET</span>/api/v1/staff/insights/{bottlenecks,cohorts,at-risk,demand}</span><span class="status-pill built">✅ em código</span></div>
       <pre><code>// insights NÃO possui tabela. Ele lê por contrato declarado no core e
 // implementado no journey -- a alternativa (Eloquent direto em
 // subject_enrollments) fura a fronteira e o ArchTest quebra o CI.
 interface AcademicStatsProvider   // core
 {
-    public function failureRateBySubject(string $courseId, int $lastTerms): array;
-    public function cohortDelay(string $courseId): array;
-    public function registrationsNearDeadline(string $courseId, int $within): int;
-    public function demandForNextTerm(string $courseId): array;
-}</code></pre>
+    public function failureRateBySubject(?string $courseId, int $lastTerms): array;
+    public function cohortDelay(?string $courseId): array;
+    public function registrationsNearDeadline(?string $courseId, int $within): int;
+    public function demandForNextTerm(?string $courseId): array;
+}
+// $courseId nulo = a instituição inteira (institution_admin);
+// preenchido = só aquele curso (coordinator) — resolvido no controller a
+// partir do usuário autenticado, nunca de um course_id vindo do cliente.</code></pre>
       <div class="callout">
         <b>Por que módulo, e não só mais um endpoint no journey:</b> a razão de mudar é diferente.
         <code>journey</code> muda quando a regra acadêmica muda; <code>insights</code> muda quando a coordenação quer outro recorte.
-        Separar hoje custa um contrato de quatro métodos. <b>Mas é honesto dizer que a fronteira ainda não doeu</b> — se o relógio
-        apertar, nascer como <code>GET /staff/insights/*</code> dentro do <code>journey</code> e extrair depois é a decisão certa
-        pelo critério anti-over-engineering do próprio template.
+        O relógio não apertou — coube separar desde já: contrato de quatro métodos no <code>core</code>
+        (<code>AcademicStatsProvider</code>), implementação em <code>JourneyAcademicStatsProvider</code>, controller e rotas
+        vivendo só em <code>insights</code>.
       </div>
       <p>
         <b>Agregação em SQL, não em PHP.</b> É a exceção legítima à regra "Eloquent é a única camada de dados":
-        <code>selectRaw</code> com <code>COUNT</code>/<code>AVG</code> agrupado continua sendo Eloquent, e trazer
-        quarenta mil linhas para somar em memória seria o erro real. O que não se faz é montar string de SQL com valor vindo do cliente.
+        <code>DB::table()</code> com <code>JOIN</code>/<code>GROUP BY</code>/<code>HAVING</code> continua sendo query
+        estruturada, e trazer quarenta mil linhas para somar em memória seria o erro real. O que não se faz é montar string
+        de SQL com valor vindo do cliente.
       </p>
+      <div class="callout warn">
+        <b><code>DB::table()</code> não aplica <code>EntityScope</code>.</b> Bug real pego por teste antes do merge:
+        as duas perguntas que agregam em SQL puro (gargalo por disciplina, atraso por coorte) esqueceram o filtro de
+        <code>entity_ent_id</code> na primeira versão — com o escopo de <code>institution_admin</code>
+        (<code>courseId: null</code>), isso vazaria a agregação de TODAS as instituições, não só a de quem perguntou.
+        Ver <a href="../arquitetura/IMPLEMENTACAO.md">IMPLEMENTACAO.md</a>.
+      </div>
     </div>
   </section>
 
@@ -136,23 +147,34 @@ interface AcademicStatsProvider   // core
     <div class="view-code">
       <pre><code>// Piso de anonimato aplicado no read model, não na interface --
 // esconder no front é vazamento com passo extra (o JSON continua lá).
-const MIN_COHORT = 5;
+private const MIN_COHORT = 5;
 
-$rows-&gt;filter(fn ($r) =&gt; $r-&gt;total &gt;= self::MIN_COHORT);</code></pre>
+$rows-&gt;havingRaw('COUNT(*) &gt;= ?', [self::MIN_COHORT]);</code></pre>
       <p>
-        RBAC: rotas sob <code>role:coordinator|institution_admin</code> com escopo resolvido no servidor a partir do
-        <code>campus_cps_id</code> e do curso do usuário — <b>nunca</b> a partir de um <code>course_id</code> que o cliente manda.
+        RBAC: rotas sob <code>role:coordinator,institution_admin</code> (middleware genérico,
+        <code>app/Http/Middleware/EnsureUserHasRole.php</code>) com escopo resolvido no servidor a partir de
+        <code>users.course_crs_id</code> — <b>nunca</b> a partir de um <code>course_id</code> que o cliente manda.
         Aceitar o recorte do request é como um painel de gestão vira leitura de curso alheio.
       </p>
     </div>
   </section>
 
   <section class="step is-final" id="resumo">
-    <div class="step-head"><span class="step-num">✓</span><h2>Se o tempo acabar</h2></div>
+    <div class="step-head"><span class="step-num">✓</span><h2>As quatro perguntas, todas em código</h2></div>
+    <table>
+      <thead><tr><th>Pergunta</th><th>Endpoint</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Onde a turma empaca</td><td><code>GET /staff/insights/bottlenecks</code></td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Quanto custa</td><td><code>GET /staff/insights/cohorts</code></td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>Quem está perto do limite</td><td><code>GET /staff/insights/at-risk</code></td><td><span class="status-pill built">✅ em código</span></td></tr>
+        <tr><td>O que está represado</td><td><code>GET /staff/insights/demand</code></td><td><span class="status-pill built">✅ em código</span></td></tr>
+      </tbody>
+    </table>
     <div class="callout grifo">
-      <b>Duas queries salvam esta página inteira na demo:</b> reprovação por disciplina (o gráfico de barras) e atraso médio
-      por coorte (um número). São 20 minutos, cabem no B8, e mudam a natureza da apresentação — de "app de estudante"
-      para "produto com cliente institucional". O resto do painel pode ser roadmap sem prejuízo nenhum.
+      As duas que "salvariam a demo" sozinhas (reprovação por disciplina e atraso médio por coorte) saíram — mas as
+      outras duas couberam no mesmo orçamento reaproveitando <code>ProgressReadModel</code>/<code>EligibilityReadModel</code>
+      já prontos (B3, B8 esticada 1), em vez de reimplementar a lógica de previsão/elegibilidade em SQL. Ver
+      <a href="../../docs/dominio/PAINEL_COORDENACAO.md">PAINEL_COORDENACAO.md</a>.
     </div>
   </section>
 

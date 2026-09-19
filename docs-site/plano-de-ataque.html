@@ -104,7 +104,7 @@
     <div class="eyebrow">hackathon · 14 horas e 15 minutos</div>
     <h1>Plano de ataque</h1>
     <p class="lede">
-      <b style="color:var(--leaf-700)">Atualizado v0.7.0 (19/09) — B0 a B7 fechados. O documento do aluno vira barra de progresso, o acervo do veterano entrega nota entre semestres, a turma compartilha prazo pela agenda, e o aluno acompanha horas complementares com teto por categoria. Restam as esticadas (B8).</b><br>
+      <b style="color:var(--leaf-700)">Atualizado v0.9.0 (19/09) — B0 a B7 fechados, e duas das três esticadas do B8 também: pré-requisitos/simulação de reprovação e o painel da coordenação. Só o copiloto MCP (B8.3) segue de fora.</b><br>
       São <strong>01:45</strong>. A entrega é <strong>hoje às 16:00</strong>. Isso são <strong>14h15</strong> de relógio, das quais
       aproximadamente 13 são de código — o resto é a demo, e a demo não se improvisa.
       Esta página existe por um motivo só: às 05:30 da manhã ninguém decide prioridade direito,
@@ -252,7 +252,7 @@
         <p>O que couber. A ordem abaixo é por <b>retorno no pitch dividido pelo custo</b>, já considerando que a essa hora ninguém está raciocinando bem.</p>
         <ul>
           <li><b>1. Pré-requisitos e simulação de reprovação</b> — o "se eu reprovar em Cálculo 2, formo um semestre depois". Puro cálculo sobre dado que já existe, nenhuma tabela nova, e é o bullet mais vistoso do 5.1. <b>✅ feito</b> — <code>GET /me/next-term</code> + <code>POST /me/simulate</code>, ver <a href="features/matricula-e-progressao.html">Fases 5–6</a>.</li>
-          <li><b>2. Painel da coordenação</b> — duas queries agregadas. Mostra que o produto tem cliente institucional, não só aluno.</li>
+          <li><b>2. Painel da coordenação</b> — duas queries agregadas. Mostra que o produto tem cliente institucional, não só aluno. <b>✅ feito</b> — as quatro perguntas do desenho, não só as duas mínimas: <code>GET /staff/insights/{bottlenecks,cohorts,at-risk,demand}</code>, ver <a href="features/painel-da-coordenacao.html">o desenho completo</a>.</li>
           <li><b>3. Copiloto MCP</b> — maior efeito no pitch, maior risco de consumir duas horas. Só encare se o B1–B7 fechou inteiro.</li>
         </ul>
       </div>

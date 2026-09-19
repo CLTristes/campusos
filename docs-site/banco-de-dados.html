@@ -329,6 +329,7 @@ flowchart LR
           <li><span class="key-tag pk">PK</span><code>usr_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>campus_cps_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>course_crs_id</code><span class="type">uuid nullable — B8, o curso do coordenador</span></li>
           <li><span class="key-tag"></span><code>usr_name</code><span class="type">string</span></li>
           <li><span class="key-tag uk">UK</span><code>usr_email</code><span class="type">string — por entity</span></li>
           <li><span class="key-tag"></span><code>usr_password</code><span class="type">string (hash)</span></li>
@@ -346,7 +347,9 @@ flowchart LR
           <code>usr_role</code>: <code>student</code> · <code>coordinator</code> · <code>professor</code> ·
           <code>institution_admin</code>. <code>entity_ent_id</code> é <b>NOT NULL hoje</b> — o admin de plataforma sem instituição
           é ◇ planejado (a coluna vira nullable quando ele entrar, com exceção explícita no <code>EntityScope</code>).
-          <code>campus_cps_id</code> só faz sentido pro coordenador (recorte de visão).
+          <code>campus_cps_id</code> é o câmpus de qualquer usuário; <code>course_crs_id</code> (B8) é o escopo REAL do
+          painel da coordenação — só <code>coordinator</code> preenche (um curso só, nenhuma coordenação multi-curso existe
+          no piloto); <code>institution_admin</code> nunca preenche, enxerga a instituição inteira via <code>EntityScope</code>.
           <code>usr_verification_code</code> (v0.4.0) segue o mesmo tratamento de <code>usr_password</code>: hashado, fora de
           serialização e do diff de auditoria — é o código de 6 dígitos do cadastro livre, camada de segurança em paralelo,
           nunca um portão de acesso.

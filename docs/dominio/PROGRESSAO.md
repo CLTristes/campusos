@@ -226,7 +226,10 @@ disciplinas a jusante, não só a reprovada.
    sempre bate.
    **Quando revisitar:** se `registrations.reg_current_term` virar coluna de
    verdade (a regra 10 sendo implementada de fato), `EligibilityReadModel`
-   deve passar a consultá-la em vez de calcular `termsAttended` sozinho.
+   deve passar a consultá-la em vez de calcular `termsAttended` sozinho — o
+   mesmo vale para `JourneyAcademicStatsProvider::cohortDelay` (B8), que usa
+   a mesma aproximação num agregado por coorte (ver
+   [`PAINEL_COORDENACAO.md`](PAINEL_COORDENACAO.md)).
 
 ## Mapa de código
 
