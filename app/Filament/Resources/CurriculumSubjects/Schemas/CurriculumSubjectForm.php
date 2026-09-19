@@ -16,13 +16,25 @@ class CurriculumSubjectForm
     {
         return $schema
             ->components([
-                TextInput::make('entity_ent_id')
+                Select::make('entity_ent_id')
+                    ->relationship(name: 'entity', titleAttribute: 'ent_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('curriculum_cur_id')
+                Select::make('curriculum_cur_id')
+                    ->relationship(name: 'curriculum', titleAttribute: 'cur_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('subject_sbj_id')
+                Select::make('subject_sbj_id')
+                    ->relationship(name: 'subject', titleAttribute: 'sbj_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('elective_group_elg_id'),
+                Select::make('elective_group_elg_id')
+                    ->relationship(name: 'electiveGroup', titleAttribute: 'elg_name')
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('cbs_term')
                     ->required()
                     ->numeric(),

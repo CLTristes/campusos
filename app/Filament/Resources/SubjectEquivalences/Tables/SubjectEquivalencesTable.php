@@ -17,8 +17,12 @@ class SubjectEquivalencesTable
         return $table
             ->columns([
                 TextColumn::make('seq_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('curriculum_subject_cbs_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('curriculumSubject.subject.sbj_name')
+                    ->label('Disciplina na matriz')
+                    ->searchable(),
                 TextColumn::make('seq_code')
                     ->searchable(),
                 TextColumn::make('seq_hours')

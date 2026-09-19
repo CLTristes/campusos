@@ -20,8 +20,12 @@ class CoursesTable
         return $table
             ->columns([
                 TextColumn::make('crs_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('campus_cps_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('campus.cps_name')
+                    ->label('Câmpus')
+                    ->searchable(),
                 TextColumn::make('crs_code')
                     ->searchable(),
                 TextColumn::make('crs_name')

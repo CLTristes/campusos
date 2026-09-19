@@ -17,11 +17,20 @@ class EnrollmentRequestForm
     {
         return $schema
             ->components([
-                TextInput::make('entity_ent_id')
+                Select::make('entity_ent_id')
+                    ->relationship(name: 'entity', titleAttribute: 'ent_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('user_usr_id')
+                Select::make('user_usr_id')
+                    ->relationship(name: 'user', titleAttribute: 'usr_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('registration_reg_id'),
+                Select::make('registration_reg_id')
+                    ->relationship(name: 'registration', titleAttribute: 'reg_number')
+                    ->searchable()
+                    ->preload(),
                 Select::make('erq_kind')
                     ->options([
                         'transcript' => 'Histórico escolar',

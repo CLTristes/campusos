@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ElectiveGroups\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -14,9 +15,15 @@ class ElectiveGroupForm
     {
         return $schema
             ->components([
-                TextInput::make('entity_ent_id')
+                Select::make('entity_ent_id')
+                    ->relationship(name: 'entity', titleAttribute: 'ent_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('curriculum_cur_id')
+                Select::make('curriculum_cur_id')
+                    ->relationship(name: 'curriculum', titleAttribute: 'cur_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
                 TextInput::make('elg_code')
                     ->required(),

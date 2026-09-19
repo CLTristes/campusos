@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Students\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -15,9 +16,15 @@ class StudentForm
     {
         return $schema
             ->components([
-                TextInput::make('entity_ent_id')
+                Select::make('entity_ent_id')
+                    ->relationship(name: 'entity', titleAttribute: 'ent_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('user_usr_id'),
+                Select::make('user_usr_id')
+                    ->relationship(name: 'user', titleAttribute: 'usr_name')
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('std_name')
                     ->required(),
                 TextInput::make('std_document'),

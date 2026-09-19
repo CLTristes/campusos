@@ -17,10 +17,18 @@ class CurriculumSubjectsTable
         return $table
             ->columns([
                 TextColumn::make('cbs_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('curriculum_cur_id'),
-                TextColumn::make('subject_sbj_id'),
-                TextColumn::make('elective_group_elg_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('curriculum.cur_name')
+                    ->label('Matriz')
+                    ->searchable(),
+                TextColumn::make('subject.sbj_name')
+                    ->label('Disciplina')
+                    ->searchable(),
+                TextColumn::make('electiveGroup.elg_name')
+                    ->label('Conjunto de optativas')
+                    ->searchable(),
                 TextColumn::make('cbs_term')
                     ->numeric()
                     ->sortable(),

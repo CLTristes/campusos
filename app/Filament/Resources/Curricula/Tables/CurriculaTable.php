@@ -20,8 +20,12 @@ class CurriculaTable
         return $table
             ->columns([
                 TextColumn::make('cur_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('course_crs_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('course.crs_name')
+                    ->label('Curso')
+                    ->searchable(),
                 TextColumn::make('cur_code')
                     ->searchable(),
                 TextColumn::make('cur_name')

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Campuses\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -14,7 +15,10 @@ class CampusForm
     {
         return $schema
             ->components([
-                TextInput::make('entity_ent_id')
+                Select::make('entity_ent_id')
+                    ->relationship(name: 'entity', titleAttribute: 'ent_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
                 TextInput::make('cps_name')
                     ->required(),

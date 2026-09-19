@@ -17,9 +17,15 @@ class EnrollmentRequestsTable
         return $table
             ->columns([
                 TextColumn::make('erq_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('user_usr_id'),
-                TextColumn::make('registration_reg_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('user.usr_name')
+                    ->label('Aluno')
+                    ->searchable(),
+                TextColumn::make('registration.reg_number')
+                    ->label('Vínculo')
+                    ->searchable(),
                 TextColumn::make('erq_kind')
                     ->badge(),
                 TextColumn::make('erq_status')

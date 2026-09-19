@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Registrations\Schemas;
 
+use CampusOs\Catalog\Models\Term;
 use CampusOs\Journey\Enums\RegistrationStatus;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -17,15 +18,31 @@ class RegistrationForm
     {
         return $schema
             ->components([
-                TextInput::make('entity_ent_id')
+                Select::make('entity_ent_id')
+                    ->relationship(name: 'entity', titleAttribute: 'ent_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('student_std_id')
+                Select::make('student_std_id')
+                    ->relationship(name: 'student', titleAttribute: 'std_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('course_crs_id')
+                Select::make('course_crs_id')
+                    ->relationship(name: 'course', titleAttribute: 'crs_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('curriculum_cur_id')
+                Select::make('curriculum_cur_id')
+                    ->relationship(name: 'curriculum', titleAttribute: 'cur_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('entry_term_trm_id')
+                Select::make('entry_term_trm_id')
+                    ->relationship(name: 'entryTerm')
+                    ->getOptionLabelFromRecordUsing(fn (Term $record): string => $record->label())
+                    ->searchable(['trm_year', 'trm_period'])
+                    ->preload()
                     ->required(),
                 TextInput::make('reg_number')
                     ->required(),

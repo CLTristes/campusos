@@ -20,8 +20,15 @@ class UsersTable
         return $table
             ->columns([
                 TextColumn::make('usr_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('campus_cps_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('campus.cps_name')
+                    ->label('Câmpus')
+                    ->searchable(),
+                TextColumn::make('course.crs_name')
+                    ->label('Curso coordenado')
+                    ->searchable(),
                 TextColumn::make('usr_name')
                     ->searchable(),
                 TextColumn::make('usr_email')

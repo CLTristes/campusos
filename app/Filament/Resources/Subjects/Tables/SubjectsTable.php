@@ -20,7 +20,9 @@ class SubjectsTable
         return $table
             ->columns([
                 TextColumn::make('sbj_id'),
-                TextColumn::make('entity_ent_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
                 TextColumn::make('sbj_code')
                     ->searchable(),
                 TextColumn::make('sbj_name')

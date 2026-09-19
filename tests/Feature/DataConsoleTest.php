@@ -5,6 +5,8 @@ declare(strict_types=1);
 use CampusOs\Catalog\Database\Seeders\MatrizUtfprSeeder;
 use CampusOs\Catalog\Models\Course;
 use CampusOs\Catalog\Models\Curriculum;
+use CampusOs\Catalog\Models\CurriculumSubject;
+use CampusOs\Catalog\Models\Prerequisite;
 use CampusOs\Catalog\Models\Subject;
 use CampusOs\Catalog\Models\Term;
 use CampusOs\Core\Tenancy\TenantContext;
@@ -13,6 +15,8 @@ use CampusOs\Journey\Models\EnrollmentRequest;
 use CampusOs\Journey\Models\Registration;
 use CampusOs\Journey\Models\Student;
 use CampusOs\Journey\Models\SubjectEnrollment;
+use CampusOs\Lifeos\Models\Note;
+use CampusOs\Lifeos\Models\Task;
 use CampusOs\Tenancy\Enums\UserRole;
 use CampusOs\Tenancy\Models\Campus;
 use CampusOs\Tenancy\Models\Entity;
@@ -81,6 +85,12 @@ it('as listagens do console abrem sem erro', function () {
         '/data-console/registrations',
         '/data-console/subject-enrollments',
         '/data-console/enrollment-requests',
+        '/data-console/complementary-categories',
+        '/data-console/prerequisites',
+        '/data-console/complementary-activities',
+        '/data-console/notes',
+        '/data-console/tasks',
+        '/data-console/audit-logs',
     ] as $url) {
         $this->actingAs($coord)->get($url)->assertSuccessful();
     }
@@ -115,6 +125,42 @@ it('as telas de edição da jornada abrem sem erro, com dado real', function () 
         "/data-console/registrations/{$registration->reg_id}/edit",
         "/data-console/subject-enrollments/{$enrollment->sen_id}/edit",
         "/data-console/enrollment-requests/{$document->erq_id}/edit",
+    ] as $url) {
+        $this->actingAs($coord)->get($url)->assertSuccessful();
+    }
+});
+
+it('as telas de edição do acervo, tarefas e pré-requisitos abrem sem erro, com dado relacional real', function () {
+    $this->seed(MatrizUtfprSeeder::class);
+    $coord = User::factory()->coordinator()->create();
+    $author = User::factory()->create();
+
+    // Note: FK simples (author, subject) — prova que o NoteVisibilityScope
+    // foi removido do Resource (senão dependeria de quem está logado).
+    $note = Note::factory()->create([
+        'author_usr_id' => $author->usr_id,
+        'subject_sbj_id' => Subject::query()->value('sbj_id'),
+    ]);
+
+    // Task: auto-relação (origin_tsk_id -> tasks.tsk_id).
+    $originTask = Task::factory()->create(['owner_usr_id' => $author->usr_id]);
+    $adoptedTask = Task::factory()->create([
+        'owner_usr_id' => $coord->usr_id,
+        'origin_tsk_id' => $originTask->tsk_id,
+    ]);
+
+    // Prerequisite: DUAS BelongsTo pro mesmo CurriculumSubject, dois níveis
+    // de dot-notation (curriculumSubject.subject / required.subject).
+    $curriculumSubjects = CurriculumSubject::query()->with('subject')->take(2)->get();
+    $prerequisite = Prerequisite::factory()->create([
+        'curriculum_subject_cbs_id' => $curriculumSubjects[0]->cbs_id,
+        'required_cbs_id' => $curriculumSubjects[1]->cbs_id,
+    ]);
+
+    foreach ([
+        "/data-console/notes/{$note->nte_id}/edit",
+        "/data-console/tasks/{$adoptedTask->tsk_id}/edit",
+        "/data-console/prerequisites/{$prerequisite->prq_id}/edit",
     ] as $url) {
         $this->actingAs($coord)->get($url)->assertSuccessful();
     }

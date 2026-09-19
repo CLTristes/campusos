@@ -20,10 +20,19 @@ class OfferingsTable
         return $table
             ->columns([
                 TextColumn::make('ofr_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('term_trm_id'),
-                TextColumn::make('subject_sbj_id'),
-                TextColumn::make('campus_cps_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('term.trm_year')
+                    ->label('Termo')
+                    ->formatStateUsing(fn ($record) => $record->term?->label() ?? '—')
+                    ->sortable(),
+                TextColumn::make('subject.sbj_name')
+                    ->label('Disciplina')
+                    ->searchable(),
+                TextColumn::make('campus.cps_name')
+                    ->label('Câmpus')
+                    ->searchable(),
                 TextColumn::make('ofr_class_code')
                     ->searchable(),
                 TextColumn::make('ofr_professor_name')

@@ -20,11 +20,22 @@ class SubjectEnrollmentsTable
         return $table
             ->columns([
                 TextColumn::make('sen_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('registration_reg_id'),
-                TextColumn::make('subject_sbj_id'),
-                TextColumn::make('term_trm_id'),
-                TextColumn::make('offering_ofr_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('registration.reg_number')
+                    ->label('Vínculo')
+                    ->searchable(),
+                TextColumn::make('subject.sbj_name')
+                    ->label('Disciplina')
+                    ->searchable(),
+                TextColumn::make('term.trm_year')
+                    ->label('Termo')
+                    ->formatStateUsing(fn ($record) => $record->term?->label() ?? '—')
+                    ->sortable(),
+                TextColumn::make('offering.ofr_class_code')
+                    ->label('Turma')
+                    ->searchable(),
                 TextColumn::make('sen_status')
                     ->badge()
                     ->searchable(),

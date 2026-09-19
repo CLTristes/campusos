@@ -20,11 +20,22 @@ class RegistrationsTable
         return $table
             ->columns([
                 TextColumn::make('reg_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('student_std_id'),
-                TextColumn::make('course_crs_id'),
-                TextColumn::make('curriculum_cur_id'),
-                TextColumn::make('entry_term_trm_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('student.std_name')
+                    ->label('Aluno')
+                    ->searchable(),
+                TextColumn::make('course.crs_name')
+                    ->label('Curso')
+                    ->searchable(),
+                TextColumn::make('curriculum.cur_name')
+                    ->label('Matriz')
+                    ->searchable(),
+                TextColumn::make('entryTerm.trm_year')
+                    ->label('Termo de ingresso')
+                    ->formatStateUsing(fn ($record) => $record->entryTerm?->label() ?? '—')
+                    ->sortable(),
                 TextColumn::make('reg_number')
                     ->searchable(),
                 TextColumn::make('reg_status')

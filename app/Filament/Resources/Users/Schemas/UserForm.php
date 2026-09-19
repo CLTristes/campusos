@@ -16,9 +16,21 @@ class UserForm
     {
         return $schema
             ->components([
-                TextInput::make('entity_ent_id')
+                Select::make('entity_ent_id')
+                    ->relationship(name: 'entity', titleAttribute: 'ent_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('campus_cps_id'),
+                Select::make('campus_cps_id')
+                    ->relationship(name: 'campus', titleAttribute: 'cps_name')
+                    ->searchable()
+                    ->preload(),
+                Select::make('course_crs_id')
+                    ->label('Curso coordenado')
+                    ->relationship(name: 'course', titleAttribute: 'crs_name')
+                    ->searchable()
+                    ->preload()
+                    ->helperText('Só relevante para coordenação — o curso que este usuário coordena (B8).'),
                 TextInput::make('usr_name')
                     ->required(),
                 TextInput::make('usr_email')

@@ -17,6 +17,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Atrás de um proxy que termina TLS (Cloudflare Tunnel, ngrok, etc.),
+        // o `php artisan serve` só enxerga tráfego HTTP puro — sem isto,
+        // route()/url() geram links `http://` mesmo servidos via `https://`,
+        // e o navegador bloqueia como conteúdo misto (é por isso que o Scalar
+        // do /docs/api não carrega a spec por trás de um túnel). `at: '*'`
+        // porque o IP do proxy muda a cada túnel novo — não é fixável a um
+        // IP conhecido em dev.
+        $middleware->trustProxies(at: '*');
+
         // Aliases de middleware de BORDA. `resolve.tenant` é o placeholder
         // didático do template — troque a classe pelo seu middleware real de
         // autenticação (token/hash) mantendo o alias, e nenhuma rota muda.

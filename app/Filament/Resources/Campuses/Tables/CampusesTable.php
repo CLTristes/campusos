@@ -20,7 +20,9 @@ class CampusesTable
         return $table
             ->columns([
                 TextColumn::make('cps_id'),
-                TextColumn::make('entity_ent_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
                 TextColumn::make('cps_name')
                     ->searchable(),
                 TextColumn::make('cps_code')

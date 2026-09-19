@@ -17,8 +17,12 @@ class ElectiveGroupsTable
         return $table
             ->columns([
                 TextColumn::make('elg_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('curriculum_cur_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('curriculum.cur_name')
+                    ->label('Matriz')
+                    ->searchable(),
                 TextColumn::make('elg_code')
                     ->searchable(),
                 TextColumn::make('elg_name')

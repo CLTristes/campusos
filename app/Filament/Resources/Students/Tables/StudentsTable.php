@@ -20,8 +20,12 @@ class StudentsTable
         return $table
             ->columns([
                 TextColumn::make('std_id'),
-                TextColumn::make('entity_ent_id'),
-                TextColumn::make('user_usr_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
+                TextColumn::make('user.usr_name')
+                    ->label('Usuário')
+                    ->searchable(),
                 TextColumn::make('std_name')
                     ->searchable(),
                 TextColumn::make('std_document')

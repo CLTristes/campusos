@@ -17,9 +17,15 @@ class CurriculumForm
     {
         return $schema
             ->components([
-                TextInput::make('entity_ent_id')
+                Select::make('entity_ent_id')
+                    ->relationship(name: 'entity', titleAttribute: 'ent_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('course_crs_id')
+                Select::make('course_crs_id')
+                    ->relationship(name: 'course', titleAttribute: 'crs_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
                 TextInput::make('cur_code')
                     ->required(),

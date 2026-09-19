@@ -17,7 +17,9 @@ class TermsTable
         return $table
             ->columns([
                 TextColumn::make('trm_id'),
-                TextColumn::make('entity_ent_id'),
+                TextColumn::make('entity.ent_name')
+                    ->label('Instituição')
+                    ->searchable(),
                 TextColumn::make('trm_year')
                     ->numeric()
                     ->sortable(),

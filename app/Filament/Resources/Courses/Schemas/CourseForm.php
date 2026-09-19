@@ -17,9 +17,15 @@ class CourseForm
     {
         return $schema
             ->components([
-                TextInput::make('entity_ent_id')
+                Select::make('entity_ent_id')
+                    ->relationship(name: 'entity', titleAttribute: 'ent_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                TextInput::make('campus_cps_id')
+                Select::make('campus_cps_id')
+                    ->relationship(name: 'campus', titleAttribute: 'cps_name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
                 TextInput::make('crs_code')
                     ->required(),
