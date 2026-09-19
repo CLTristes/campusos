@@ -1,25 +1,34 @@
-name: 'Tarefas da turma'
+name: 'Acervo do veterano'
 description: |-
 
-  B6 do desafio 5.2: uma pessoa cadastra um prazo na oferta, a turma inteira
-  enxerga na própria agenda (`GET /me/agenda`) e decide se adota.
+  O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+  turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+  leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+  exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+  aqui.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/me/agenda
+    uri: api/v1/notes
     metadata:
       custom: []
-      groupName: 'Tarefas da turma'
-      groupDescription: ''
+      groupName: 'Acervo do veterano'
+      groupDescription: |-
+
+        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+        aqui.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Minha agenda'
+      title: 'Listar notas'
       description: |-
-        Pendências próprias mais as tarefas que a turma compartilhou nas
-        ofertas em que você está matriculado **no termo corrente**, ainda não
-        adotadas (`adopted: false`) — ordenado por prazo.
+        As próprias (qualquer visibilidade) mais o que outros compartilharam com
+        este usuário, pela escada de visibilidade. Filtre por `subject_id` para
+        ver o acervo de uma disciplina específica — é a tela do 5.2.
       authenticated: true
       deprecated: false
     headers:
@@ -27,8 +36,20 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
+    queryParameters:
+      subject_id:
+        custom: []
+        name: subject_id
+        description: 'O acervo de uma disciplina específica.'
+        required: false
+        example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      subject_id: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
@@ -36,9 +57,9 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":[{"id":"01a0…","title":"Prova 2","due_at":"2026-10-14T23:59:00-03:00","visibility":"offering","adopted":false}]}'
+        content: '{"data":[{"id":"01a0…","title":"Resumo da P2","kind":"summary","visibility":"subject","author":{"id":"01a0…","name":"Um Veterano"},"term":{"year":2024,"period":1}}]}'
         headers: []
-        description: 'com tarefa da turma pendente de adoção'
+        description: 'acervo de uma disciplina'
     responseFields: []
     auth: []
     controller: null
@@ -48,21 +69,21 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/v1/tasks
+    uri: api/v1/notes
     metadata:
       custom: []
-      groupName: 'Tarefas da turma'
+      groupName: 'Acervo do veterano'
       groupDescription: |-
 
-        B6 do desafio 5.2: uma pessoa cadastra um prazo na oferta, a turma inteira
-        enxerga na própria agenda (`GET /me/agenda`) e decide se adota.
+        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+        aqui.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Criar tarefa'
-      description: |-
-        Ao contrário da nota, a tarefa não nasce sempre privada: informe
-        `visibility: offering` + `offering_id` para já cadastrar direto na
-        turma.
+      title: 'Criar nota'
+      description: 'Nasce privada — publicar é um passo separado (`.../visibility`).'
       authenticated: true
       deprecated: false
     headers:
@@ -78,17 +99,17 @@ endpoints:
         name: title
         description: ''
         required: true
-        example: 'Prova 2'
+        example: 'Resumo da P2'
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-      description_md:
+      body_md:
         custom: []
-        name: description_md
+        name: body_md
         description: 'Conteúdo em markdown.'
-        required: false
+        required: true
         example: architecto
         type: string
         enumValues: []
@@ -98,34 +119,12 @@ endpoints:
       kind:
         custom: []
         name: kind
-        description: 'exam, assignment, reading ou personal.'
+        description: 'summary, past_exam, solved_exercise_list, material ou tip.'
         required: true
-        example: exam
+        example: summary
         type: string
         enumValues: []
         exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      due_at:
-        custom: []
-        name: due_at
-        description: 'Data limite (ISO 8601).'
-        required: false
-        example: '2026-10-14T23:59:00-03:00'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      visibility:
-        custom: []
-        name: visibility
-        description: 'private, offering, subject, course ou institution. Default: private.'
-        required: false
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
         nullable: false
         deprecated: false
       subject_id:
@@ -133,16 +132,38 @@ endpoints:
         name: subject_id
         description: 'A disciplina, se houver.'
         required: false
+        example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      offering_id:
+        custom: []
+        name: offering_id
+        description: 'A turma, se houver.'
+        required: false
         example: architecto
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      offering_id:
+      course_id:
         custom: []
-        name: offering_id
-        description: 'A turma — obrigatório se visibility=offering.'
+        name: course_id
+        description: 'O curso, se houver.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      term_id:
+        custom: []
+        name: term_id
+        description: 'O semestre em que foi escrita, se houver.'
         required: false
         example: architecto
         type: string
@@ -151,21 +172,79 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      title: 'Prova 2'
-      description_md: architecto
-      kind: exam
-      due_at: '2026-10-14T23:59:00-03:00'
-      visibility: architecto
-      subject_id: architecto
+      title: 'Resumo da P2'
+      body_md: architecto
+      kind: summary
+      subject_id: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
       offering_id: architecto
+      course_id: architecto
+      term_id: architecto
     fileParameters: []
     responses:
       -
         custom: []
         status: 201
-        content: '{"data":{"id":"01a0…","title":"Prova 2","visibility":"offering"}}'
+        content: '{"data":{"id":"01a0…","title":"Resumo da P2","visibility":"private"}}'
         headers: []
-        description: 'criada na turma'
+        description: criada
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/notes/{nte_id}'
+    metadata:
+      custom: []
+      groupName: 'Acervo do veterano'
+      groupDescription: |-
+
+        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+        aqui.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Ver uma nota'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      nte_id:
+        custom: []
+        name: nte_id
+        description: 'The ID of the nte.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      nte_id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
     responseFields: []
     auth: []
     controller: null
@@ -175,30 +254,33 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: 'api/v1/tasks/{task_tsk_id}/adopt'
+    uri: 'api/v1/notes/{note_nte_id}/visibility'
     metadata:
       custom: []
-      groupName: 'Tarefas da turma'
+      groupName: 'Acervo do veterano'
       groupDescription: |-
 
-        B6 do desafio 5.2: uma pessoa cadastra um prazo na oferta, a turma inteira
-        enxerga na própria agenda (`GET /me/agenda`) e decide se adota.
+        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
+        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
+        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
+        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
+        aqui.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Adotar tarefa da turma'
+      title: 'Mudar a visibilidade'
       description: |-
-        Cria uma cópia privada apontando pra origem — sem afetar a tarefa
-        original nem quem mais adotou.
+        Publicar (subir na escada) ou despublicar (voltar para `private`, que
+        sempre funciona, sem pré-condição nenhuma). Só o autor pode chamar.
       authenticated: true
       deprecated: false
     headers:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      task_tsk_id:
+      note_nte_id:
         custom: []
-        name: task_tsk_id
-        description: 'The ID of the task tsk.'
+        name: note_nte_id
+        description: 'The ID of the note nte.'
         required: true
         example: architecto
         type: string
@@ -207,95 +289,49 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      task_tsk_id: architecto
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":{"id":"01a0…","visibility":"private","origin_task_id":"01a0…"}}'
-        headers: []
-        description: adotada
-      -
-        custom: []
-        status: 403
-        content: '{"message":"Esta tarefa não foi compartilhada com a turma."}'
-        headers: []
-        description: 'não compartilhada'
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - PATCH
-    uri: 'api/v1/tasks/{task_tsk_id}/status'
-    metadata:
-      custom: []
-      groupName: 'Tarefas da turma'
-      groupDescription: |-
-
-        B6 do desafio 5.2: uma pessoa cadastra um prazo na oferta, a turma inteira
-        enxerga na própria agenda (`GET /me/agenda`) e decide se adota.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Mudar o status'
-      description: 'Só o dono da tarefa (a cópia adotada é sua desde a adoção).'
-      authenticated: true
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      task_tsk_id:
-        custom: []
-        name: task_tsk_id
-        description: 'The ID of the task tsk.'
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      task_tsk_id: architecto
+      note_nte_id: architecto
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      status:
+      visibility:
         custom: []
-        name: status
-        description: 'todo, doing ou done.'
+        name: visibility
+        description: 'private, offering, subject, course ou institution.'
         required: true
-        example: done
+        example: subject
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
+      subject_id:
+        custom: []
+        name: subject_id
+        description: 'Obrigatório se a nota ainda não tiver disciplina e o alvo exigir uma.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
     cleanBodyParameters:
-      status: done
+      visibility: subject
+      subject_id: architecto
     fileParameters: []
     responses:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":"01a0…","status":"done"}}'
+        content: '{"data":{"id":"01a0…","visibility":"subject"}}'
         headers: []
-        description: concluída
+        description: publicada
       -
         custom: []
         status: 403
-        content: '{"message":"Esta tarefa não é sua."}'
+        content: '{"message":"Esta nota não é sua."}'
         headers: []
-        description: 'não é o dono'
+        description: 'não é o autor'
     responseFields: []
     auth: []
     controller: null

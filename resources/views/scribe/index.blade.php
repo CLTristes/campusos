@@ -168,6 +168,25 @@
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-painel-da-coordenacao" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="painel-da-coordenacao">
+                    <a href="#painel-da-coordenacao">Painel da coordenação</a>
+                </li>
+                                    <ul id="tocify-subheader-painel-da-coordenacao" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="painel-da-coordenacao-GETapi-v1-staff-insights-bottlenecks">
+                                <a href="#painel-da-coordenacao-GETapi-v1-staff-insights-bottlenecks">Onde a turma empaca</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="painel-da-coordenacao-GETapi-v1-staff-insights-cohorts">
+                                <a href="#painel-da-coordenacao-GETapi-v1-staff-insights-cohorts">Quanto custa</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="painel-da-coordenacao-GETapi-v1-staff-insights-at-risk">
+                                <a href="#painel-da-coordenacao-GETapi-v1-staff-insights-at-risk">Quem está perto do limite</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="painel-da-coordenacao-GETapi-v1-staff-insights-demand">
+                                <a href="#painel-da-coordenacao-GETapi-v1-staff-insights-demand">O que está represado</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-tarefas-da-turma" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="tarefas-da-turma">
                     <a href="#tarefas-da-turma">Tarefas da turma</a>
@@ -2679,7 +2698,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --form "title=Semana Acadêmica de Sistemas de Informação"\
     --form "hours_claimed=20"\
     --form "issued_at=architecto"\
-    --form "certificate=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpklg3r0u5tpt78KexqOy" </code></pre></div>
+    --form "certificate=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php0e3lkhvpo376antOiC9" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -2867,7 +2886,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>O certificado (PDF, PNG ou JPG). Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpklg3r0u5tpt78KexqOy</code></p>
+<p>O certificado (PDF, PNG ou JPG). Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php0e3lkhvpo376antOiC9</code></p>
         </div>
         </form>
 
@@ -3039,7 +3058,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "kind=transcript"\
-    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpd15l9eep1ur2dXjVj9t" </code></pre></div>
+    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpbpeugscuniv8aiiZ8pV" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -3174,7 +3193,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpd15l9eep1ur2dXjVj9t</code></p>
+<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpbpeugscuniv8aiiZ8pV</code></p>
         </div>
         </form>
 
@@ -3591,6 +3610,571 @@ You can check the Dev Tools console for debugging information.</code></pre>
                                     </details>
         </div>
         </form>
+
+                <h1 id="painel-da-coordenacao">Painel da coordenação</h1>
+
+    <p>B8, segunda esticada do desafio 5.1: agregados ANÔNIMOS pra quem coordena
+— nunca aluno nomeado (ver docs/dominio/PAINEL_COORDENACAO.md). <code>insights</code>
+não tem tabela própria: tudo aqui vem de <code>AcademicStatsProvider</code>, contrato
+do <code>core</code> implementado no <code>journey</code>.</p>
+<p>O escopo (curso × instituição) é resolvido AQUI, a partir do usuário
+autenticado — nunca de um <code>course_id</code> que o cliente mande. Coordenador
+enxerga o próprio curso (<code>usr.course_crs_id</code>); <code>institution_admin</code> enxerga
+a instituição inteira (<code>courseId: null</code>, o <code>EntityScope</code> já faz o resto).</p>
+
+                                <h2 id="painel-da-coordenacao-GETapi-v1-staff-insights-bottlenecks">Onde a turma empaca</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Taxa de reprovação por disciplina, nota e falta separadas, nos últimos
+<code>last_terms</code> termos com matrícula. Disciplinas com menos de 5
+tentativas resolvidas não aparecem (piso de anonimato).</p>
+
+<span id="example-requests-GETapi-v1-staff-insights-bottlenecks">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/staff/insights/bottlenecks?last_terms=4" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/staff/insights/bottlenecks"
+);
+
+const params = {
+    "last_terms": "4",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-staff-insights-bottlenecks">
+            <blockquote>
+            <p>Example response (200, com gargalo):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;subject_code&quot;: &quot;MAT029&quot;,
+            &quot;subject_name&quot;: &quot;C&aacute;lculo 2&quot;,
+            &quot;total_attempts&quot;: 40,
+            &quot;failed_grade&quot;: 15,
+            &quot;failed_absence&quot;: 6,
+            &quot;failed_both&quot;: 0,
+            &quot;failure_rate&quot;: 0.525
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-staff-insights-bottlenecks" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-staff-insights-bottlenecks"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-staff-insights-bottlenecks"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-staff-insights-bottlenecks" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-staff-insights-bottlenecks">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-staff-insights-bottlenecks" data-method="GET"
+      data-path="api/v1/staff/insights/bottlenecks"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-staff-insights-bottlenecks', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-staff-insights-bottlenecks"
+                    onclick="tryItOut('GETapi-v1-staff-insights-bottlenecks');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-staff-insights-bottlenecks"
+                    onclick="cancelTryOut('GETapi-v1-staff-insights-bottlenecks');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-staff-insights-bottlenecks"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/staff/insights/bottlenecks</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-staff-insights-bottlenecks"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-staff-insights-bottlenecks"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>last_terms</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="last_terms"                data-endpoint="GETapi-v1-staff-insights-bottlenecks"
+               value="4"
+               data-component="query">
+    <br>
+<p>Quantos termos recentes considerar. Default: 4. Example: <code>4</code></p>
+            </div>
+                </form>
+
+                    <h2 id="painel-da-coordenacao-GETapi-v1-staff-insights-cohorts">Quanto custa</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Atraso médio (em termos além do previsto pela matriz) entre os
+vínculos ativos de cada coorte de ingresso. Coortes com menos de 5
+vínculos ativos não aparecem (piso de anonimato).</p>
+
+<span id="example-requests-GETapi-v1-staff-insights-cohorts">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/staff/insights/cohorts" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/staff/insights/cohorts"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-staff-insights-cohorts">
+            <blockquote>
+            <p>Example response (200, com atraso):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;entry_term&quot;: &quot;2022/1&quot;,
+            &quot;active_registrations&quot;: 38,
+            &quot;avg_delay_terms&quot;: 2.4
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-staff-insights-cohorts" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-staff-insights-cohorts"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-staff-insights-cohorts"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-staff-insights-cohorts" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-staff-insights-cohorts">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-staff-insights-cohorts" data-method="GET"
+      data-path="api/v1/staff/insights/cohorts"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-staff-insights-cohorts', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-staff-insights-cohorts"
+                    onclick="tryItOut('GETapi-v1-staff-insights-cohorts');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-staff-insights-cohorts"
+                    onclick="cancelTryOut('GETapi-v1-staff-insights-cohorts');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-staff-insights-cohorts"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/staff/insights/cohorts</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-staff-insights-cohorts"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-staff-insights-cohorts"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="painel-da-coordenacao-GETapi-v1-staff-insights-at-risk">Quem está perto do limite</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Quantidade de vínculos ativos cuja previsão de formatura cabe em
+<code>within</code> termos ou menos até o prazo de integralização.</p>
+
+<span id="example-requests-GETapi-v1-staff-insights-at-risk">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/staff/insights/at-risk?within=2" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/staff/insights/at-risk"
+);
+
+const params = {
+    "within": "2",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-staff-insights-at-risk">
+            <blockquote>
+            <p>Example response (200, ok):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;count&quot;: 12,
+        &quot;within_terms&quot;: 2
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-staff-insights-at-risk" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-staff-insights-at-risk"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-staff-insights-at-risk"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-staff-insights-at-risk" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-staff-insights-at-risk">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-staff-insights-at-risk" data-method="GET"
+      data-path="api/v1/staff/insights/at-risk"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-staff-insights-at-risk', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-staff-insights-at-risk"
+                    onclick="tryItOut('GETapi-v1-staff-insights-at-risk');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-staff-insights-at-risk"
+                    onclick="cancelTryOut('GETapi-v1-staff-insights-at-risk');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-staff-insights-at-risk"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/staff/insights/at-risk</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-staff-insights-at-risk"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-staff-insights-at-risk"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>within</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="within"                data-endpoint="GETapi-v1-staff-insights-at-risk"
+               value="2"
+               data-component="query">
+    <br>
+<p>Quantos termos até o prazo contam como "perto". Default: 2. Example: <code>2</code></p>
+            </div>
+                </form>
+
+                    <h2 id="painel-da-coordenacao-GETapi-v1-staff-insights-demand">O que está represado</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Quantos vínculos ativos já estão elegíveis para cada disciplina ainda
+não cursada — planejamento de oferta direto, sem chute. Disciplinas
+com menos de 5 elegíveis não aparecem (piso de anonimato).</p>
+
+<span id="example-requests-GETapi-v1-staff-insights-demand">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/staff/insights/demand" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/staff/insights/demand"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-staff-insights-demand">
+            <blockquote>
+            <p>Example response (200, com demanda):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;subject_code&quot;: &quot;ES52C&quot;,
+            &quot;subject_name&quot;: &quot;Engenharia de Software II&quot;,
+            &quot;demand&quot;: 22
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-staff-insights-demand" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-staff-insights-demand"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-staff-insights-demand"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-staff-insights-demand" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-staff-insights-demand">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-staff-insights-demand" data-method="GET"
+      data-path="api/v1/staff/insights/demand"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-staff-insights-demand', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-staff-insights-demand"
+                    onclick="tryItOut('GETapi-v1-staff-insights-demand');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-staff-insights-demand"
+                    onclick="cancelTryOut('GETapi-v1-staff-insights-demand');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-staff-insights-demand"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/staff/insights/demand</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-staff-insights-demand"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-staff-insights-demand"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
 
                 <h1 id="tarefas-da-turma">Tarefas da turma</h1>
 

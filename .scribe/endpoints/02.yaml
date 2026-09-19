@@ -1,29 +1,33 @@
-name: 'Horas complementares'
+name: 'Jornada acadêmica'
 description: |-
 
-  O tracker pessoal do aluno para atividades complementares (B7) — teto por
-  categoria e certificado guardado. Puramente informativo: não muda
-  `GET /me/progress` (ver docs/dominio/HORAS_COMPLEMENTARES.md).
+  A progressão da graduação do aluno autenticado — o endpoint que sozinho
+  desenha a tela principal do produto.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/me/complementary-activities
+    uri: api/v1/me/progress
     metadata:
       custom: []
-      groupName: 'Horas complementares'
+      groupName: 'Jornada acadêmica'
       groupDescription: |-
 
-        O tracker pessoal do aluno para atividades complementares (B7) — teto por
-        categoria e certificado guardado. Puramente informativo: não muda
-        `GET /me/progress` (ver docs/dominio/HORAS_COMPLEMENTARES.md).
+        A progressão da graduação do aluno autenticado — o endpoint que sozinho
+        desenha a tela principal do produto.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Minhas atividades complementares'
+      title: 'Minha progressão'
       description: |-
-        A lista mais o resumo por categoria (`summary`): quanto foi declarado,
-        quanto conta depois do teto, e quanto foi perdido.
+        Quanto falta para formar, por faixa de carga horária, com o que ainda
+        está pendente e a previsão de formatura pelo ritmo **real** do aluno.
+
+        `overall.required_hours` é **calculado** — obrigatórias + optativas +
+        extensão autônoma — e `extension.counts_in_total` é `false` de propósito:
+        a carga extensionista exigida pelo curso mora *dentro* das disciplinas e
+        é verificada em paralelo. Somá-la inventaria horas que o aluno não
+        precisa cursar.
       authenticated: true
       deprecated: false
     headers:
@@ -31,6 +35,139 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+      -
+        custom: []
+        status: 404
+        content: '{"message":"Você ainda não tem vínculo acadêmico. Envie seu histórico escolar."}'
+        headers: []
+        description: 'sem vínculo'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/me/academic-documents
+    metadata:
+      custom: []
+      groupName: 'Jornada acadêmica'
+      groupDescription: |-
+
+        Importação do documento acadêmico do aluno. Três passos: **sobe**, **confere**
+        e **confirma** — e só o último escreve matrícula. Um erro de leitura vira uma
+        correção de 30 segundos, em vez de um histórico corrompido.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Enviar documento'
+      description: |-
+        Aceita o **histórico escolar** (reconstitui a graduação inteira) ou o
+        **requerimento de matrícula** (atualiza o semestre corrente). Responde
+        **202**: a leitura roda em segundo plano, e o front consulta o status.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      kind:
+        custom: []
+        name: kind
+        description: '`transcript` ou `enrollment_request`.'
+        required: true
+        example: transcript
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      file:
+        custom: []
+        name: file
+        description: 'PDF ou foto (PNG/JPG), até 20 MB.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      kind: transcript
+    fileParameters:
+      file: null
+    responses:
+      -
+        custom: []
+        status: 202
+        content: '{"data":{"id":"01a0…","status":"uploaded","status_label":"Recebido","is_pending":true}}'
+        headers: []
+        description: recebido
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/me/academic-documents/{erq_id}'
+    metadata:
+      custom: []
+      groupName: 'Jornada acadêmica'
+      groupDescription: |-
+
+        Importação do documento acadêmico do aluno. Três passos: **sobe**, **confere**
+        e **confirma** — e só o último escreve matrícula. Um erro de leitura vira uma
+        correção de 30 segundos, em vez de um histórico corrompido.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Status da leitura'
+      description: |-
+        O que a tela de conferência consome. Enquanto `is_pending` for `true`, o
+        front continua consultando; quando vira `parsed`, `extraction` traz o que
+        foi lido para o aluno revisar.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      erq_id:
+        custom: []
+        name: erq_id
+        description: 'The ID of the erq.'
+        required: true
+        example: 01a0b896-25f9-7171-b291-5b5a8eba8aef
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      erq_id: 01a0b896-25f9-7171-b291-5b5a8eba8aef
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -55,68 +192,48 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/v1/me/complementary-activities
+    uri: 'api/v1/me/academic-documents/{document_erq_id}/confirm'
     metadata:
       custom: []
-      groupName: 'Horas complementares'
+      groupName: 'Jornada acadêmica'
       groupDescription: |-
 
-        O tracker pessoal do aluno para atividades complementares (B7) — teto por
-        categoria e certificado guardado. Puramente informativo: não muda
-        `GET /me/progress` (ver docs/dominio/HORAS_COMPLEMENTARES.md).
+        Importação do documento acadêmico do aluno. Três passos: **sobe**, **confere**
+        e **confirma** — e só o último escreve matrícula. Um erro de leitura vira uma
+        correção de 30 segundos, em vez de um histórico corrompido.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Declarar atividade complementar'
+      title: 'Confirmar a leitura'
       description: |-
-        Sem fila de homologação nesta entrega — o contador anda na hora, com
-        `capped`/`hours_not_counted` avisando se a categoria estourou o teto.
+        Recebe as linhas **já revisadas pelo aluno** e cria as matrículas. Linha
+        cujo código não existe no catálogo volta em `pending` — nunca derruba a
+        importação inteira, porque histórico real tem disciplina extinta.
       authenticated: true
       deprecated: false
     headers:
-      Content-Type: multipart/form-data
+      Content-Type: application/json
       Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      document_erq_id:
+        custom: []
+        name: document_erq_id
+        description: 'The ID of the document erq.'
+        required: true
+        example: 01a0b896-25f9-7171-b291-5b5a8eba8aef
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      document_erq_id: 01a0b896-25f9-7171-b291-5b5a8eba8aef
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      category_id:
+      registration_id:
         custom: []
-        name: category_id
-        description: ''
-        required: true
-        example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      title:
-        custom: []
-        name: title
-        description: ''
-        required: true
-        example: 'Semana Acadêmica de Sistemas de Informação'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      hours_claimed:
-        custom: []
-        name: hours_claimed
-        description: ''
-        required: true
-        example: 20
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      issued_at:
-        custom: []
-        name: issued_at
-        description: 'Data do certificado (ISO 8601).'
+        name: registration_id
+        description: 'O vínculo que recebe as matrículas. Omitido, nasce do cabeçalho do documento (curso, RA, ingresso).'
         required: false
         example: architecto
         type: string
@@ -124,37 +241,102 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      certificate:
+      lines:
         custom: []
-        name: certificate
-        description: 'O certificado (PDF, PNG ou JPG).'
-        required: false
-        example: null
-        type: file
+        name: lines
+        description: 'As linhas conferidas.'
+        required: true
+        example:
+          - []
+        type: 'object[]'
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      'lines[].code':
+        custom: []
+        name: 'lines[].code'
+        description: 'Código da disciplina.'
+        required: true
+        example: ARC102
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].year':
+        custom: []
+        name: 'lines[].year'
+        description: ''
+        required: true
+        example: 2023
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].period':
+        custom: []
+        name: 'lines[].period'
+        description: '1 ou 2.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].status':
+        custom: []
+        name: 'lines[].status'
+        description: 'O texto da situação.'
+        required: true
+        example: 'Aprovado Por Nota/Frequência'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].grade':
+        custom: []
+        name: 'lines[].grade'
+        description: 'Nota de 0 a 10.'
+        required: false
+        example: 8.5
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].attendance':
+        custom: []
+        name: 'lines[].attendance'
+        description: 'Frequência em %.'
+        required: false
+        example: 91.2
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
     cleanBodyParameters:
-      category_id: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
-      title: 'Semana Acadêmica de Sistemas de Informação'
-      hours_claimed: 20
-      issued_at: architecto
-    fileParameters:
-      certificate: null
+      registration_id: architecto
+      lines:
+        -
+          code: ARC102
+          year: 2023
+          period: 1
+          status: 'Aprovado Por Nota/Frequência'
+          grade: 8.5
+          attendance: 91.2
+    fileParameters: []
     responses:
       -
         custom: []
-        status: 201
-        content: '{"data":{"id":"01a0…","hours_claimed":20},"capped":false,"hours_not_counted":0}'
+        status: 200
+        content: '{"data":{"id":"01a0…","status":"confirmed"},"imported":46,"pending":[{"code":"XYZ999","reason":"Disciplina não está no catálogo do curso."}]}'
         headers: []
-        description: 'dentro do teto'
-      -
-        custom: []
-        status: 201
-        content: '{"data":{"id":"01a0…","hours_claimed":46},"capped":true,"hours_not_counted":46}'
-        headers: []
-        description: 'estourou o teto'
+        description: confirmado
     responseFields: []
     auth: []
     controller: null

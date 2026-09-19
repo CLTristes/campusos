@@ -1,33 +1,42 @@
-name: 'Jornada acadêmica'
+name: 'Painel da coordenação'
 description: |-
 
-  A progressão da graduação do aluno autenticado — o endpoint que sozinho
-  desenha a tela principal do produto.
+  B8, segunda esticada do desafio 5.1: agregados ANÔNIMOS pra quem coordena
+  — nunca aluno nomeado (ver docs/dominio/PAINEL_COORDENACAO.md). `insights`
+  não tem tabela própria: tudo aqui vem de `AcademicStatsProvider`, contrato
+  do `core` implementado no `journey`.
+
+  O escopo (curso × instituição) é resolvido AQUI, a partir do usuário
+  autenticado — nunca de um `course_id` que o cliente mande. Coordenador
+  enxerga o próprio curso (`usr.course_crs_id`); `institution_admin` enxerga
+  a instituição inteira (`courseId: null`, o `EntityScope` já faz o resto).
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/me/progress
+    uri: api/v1/staff/insights/bottlenecks
     metadata:
       custom: []
-      groupName: 'Jornada acadêmica'
+      groupName: 'Painel da coordenação'
       groupDescription: |-
 
-        A progressão da graduação do aluno autenticado — o endpoint que sozinho
-        desenha a tela principal do produto.
+        B8, segunda esticada do desafio 5.1: agregados ANÔNIMOS pra quem coordena
+        — nunca aluno nomeado (ver docs/dominio/PAINEL_COORDENACAO.md). `insights`
+        não tem tabela própria: tudo aqui vem de `AcademicStatsProvider`, contrato
+        do `core` implementado no `journey`.
+
+        O escopo (curso × instituição) é resolvido AQUI, a partir do usuário
+        autenticado — nunca de um `course_id` que o cliente mande. Coordenador
+        enxerga o próprio curso (`usr.course_crs_id`); `institution_admin` enxerga
+        a instituição inteira (`courseId: null`, o `EntityScope` já faz o resto).
       subgroup: ''
       subgroupDescription: ''
-      title: 'Minha progressão'
+      title: 'Onde a turma empaca'
       description: |-
-        Quanto falta para formar, por faixa de carga horária, com o que ainda
-        está pendente e a previsão de formatura pelo ritmo **real** do aluno.
-
-        `overall.required_hours` é **calculado** — obrigatórias + optativas +
-        extensão autônoma — e `extension.counts_in_total` é `false` de propósito:
-        a carga extensionista exigida pelo curso mora *dentro* das disciplinas e
-        é verificada em paralelo. Somá-la inventaria horas que o aluno não
-        precisa cursar.
+        Taxa de reprovação por disciplina, nota e falta separadas, nos últimos
+        `last_terms` termos com matrícula. Disciplinas com menos de 5
+        tentativas resolvidas não aparecem (piso de anonimato).
       authenticated: true
       deprecated: false
     headers:
@@ -35,95 +44,30 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
+    queryParameters:
+      last_terms:
+        custom: []
+        name: last_terms
+        description: 'Quantos termos recentes considerar. Default: 4.'
+        required: false
+        example: 4
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      last_terms: 4
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
     responses:
       -
         custom: []
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
-      -
-        custom: []
-        status: 404
-        content: '{"message":"Você ainda não tem vínculo acadêmico. Envie seu histórico escolar."}'
+        status: 200
+        content: '{"data":[{"subject_code":"MAT029","subject_name":"Cálculo 2","total_attempts":40,"failed_grade":15,"failed_absence":6,"failed_both":0,"failure_rate":0.525}]}'
         headers: []
-        description: 'sem vínculo'
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/me/academic-documents
-    metadata:
-      custom: []
-      groupName: 'Jornada acadêmica'
-      groupDescription: |-
-
-        Importação do documento acadêmico do aluno. Três passos: **sobe**, **confere**
-        e **confirma** — e só o último escreve matrícula. Um erro de leitura vira uma
-        correção de 30 segundos, em vez de um histórico corrompido.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Enviar documento'
-      description: |-
-        Aceita o **histórico escolar** (reconstitui a graduação inteira) ou o
-        **requerimento de matrícula** (atualiza o semestre corrente). Responde
-        **202**: a leitura roda em segundo plano, e o front consulta o status.
-      authenticated: true
-      deprecated: false
-    headers:
-      Content-Type: multipart/form-data
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      kind:
-        custom: []
-        name: kind
-        description: '`transcript` ou `enrollment_request`.'
-        required: true
-        example: transcript
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      file:
-        custom: []
-        name: file
-        description: 'PDF ou foto (PNG/JPG), até 20 MB.'
-        required: true
-        example: null
-        type: file
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      kind: transcript
-    fileParameters:
-      file: null
-    responses:
-      -
-        custom: []
-        status: 202
-        content: '{"data":{"id":"01a0…","status":"uploaded","status_label":"Recebido","is_pending":true}}'
-        headers: []
-        description: recebido
+        description: 'com gargalo'
     responseFields: []
     auth: []
     controller: null
@@ -133,41 +77,35 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: 'api/v1/me/academic-documents/{erq_id}'
+    uri: api/v1/staff/insights/cohorts
     metadata:
       custom: []
-      groupName: 'Jornada acadêmica'
+      groupName: 'Painel da coordenação'
       groupDescription: |-
 
-        Importação do documento acadêmico do aluno. Três passos: **sobe**, **confere**
-        e **confirma** — e só o último escreve matrícula. Um erro de leitura vira uma
-        correção de 30 segundos, em vez de um histórico corrompido.
+        B8, segunda esticada do desafio 5.1: agregados ANÔNIMOS pra quem coordena
+        — nunca aluno nomeado (ver docs/dominio/PAINEL_COORDENACAO.md). `insights`
+        não tem tabela própria: tudo aqui vem de `AcademicStatsProvider`, contrato
+        do `core` implementado no `journey`.
+
+        O escopo (curso × instituição) é resolvido AQUI, a partir do usuário
+        autenticado — nunca de um `course_id` que o cliente mande. Coordenador
+        enxerga o próprio curso (`usr.course_crs_id`); `institution_admin` enxerga
+        a instituição inteira (`courseId: null`, o `EntityScope` já faz o resto).
       subgroup: ''
       subgroupDescription: ''
-      title: 'Status da leitura'
+      title: 'Quanto custa'
       description: |-
-        O que a tela de conferência consome. Enquanto `is_pending` for `true`, o
-        front continua consultando; quando vira `parsed`, `extraction` traz o que
-        foi lido para o aluno revisar.
+        Atraso médio (em termos além do previsto pela matriz) entre os
+        vínculos ativos de cada coorte de ingresso. Coortes com menos de 5
+        vínculos ativos não aparecem (piso de anonimato).
       authenticated: true
       deprecated: false
     headers:
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      erq_id:
-        custom: []
-        name: erq_id
-        description: 'The ID of the erq.'
-        required: true
-        example: 01a0b896-25f9-7171-b291-5b5a8eba8aef
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      erq_id: 01a0b896-25f9-7171-b291-5b5a8eba8aef
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -176,13 +114,10 @@ endpoints:
     responses:
       -
         custom: []
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: '*'
-        description: null
+        status: 200
+        content: '{"data":[{"entry_term":"2022/1","active_registrations":38,"avg_delay_terms":2.4}]}'
+        headers: []
+        description: 'com atraso'
     responseFields: []
     auth: []
     controller: null
@@ -191,152 +126,109 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: 'api/v1/me/academic-documents/{document_erq_id}/confirm'
+      - GET
+    uri: api/v1/staff/insights/at-risk
     metadata:
       custom: []
-      groupName: 'Jornada acadêmica'
+      groupName: 'Painel da coordenação'
       groupDescription: |-
 
-        Importação do documento acadêmico do aluno. Três passos: **sobe**, **confere**
-        e **confirma** — e só o último escreve matrícula. Um erro de leitura vira uma
-        correção de 30 segundos, em vez de um histórico corrompido.
+        B8, segunda esticada do desafio 5.1: agregados ANÔNIMOS pra quem coordena
+        — nunca aluno nomeado (ver docs/dominio/PAINEL_COORDENACAO.md). `insights`
+        não tem tabela própria: tudo aqui vem de `AcademicStatsProvider`, contrato
+        do `core` implementado no `journey`.
+
+        O escopo (curso × instituição) é resolvido AQUI, a partir do usuário
+        autenticado — nunca de um `course_id` que o cliente mande. Coordenador
+        enxerga o próprio curso (`usr.course_crs_id`); `institution_admin` enxerga
+        a instituição inteira (`courseId: null`, o `EntityScope` já faz o resto).
       subgroup: ''
       subgroupDescription: ''
-      title: 'Confirmar a leitura'
+      title: 'Quem está perto do limite'
       description: |-
-        Recebe as linhas **já revisadas pelo aluno** e cria as matrículas. Linha
-        cujo código não existe no catálogo volta em `pending` — nunca derruba a
-        importação inteira, porque histórico real tem disciplina extinta.
+        Quantidade de vínculos ativos cuja previsão de formatura cabe em
+        `within` termos ou menos até o prazo de integralização.
       authenticated: true
       deprecated: false
     headers:
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      document_erq_id:
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      within:
         custom: []
-        name: document_erq_id
-        description: 'The ID of the document erq.'
-        required: true
-        example: 01a0b896-25f9-7171-b291-5b5a8eba8aef
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      document_erq_id: 01a0b896-25f9-7171-b291-5b5a8eba8aef
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      registration_id:
-        custom: []
-        name: registration_id
-        description: 'O vínculo que recebe as matrículas. Omitido, nasce do cabeçalho do documento (curso, RA, ingresso).'
+        name: within
+        description: 'Quantos termos até o prazo contam como "perto". Default: 2.'
         required: false
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      lines:
-        custom: []
-        name: lines
-        description: 'As linhas conferidas.'
-        required: true
-        example:
-          - []
-        type: 'object[]'
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      'lines[].code':
-        custom: []
-        name: 'lines[].code'
-        description: 'Código da disciplina.'
-        required: true
-        example: ARC102
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      'lines[].year':
-        custom: []
-        name: 'lines[].year'
-        description: ''
-        required: true
-        example: 2023
+        example: 2
         type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-      'lines[].period':
-        custom: []
-        name: 'lines[].period'
-        description: '1 ou 2.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      'lines[].status':
-        custom: []
-        name: 'lines[].status'
-        description: 'O texto da situação.'
-        required: true
-        example: 'Aprovado Por Nota/Frequência'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      'lines[].grade':
-        custom: []
-        name: 'lines[].grade'
-        description: 'Nota de 0 a 10.'
-        required: false
-        example: 8.5
-        type: number
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      'lines[].attendance':
-        custom: []
-        name: 'lines[].attendance'
-        description: 'Frequência em %.'
-        required: false
-        example: 91.2
-        type: number
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      registration_id: architecto
-      lines:
-        -
-          code: ARC102
-          year: 2023
-          period: 1
-          status: 'Aprovado Por Nota/Frequência'
-          grade: 8.5
-          attendance: 91.2
+    cleanQueryParameters:
+      within: 2
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
     responses:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":"01a0…","status":"confirmed"},"imported":46,"pending":[{"code":"XYZ999","reason":"Disciplina não está no catálogo do curso."}]}'
+        content: '{"data":{"count":12,"within_terms":2}}'
         headers: []
-        description: confirmado
+        description: ok
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/staff/insights/demand
+    metadata:
+      custom: []
+      groupName: 'Painel da coordenação'
+      groupDescription: |-
+
+        B8, segunda esticada do desafio 5.1: agregados ANÔNIMOS pra quem coordena
+        — nunca aluno nomeado (ver docs/dominio/PAINEL_COORDENACAO.md). `insights`
+        não tem tabela própria: tudo aqui vem de `AcademicStatsProvider`, contrato
+        do `core` implementado no `journey`.
+
+        O escopo (curso × instituição) é resolvido AQUI, a partir do usuário
+        autenticado — nunca de um `course_id` que o cliente mande. Coordenador
+        enxerga o próprio curso (`usr.course_crs_id`); `institution_admin` enxerga
+        a instituição inteira (`courseId: null`, o `EntityScope` já faz o resto).
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'O que está represado'
+      description: |-
+        Quantos vínculos ativos já estão elegíveis para cada disciplina ainda
+        não cursada — planejamento de oferta direto, sem chute. Disciplinas
+        com menos de 5 elegíveis não aparecem (piso de anonimato).
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":[{"subject_code":"ES52C","subject_name":"Engenharia de Software II","demand":22}]}'
+        headers: []
+        description: 'com demanda'
     responseFields: []
     auth: []
     controller: null
