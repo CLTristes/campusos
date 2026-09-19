@@ -1,125 +1,33 @@
-name: Autenticação
+name: 'Jornada acadêmica'
 description: |-
 
-  Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
-  `Authorization: Bearer <token>` de toda rota autenticada — e é dele que o
-  sistema descobre a instituição do usuário, nunca de um parâmetro do cliente.
+  A progressão da graduação do aluno autenticado — o endpoint que sozinho
+  desenha a tela principal do produto.
 endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/auth/login
-    metadata:
-      custom: []
-      groupName: Autenticação
-      groupDescription: |-
-
-        Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
-        `Authorization: Bearer <token>` de toda rota autenticada — e é dele que o
-        sistema descobre a instituição do usuário, nunca de um parâmetro do cliente.
-      subgroup: ''
-      subgroupDescription: ''
-      title: Entrar
-      description: |-
-        Autentica e devolve o token. O e-mail é único **por instituição**: se o
-        mesmo endereço existir em mais de uma, responde 422 pedindo `entity_id`
-        em vez de escolher uma.
-      authenticated: false
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      email:
-        custom: []
-        name: email
-        description: 'E-mail institucional.'
-        required: true
-        example: aluno@alunos.utfpr.edu.br
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
-        description: 'A senha.'
-        required: true
-        example: campusos
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      entity_id:
-        custom: []
-        name: entity_id
-        description: 'Só quando o e-mail existe em mais de uma instituição.'
-        required: false
-        example: null
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      device:
-        custom: []
-        name: device
-        description: 'Rótulo do token, para revogar só este dispositivo depois.'
-        required: false
-        example: iphone-felipe
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      email: aluno@alunos.utfpr.edu.br
-      password: campusos
-      entity_id: null
-      device: iphone-felipe
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":{"id":"01a0…","name":"Felipe Kurt Pohling","email":"aluno@alunos.utfpr.edu.br","role":"student","role_label":"Estudante","registration_number":"2567857","entity_id":"01a0…","enabled_modules":[]},"token":"1|abc…"}'
-        headers: []
-        description: sucesso
-      -
-        custom: []
-        status: 422
-        content: '{"message":"Credenciais inválidas.","errors":{"email":["Credenciais inválidas."]}}'
-        headers: []
-        description: 'credenciais inválidas'
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
       - GET
-    uri: api/v1/auth/me
+    uri: api/v1/me/progress
     metadata:
       custom: []
-      groupName: Autenticação
+      groupName: 'Jornada acadêmica'
       groupDescription: |-
 
-        Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
-        `Authorization: Bearer <token>` de toda rota autenticada — e é dele que o
-        sistema descobre a instituição do usuário, nunca de um parâmetro do cliente.
+        A progressão da graduação do aluno autenticado — o endpoint que sozinho
+        desenha a tela principal do produto.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Quem sou eu'
-      description: 'O usuário do token atual. É o que a SPA chama no boot para saber que tela abrir.'
+      title: 'Minha progressão'
+      description: |-
+        Quanto falta para formar, por faixa de carga horária, com o que ainda
+        está pendente e a previsão de formatura pelo ritmo **real** do aluno.
+
+        `overall.required_hours` é **calculado** — obrigatórias + optativas +
+        extensão autônoma — e `extension.counts_in_total` é `false` de propósito:
+        a carga extensionista exigida pelo curso mora *dentro* das disciplinas e
+        é verificada em paralelo. Somá-la inventaria horas que o aluno não
+        precisa cursar.
       authenticated: true
       deprecated: false
     headers:
@@ -142,47 +50,12 @@ endpoints:
           content-type: application/json
           access-control-allow-origin: '*'
         description: null
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/logout
-    metadata:
-      custom: []
-      groupName: Autenticação
-      groupDescription: |-
-
-        Login por e-mail e senha, devolvendo um token Sanctum. O token vai no header
-        `Authorization: Bearer <token>` de toda rota autenticada — e é dele que o
-        sistema descobre a instituição do usuário, nunca de um parâmetro do cliente.
-      subgroup: ''
-      subgroupDescription: ''
-      title: Sair
-      description: 'Revoga **apenas o token atual** — os outros dispositivos do usuário seguem logados.'
-      authenticated: true
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
       -
         custom: []
-        status: 204
-        content: '{}'
+        status: 404
+        content: '{"message":"Você ainda não tem vínculo acadêmico. Envie seu histórico escolar."}'
         headers: []
-        description: sucesso
+        description: 'sem vínculo'
     responseFields: []
     auth: []
     controller: null

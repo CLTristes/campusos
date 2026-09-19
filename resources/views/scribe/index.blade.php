@@ -95,6 +95,16 @@
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-jornada-academica" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="jornada-academica">
+                    <a href="#jornada-academica">Jornada acadêmica</a>
+                </li>
+                                    <ul id="tocify-subheader-jornada-academica" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="jornada-academica-GETapi-v1-me-progress">
+                                <a href="#jornada-academica-GETapi-v1-me-progress">Minha progressão</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
             </div>
 
     <ul class="toc-footer" id="toc-footer">
@@ -744,14 +754,14 @@ inventaria horas que o aluno não precisa cursar.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/courses/01a0b856-a519-706d-a77a-8d597f58bc7f/curriculum" \
+    --get "http://localhost/api/v1/courses/01a0b860-2cbf-7061-b1fc-ffce925b44c6/curriculum" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/courses/01a0b856-a519-706d-a77a-8d597f58bc7f/curriculum"
+    "http://localhost/api/v1/courses/01a0b860-2cbf-7061-b1fc-ffce925b44c6/curriculum"
 );
 
 const headers = {
@@ -873,10 +883,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="course_crs_id"                data-endpoint="GETapi-v1-courses--course_crs_id--curriculum"
-               value="01a0b856-a519-706d-a77a-8d597f58bc7f"
+               value="01a0b860-2cbf-7061-b1fc-ffce925b44c6"
                data-component="url">
     <br>
-<p>The ID of the course crs. Example: <code>01a0b856-a519-706d-a77a-8d597f58bc7f</code></p>
+<p>The ID of the course crs. Example: <code>01a0b860-2cbf-7061-b1fc-ffce925b44c6</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>course</code></b>&nbsp;&nbsp;
@@ -891,6 +901,154 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>O id do curso. Example: <code>01a0b823-b7d7-72d8-8db9-810d0e28d9c7</code></p>
             </div>
                     </form>
+
+                <h1 id="jornada-academica">Jornada acadêmica</h1>
+
+    <p>A progressão da graduação do aluno autenticado — o endpoint que sozinho
+desenha a tela principal do produto.</p>
+
+                                <h2 id="jornada-academica-GETapi-v1-me-progress">Minha progressão</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Quanto falta para formar, por faixa de carga horária, com o que ainda
+está pendente e a previsão de formatura pelo ritmo <strong>real</strong> do aluno.</p>
+<p><code>overall.required_hours</code> é <strong>calculado</strong> — obrigatórias + optativas +
+extensão autônoma — e <code>extension.counts_in_total</code> é <code>false</code> de propósito:
+a carga extensionista exigida pelo curso mora <em>dentro</em> das disciplinas e
+é verificada em paralelo. Somá-la inventaria horas que o aluno não
+precisa cursar.</p>
+
+<span id="example-requests-GETapi-v1-me-progress">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/me/progress" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/me/progress"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-me-progress">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+access-control-allow-origin: *
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (404, sem vínculo):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Voc&ecirc; ainda n&atilde;o tem v&iacute;nculo acad&ecirc;mico. Envie seu hist&oacute;rico escolar.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-me-progress" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-me-progress"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-me-progress"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-me-progress" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-me-progress">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-me-progress" data-method="GET"
+      data-path="api/v1/me/progress"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-me-progress', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-me-progress"
+                    onclick="tryItOut('GETapi-v1-me-progress');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-me-progress"
+                    onclick="cancelTryOut('GETapi-v1-me-progress');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-me-progress"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/me/progress</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-me-progress"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-me-progress"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
 
             
 

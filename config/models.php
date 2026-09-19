@@ -32,4 +32,9 @@ return [
     'subject' => CampusOs\Catalog\Models\Subject::class,
     'term' => CampusOs\Catalog\Models\Term::class,
     'offering' => CampusOs\Catalog\Models\Offering::class,
+
+    // journey — o lifeos e o insights leem estes por contrato/config.
+    'student' => CampusOs\Journey\Models\Student::class,
+    'registration' => CampusOs\Journey\Models\Registration::class,
+    'subject_enrollment' => CampusOs\Journey\Models\SubjectEnrollment::class,
 ];

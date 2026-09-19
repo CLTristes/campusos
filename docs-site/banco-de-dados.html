@@ -103,7 +103,7 @@
     <div class="eyebrow">CampusOS · modelo de dados</div>
     <h1>Diagrama Entidade‑Relacionamento</h1>
     <p class="lede">
-      <strong>26 tabelas em 6 módulos</strong>, <strong>13 delas já em código</strong> (tenancy e catalog completos). Convenções do template modular sem exceção:
+      <strong>26 tabelas em 6 módulos</strong>, <strong>16 delas já em código</strong> (tenancy, catalog e o núcleo do journey). Convenções do template modular sem exceção:
       prefixo de 3 letras em toda coluna, PK UUID gerada na aplicação, <code>SoftDeletes</code> em tudo que é transacional,
       FK no formato <code>{tabela_singular}_{pk}</code>, e <code>entity_ent_id</code> em toda tabela com escopo de tenant.
       Cada card traz a <strong>razão</strong> da modelagem — num hackathon, a decisão esquecida às 4 da manhã custa mais que a tabela errada.
@@ -638,7 +638,7 @@ flowchart LR
 
   <!-- JOURNEY -->
   <section class="module">
-    <div class="module-head"><h2>journey</h2><span class="module-tag">a trajetória do aluno · 5 tabelas</span></div>
+    <div class="module-head"><h2>journey</h2><span class="module-tag">a trajetória do aluno · 5 tabelas · 3 ✅ em código</span></div>
     <p class="module-intro">
       O desafio 5.1 inteiro mora aqui. É o módulo que <b>lê</b> o catálogo e <b>escreve</b> o que aconteceu de fato com uma pessoa.
       Toda a progressão — percentual, horas, pendências, previsão de formatura — é <b>calculada</b> sobre estas tabelas, nunca
@@ -646,8 +646,8 @@ flowchart LR
     </p>
     <div class="card-grid">
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">students</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">students</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>std_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
@@ -665,8 +665,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">registrations</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">registrations</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>reg_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
@@ -691,8 +691,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">subject_enrollments</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">subject_enrollments</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>sen_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
@@ -701,6 +701,7 @@ flowchart LR
           <li><span class="key-tag">FK</span><code>term_trm_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>offering_ofr_id</code><span class="type">uuid nullable</span></li>
           <li><span class="key-tag"></span><code>sen_status</code><span class="type">enum — 10 valores reais</span></li>
+          <li><span class="key-tag"></span><code>sen_class_code</code><span class="type">string nullable — "5SI"</span></li>
           <li><span class="key-tag"></span><code>sen_class_type</code><span class="type">enum — R | F | E | D | S | I</span></li>
           <li><span class="key-tag"></span><code>sen_grade</code><span class="type">decimal(5,2) nullable</span></li>
           <li><span class="key-tag"></span><code>sen_attendance</code><span class="type">smallint nullable (%)</span></li>

@@ -1,7 +1,7 @@
 {
     "version": 1,
     "project": "campusos",
-    "current_release": "v0.1.0",
+    "current_release": "v0.2.0",
     "last_sync": {
         "at": "2026-07-07",
         "by": "claude-opus-4-8",
@@ -59,6 +59,23 @@
                 "docs/arquitetura/MODULOS.md",
                 "docs/dominio/",
                 "docs/README.md"
+            ]
+        },
+        {
+            "id": "v0.2.0/feat_journey_progressao",
+            "file": "docs/reports/v0.2.0/feat_journey_progressao.md",
+            "title": "Jornada do aluno e progressão da graduação (B3)",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
+            "synced_at": null,
+            "touches": [
+                "docs/dominio/PROGRESSAO.md",
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md",
+                "docs/arquitetura/BANCO.md",
+                "docs/dominio/DOCUMENTOS_ACADEMICOS.md",
+                "docs-site/features/matricula-e-progressao.html",
+                "docs-site/banco-de-dados.html"
             ]
         }
     ]

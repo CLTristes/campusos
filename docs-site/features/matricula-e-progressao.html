@@ -60,7 +60,7 @@
       <span><b>Módulos:</b> catalog + journey</span>
       <span><b>Tabelas:</b> 8 + 5</span>
       <span><b>Blocos do plano:</b> B2, B3, B4</span>
-      <span><b>Status:</b> <span class="status-pill mvp">⚑ MVP</span></span>
+      <span><b>Status:</b> Fases 0–4 <span class="status-pill built">✅ em código</span> · 5–6 <span class="status-pill mvp">⚑ MVP</span></span>
     </div>
     <div class="switch-bar">
       <div class="view-switch" role="group" aria-label="Nível de detalhe">
@@ -93,7 +93,7 @@
 
   <!-- FASE 0 -->
   <section class="step" id="fase-0">
-    <div class="step-head"><span class="step-num">0</span><h2>Os dados mestres — a matriz como dado, não como código</h2></div>
+    <div class="step-head"><span class="step-num">0</span><h2>Os dados mestres — a matriz como dado, não como código</h2><span class="status-pill built">✅ em código</span></div>
 
     <div class="view-business">
       <p>
@@ -166,7 +166,7 @@ final class Curriculum extends Model
 
   <!-- FASE 1 -->
   <section class="step" id="fase-1">
-    <div class="step-head"><span class="step-num">1</span><h2>O vínculo — quem é este aluno, e sob qual matriz</h2></div>
+    <div class="step-head"><span class="step-num">1</span><h2>O vínculo — quem é este aluno, e sob qual matriz</h2><span class="status-pill built">✅ em código</span></div>
 
     <div class="view-business">
       <p>
@@ -339,9 +339,14 @@ final class AcademicDocument implements StructuredOutputModel
 
   <!-- FASE 3 -->
   <section class="step" id="fase-3">
-    <div class="step-head"><span class="step-num">3</span><h2>O histórico — seis situações, e por que não são três</h2></div>
+    <div class="step-head"><span class="step-num">3</span><h2>O histórico — dez situações, e por que não são três</h2><span class="status-pill built">✅ em código</span></div>
 
     <div class="view-business">
+      <div class="callout good">
+        <b>Implementado em 19/09 · <span class="status-pill built">✅ em código</span></b> —
+        <code>EnrollmentStatus</code> com as <b>10 situações reais</b> que o histórico imprime, e a regra de aprovação
+        da UTFPR em <code>ApprovalPolicy</code>, conferida contra sete pares (média, frequência, situação) do documento real.
+      </div>
       <p>Cada linha do histórico é uma matrícula numa disciplina, num semestre, com uma situação:</p>
       <ol class="rules">
         <li><b>Cursando</b> — conta como carga <i>em andamento</i>, nunca como cumprida. A barra mostra as duas faixas separadas, porque tratar em-curso como cumprido é mentir para o aluno no pior momento possível.</li>
@@ -356,6 +361,32 @@ final class AcademicDocument implements StructuredOutputModel
         em <b>outro</b> semestre é permitido e gera uma linha nova — é exatamente assim que uma reprovação aparece no
         histórico, duas linhas da mesma disciplina, e é assim que a contagem de tentativas sai de graça.
       </p>
+
+      <h3 style="margin-top:2rem">Aprovar: frequência primeiro, nota depois</h3>
+      <p>A regra da UTFPR não é um corte só. A frequência decide <b>qual nota</b> é exigida:</p>
+      <table>
+        <thead><tr><th>Frequência</th><th>Exigência de nota</th><th>O que o aluno precisa ouvir</th></tr></thead>
+        <tbody>
+          <tr><td><b>menos de 50%</b></td><td>nenhuma — reprovado</td><td>"Já não dá para passar nesta disciplina."</td></tr>
+          <tr><td><b>50% a 75%</b></td><td>média <b>8,0</b></td><td>"Daqui em diante você precisa de 8,0, não 6,0."</td></tr>
+          <tr><td><b>75% ou mais</b></td><td>média <b>6,0</b></td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="callout grifo">
+        <b>O sistema não recalcula a situação de uma matrícula importada</b> — ele grava o que o documento oficial diz.
+        Discordar do histórico oficial do aluno seria um bug, não uma feature. A regra acima serve para outra coisa, que
+        vale mais: <b>o aviso preventivo</b>. Hoje ninguém diz ao aluno, em outubro, que a frequência dele já mudou a
+        nota de corte — ele descobre em dezembro.
+      </div>
+      <div class="callout">
+        <b>Dois achados na conferência contra o histórico real:</b><br>
+        <b>1.</b> <i>Zero de frequência não é falta.</i> O estágio aparece com <code>0,0</code> e situação <b>aprovado</b> —
+        não tem aula para frequentar. Tratar esse zero como falta reprovaria todo mundo que fez estágio; por isso a
+        frequência é <b>nula</b> quando não se aplica, nunca zero.<br>
+        <b>2.</b> <i>O rótulo entrega a faixa.</i> Nos 14 aprovados do documento, sem exceção:
+        "Aprovado Por Nota/Frequência" significa ≥ 75%, e "Aprovado Por Nota" significa abaixo disso. Dá para inferir a
+        frequência mesmo quando o campo vem vazio.
+      </div>
     </div>
 
     <div class="view-code">
@@ -396,7 +427,7 @@ final class AcademicDocument implements StructuredOutputModel
 
   <!-- FASE 4 -->
   <section class="step" id="fase-4">
-    <div class="step-head"><span class="step-num">4</span><h2>A progressão — um endpoint que desenha uma tela inteira</h2></div>
+    <div class="step-head"><span class="step-num">4</span><h2>A progressão — um endpoint que desenha uma tela inteira</h2><span class="status-pill built">✅ em código</span></div>
 
     <div class="view-business">
       <p>
