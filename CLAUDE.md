@@ -108,7 +108,7 @@ e **eventos** declarados no módulo `core`. Detalhe completo em
 | `core` | do template | shared kernel: `AbstractAction`, `Entityable`, `EntityScope`, `TenantContext`, `AuditObserver` |
 | `tenancy` | **em código** | `Entity` (a instituição) + `Campus` + `User` (4 papéis) + login/cadastro Sanctum |
 | `catalog` | **em código** | dados mestres: curso, matriz, disciplina, pré-requisito, equivalência, conjunto de optativas, semestre, oferta |
-| `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma), horas complementares (B7 — nunca soma na progressão). Falta: elegibilidade, endpoint de criar vínculo |
+| `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma), horas complementares (B7 — nunca soma na progressão), elegibilidade e simulação de reprovação (B8 esticada 1). Falta: endpoint de criar vínculo |
 | `lifeos` | **parcial** | o acervo do veterano (B5): `Note` + escada de visibilidade de 5 níveis. B6 (tarefas da turma): `Task` + adoção por cópia + `GET /me/agenda`. Falta curadoria por voto e `events` (esticada) |
 | `insights` | esqueleto | agregados da coordenação. **Sem tabelas por desenho** — lê por read model |
 | `integrations` | **em código** | `GeminiDocumentExtractor` + `NullDocumentExtractor` atrás do contrato `AcademicDocumentExtractor`. **O único lugar que sabe qual IA lê os documentos** |
@@ -277,8 +277,8 @@ test` antes de commitar.
 
 ## Estado atual
 
-**v0.7.0 (19/09/2026) — 184 testes / 557 asserções verdes**, Pint verde,
-ArchTest verde. 21 tabelas em código, 22 endpoints documentados em `/docs/api`.
+**v0.8.0 (19/09/2026) — 192 testes / 585 asserções verdes**, Pint verde,
+ArchTest verde. 21 tabelas em código, 24 endpoints documentados em `/docs/api`.
 
 O **catálogo acadêmico** está completo, com a matriz 45 da UTFPR real semeada:
 121 disciplinas, 34 pré-requisitos, 98 equivalências. O total a integralizar
@@ -330,7 +330,20 @@ do dono do produto: isso **nunca soma** em `GET /api/v1/me/progress` —
 conta como aprovado; as duas fontes não se tocam. Ver
 [`HORAS_COMPLEMENTARES.md`](docs/dominio/HORAS_COMPLEMENTARES.md).
 
-**Ainda não existe:** elegibilidade e pré-requisitos em runtime, simulação de
-reprovação, curadoria por voto e `events` no `lifeos`, homologação da
-coordenação para horas complementares, e o módulo `insights` inteiro. Lista
-completa em [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.
+**Pré-requisitos e simulação de reprovação** (`journey`, desafio 5.1, B8
+esticada 1) fecham o 5.1: `EligibilityReadModel` checa os 4 tipos de
+`prerequisites.prq_type` (`subject`, `corequisite`, `minimum_hours`,
+`minimum_term` — o caso real `EST501`) contra o histórico atual do aluno em
+`GET /api/v1/me/next-term` (liberadas × travadas com o motivo), e
+`POST /api/v1/me/simulate` recalcula em memória, sem escrever nada no banco,
+o impacto em cascata de uma reprovação hipotética sobre o mesmo grafo de
+pré-requisitos. "Período atual" usa `termsAttended` como aproximação
+deliberada do déficit de CHS completo do documento — validei a fórmula real
+contra o histórico do dono do produto, mas a parte de optativas exige dado
+que este schema não modela. Ver [`PROGRESSAO.md`](docs/dominio/PROGRESSAO.md)
+regra 10 e pendência 4.
+
+**Ainda não existe:** cálculo do período por déficit de CHS completo
+(obrigatórias+optativas), curadoria por voto e `events` no `lifeos`,
+homologação da coordenação para horas complementares, e o módulo `insights`
+inteiro. Lista completa em [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.

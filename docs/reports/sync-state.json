@@ -6,7 +6,7 @@
         "at": "2026-09-19",
         "by": "claude-sonnet-5",
         "reports_processed": [
-            "v0.7.0/feat_horas_complementares"
+            "v0.8.0/feat_prerequisitos_e_simulacao"
         ]
     },
     "targets": [
@@ -184,8 +184,8 @@
             "file": "docs/reports/v0.8.0/feat_prerequisitos_e_simulacao.md",
             "title": "Pré-requisitos e simulação de reprovação (B8, esticada 1) — o que libera/trava, impacto em cascata sem escrita no banco",
             "delivered_at": "2026-09-19",
-            "status": "pending",
-            "synced_at": null,
+            "status": "synced",
+            "synced_at": "2026-09-19",
             "touches": [
                 "docs/reports/SISTEMA.md",
                 "CLAUDE.md",

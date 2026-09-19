@@ -5,7 +5,7 @@
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-09-19 · reports até `v0.7.0/feat_horas_complementares` ·
+> **Última sincronização:** 2026-09-19 · reports até `v0.8.0/feat_prerequisitos_e_simulacao` ·
 > por claude-sonnet-5
 
 ## Índice
@@ -142,6 +142,13 @@ portal.
   [`HORAS_COMPLEMENTARES.md`](../dominio/HORAS_COMPLEMENTARES.md)): `ATV001`
   (a disciplina de 90h da matriz real) é o que de fato conta como aprovado;
   `complementary_activities` é só o tracker pessoal do aluno.
+- `EligibilityReadModel` (B8, esticada 1) — `GET /me/next-term` (liberadas ×
+  travadas com o motivo, os 4 tipos de `prerequisites.prq_type`) e
+  `POST /me/simulate` (impacto em cascata de uma reprovação hipotética,
+  longest-path sobre o grafo de pré-requisitos, sem escrita no banco).
+  "Período atual" é `termsAttended` — uma aproximação deliberada do déficit
+  de CHS completo do documento (ver [`PROGRESSAO.md`](../dominio/PROGRESSAO.md)
+  regra 10 e pendência 4).
 
 ## IV.5 `integrations` — os adaptadores externos
 
@@ -303,7 +310,7 @@ erro mais provável, e tratá-lo como documento ruim apagaria o upload do aluno.
 
 # Parte IX — Testes e qualidade
 
-**184 testes / 557 asserções verdes** · Pint verde · ArchTest verde.
+**192 testes / 585 asserções verdes** · Pint verde · ArchTest verde.
 
 O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
 rodapé do documento da matriz imprime os totais de fechamento, então a
@@ -335,12 +342,13 @@ contra sete pares (média, frequência, situação) do histórico real.
 | `/data-console` | Console de dados (Filament), 15 recursos (catalog + tenancy + journey). Só coordenação e gestão |
 | `/up` | Health check |
 
-**22 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
+**24 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
 verify-email/resend}`, `courses`, `courses/{id}/curriculum`, `me/progress`, os
 três de `me/academic-documents` (enviar, consultar, confirmar), os quatro de
 `notes` (listar, criar, ver, mudar visibilidade), `me/agenda` e os três de
-`tasks` (criar, adotar, mudar status) — B6 — e os dois de
-`me/complementary-activities` (listar+resumo, declarar) — B7.
+`tasks` (criar, adotar, mudar status) — B6 —, os dois de
+`me/complementary-activities` (listar+resumo, declarar) — B7 — e
+`me/next-term` + `me/simulate` — B8 esticada 1.
 
 ---
 
@@ -367,7 +375,7 @@ php artisan serve
 
 | Área | O que falta |
 | --- | --- |
-| `journey` | Elegibilidade/pré-requisitos em runtime, simulação de reprovação, cálculo do período por déficit de CHS, homologação da coordenação para atividades complementares (declaração já existe, B7) |
+| `journey` | Cálculo do período por déficit de CHS completo (obrigatórias+optativas — hoje `EligibilityReadModel` usa `termsAttended` como aproximação), homologação da coordenação para atividades complementares (declaração já existe, B7) |
 | `lifeos` | Curadoria por voto e `events` (◎ esticada) — o acervo de notas (B5) e as tarefas da turma (B6) estão prontos |
 | `insights` | Tudo — os agregados da coordenação |
 | Transversal | CCE autônomo (as 60 h de extensão que ninguém consegue cumprir pelo sistema), RBAC granular, guard próprio do console |
@@ -388,3 +396,4 @@ php artisan serve
 | 2026-09-19 | Console de dados ganha os 4 Resources da jornada (11→15); Scribe regenerado | `v0.5.1/fix_data_console_jornada_e_scribe_desatualizado` |
 | 2026-09-19 | Tarefas da turma (B6): `Task` reaproveita o enum `Visibility` de `notes`; adotar copia (`origin_tsk_id` + índice único de idempotência); `GET /me/agenda` filtra pelo termo corrente — ao contrário do acervo, aqui a ausência de filtro seria o bug | `v0.6.0/feat_tarefas_da_turma` |
 | 2026-09-19 | Horas complementares (B7): teto por categoria (`complementary_categories`, catalog) + tracker do aluno (`complementary_activities`, journey); corte calculado agregado por categoria, nunca por certificado; decisão do dono do produto — nunca soma no `ProgressReadModel` (`ATV001` continua sendo o que conta) | `v0.7.0/feat_horas_complementares` |
+| 2026-09-19 | Pré-requisitos e simulação de reprovação (B8, esticada 1): `EligibilityReadModel` checa os 4 tipos de `prq_type` sem `journey` importar `catalog`; `POST /me/simulate` recalcula em memória o impacto em cascata de uma reprovação hipotética; "período atual" usa `termsAttended` como aproximação validada — mas incompleta — do déficit de CHS do documento | `v0.8.0/feat_prerequisitos_e_simulacao` |
