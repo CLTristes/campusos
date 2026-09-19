@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial 01 · Cadastro e login · CampusOS</title>
+<meta name="description" content="A tela de entrada: cadastro livre pelo domínio do e-mail, acesso imediato, e a verificação por código em paralelo. Requests, respostas e o que mostrar em cada passo.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 1.75rem 5rem; }
+  .page-head { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); }
+  .page-head .kicker { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.85rem; }
+  .page-head h1 { font-size: clamp(1.9rem, 5vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 0.85rem; text-wrap: balance; }
+  .page-head p.lede { max-width: 66ch; color: var(--ink-soft); font-size: 1.02rem; }
+
+  .screen { margin: 2.25rem 0; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; background: var(--surface); }
+  .screen-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.1rem; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .screen-num { font-family: var(--font-mono); font-weight: 700; font-size: 0.75rem; color: #fff; background: var(--ink-faint); width: 1.6rem; height: 1.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .screen-title { font-family: var(--font-serif); font-weight: 600; font-size: 1.1rem; }
+  .screen-body { padding: 1.2rem 1.3rem; }
+  .screen-body p { color: var(--ink-soft); margin: 0 0 0.9rem; font-size: 0.93rem; }
+  .screen-body p:last-child { margin-bottom: 0; }
+
+  .code-block { margin: 0.9rem 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .code-path { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.85rem; background: var(--surface-2); border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); }
+  .code-block pre { margin: 0; padding: 0.9rem 1rem; overflow-x: auto; background: var(--surface); }
+  .code-block code { font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink); white-space: pre; }
+
+  .field-list { list-style: none; margin: 0.75rem 0; padding: 0; display: grid; gap: 0.4rem; }
+  .field-list li { font-size: 0.88rem; display: flex; gap: 0.5rem; align-items: baseline; }
+  .field-list code { font-family: var(--font-mono); font-size: 0.78rem; color: var(--brand-700); flex-shrink: 0; }
+  .field-list span { color: var(--ink-soft); }
+
+  .callout { margin: 1.2rem 0; border: 1px solid var(--border-strong); border-left: 3px solid var(--brand-500); background: var(--brand-50); border-radius: 4px; padding: 0.85rem 1.05rem; font-size: 0.88rem; color: var(--ink-soft); }
+  .callout b { color: var(--ink); }
+  .callout.warn { border-left-color: var(--rust-500); background: var(--rust-50); }
+
+  .tut-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.78rem; }
+  .tut-nav a { text-decoration: none; color: var(--ink-soft); }
+  .tut-nav a:hover { color: var(--brand-700); }
+  .tut-nav .step-count { color: var(--ink-faint); }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 0 1.1rem 4rem; }
+    .page-head { padding: 2.25rem 0 1.5rem; }
+    .field-list li { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="brand" href="../index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="../index.html">docs-site</a><span class="sep">/</span>tutorial<span class="sep">/</span>cadastro-e-login.html</span>
+</header>
+
+<div class="page-head">
+  <div class="wrap">
+    <div class="kicker">tutorial frontend · 01 de 04 · entrada</div>
+    <h1>Cadastro e login</h1>
+    <p class="lede">Sem tela de "escolha sua universidade": a instituição é resolvida pelo domínio do e-mail. O aluno sai logado do próprio cadastro — a verificação por código roda em paralelo, sem travar nada.</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="callout" style="margin: 1.5rem 0 2rem;">
+    <b>Não existe seletor de universidade.</b> O back-end resolve a instituição a partir do que vem depois do <code>@</code> no
+    e-mail (<code>entities.ent_email_domain</code>) — o aluno da UTFPR só precisa digitar
+    <code>seu.nome@alunos.utfpr.edu.br</code>. Se o domínio não estiver habilitado, o cadastro é recusado com 422; não invente uma
+    tela de "instituição não encontrada" separada, a mensagem de erro já serve.
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">1</span><span class="screen-title">O formulário de cadastro</span></div>
+    <div class="screen-body">
+      <p>Cinco campos, nenhum seletor de instituição:</p>
+      <ul class="field-list">
+        <li><code>name</code><span>texto livre, obrigatório</span></li>
+        <li><code>email</code><span>obrigatório — o domínio decide a instituição</span></li>
+        <li><code>password</code><span>mínimo 8 caracteres, obrigatório</span></li>
+        <li><code>password_confirmation</code><span>obrigatório, precisa bater com <code>password</code></span></li>
+        <li><code>device</code><span>opcional — rótulo do token, pra poder revogar só este dispositivo depois</span></li>
+      </ul>
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/auth/signup</div>
+        <pre><code>// request
+{
+  "name": "Felipe Kurt Pohling",
+  "email": "felipe@alunos.utfpr.edu.br",
+  "password": "senha-forte-123",
+  "password_confirmation": "senha-forte-123"
+}
+
+// 201 Created — o aluno já está autenticado
+{
+  "data": {
+    "id": "01a0b8...",
+    "name": "Felipe Kurt Pohling",
+    "email": "felipe@alunos.utfpr.edu.br",
+    "role": "student",
+    "role_label": "Estudante",
+    "registration_number": null,
+    "email_verified": false,
+    "entity_id": "01a0b8...",
+    "campus": null,
+    "enabled_modules": []
+  },
+  "token": "1|k3j2h4g5f6d7s8a9"
+}</code></pre>
+      </div>
+      <p><b>Guarde o <code>token</code></b> (localStorage/secure storage) e navegue direto pra tela principal do produto —
+      <b>não existe passo de login separado depois do cadastro.</b> <code>registration_number</code> vem <code>null</code>
+      porque o RA só aparece depois que o aluno importar o histórico escolar (<a href="documento-academico.html">tutorial 02</a>).</p>
+      <div class="code-block">
+        <div class="code-path">422 — erros possíveis</div>
+        <pre><code>// domínio de e-mail não habilitado para cadastro livre
+{ "message": "Use seu e-mail institucional — este domínio não está habilitado para cadastro.",
+  "errors": { "email": ["Use seu e-mail institucional — este domínio não está habilitado para cadastro."] } }
+
+// e-mail já cadastrado nesta instituição
+{ "message": "Já existe uma conta com este e-mail nesta instituição.",
+  "errors": { "email": ["Já existe uma conta com este e-mail nesta instituição."] } }
+
+// senhas não coincidem
+{ "errors": { "password": ["A confirmação de senha não bate."] } }</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">2</span><span class="screen-title">Confirmar o e-mail (opcional, em paralelo)</span></div>
+    <div class="screen-body">
+      <p>
+        Um e-mail com um código de 6 dígitos chega logo depois do cadastro. <b>Isto não bloqueia nada</b> — o aluno já está
+        usando o sistema desde o passo 1. Mostre um aviso discreto ("confirme seu e-mail") em vez de uma tela cheia; o aluno
+        pode ignorar por dias sem perder acesso.
+      </p>
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/auth/verify-email</div>
+        <pre><code>// request (autenticado)
+{ "code": "482913" }
+
+// 200 — sucesso
+{ "data": { "id": "01a0b8...", "email_verified": true, "..." : "..." } }
+
+// 422 — código errado, expirado (15 minutos) ou já verificado
+{ "errors": { "code": ["Código inválido."] } }</code></pre>
+      </div>
+      <p>Código expirado? Reenvie um novo — mesmo padrão de rate limit de um "reenviar SMS", só que por e-mail:</p>
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/auth/verify-email/resend</div>
+        <pre><code>// sem corpo, autenticado — 204 No Content
+// limite: 3 tentativas a cada 10 minutos</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">3</span><span class="screen-title">Login (quem já tem conta)</span></div>
+    <div class="screen-body">
+      <p>Para quem já se cadastrou antes, ou entrou por outro caminho (coordenação, seeder de dev):</p>
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/auth/login</div>
+        <pre><code>// request
+{ "email": "aluno@alunos.utfpr.edu.br", "password": "campusos" }
+
+// 200 — mesmo formato de resposta do signup
+{ "data": { "id": "01a0b8...", "email": "aluno@alunos.utfpr.edu.br", "role": "student", "..." : "..." }, "token": "1|abc..." }
+
+// 422 — e-mail OU senha errados dão A MESMA mensagem (nunca revele qual dos dois falhou)
+{ "message": "Credenciais inválidas.", "errors": { "email": ["Credenciais inválidas."] } }</code></pre>
+      </div>
+      <p>
+        <b>Um caso raro que vale tratar:</b> se o mesmo e-mail existir em mais de uma instituição, o login responde 422 pedindo
+        <code>entity_id</code> — mostre uma lista simples com o nome de cada instituição encontrada (a API não devolve essa
+        lista pronta; se isso acontecer na prática, é sinal de pedir mais contexto ao back-end antes de desenhar a tela).
+      </p>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">4</span><span class="screen-title">Quem sou eu / sair</span></div>
+    <div class="screen-body">
+      <p>No boot da aplicação (refresh de página, abrir o app), confirme o token com:</p>
+      <div class="code-block">
+        <div class="code-path">GET /api/v1/auth/me</div>
+        <pre><code>// autenticado — mesmo formato de UserResource dos passos anteriores
+// 401 se o token não existir mais (foi revogado, expirou) — mande pra tela de login</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/auth/logout</div>
+        <pre><code>// autenticado, sem corpo — 204 No Content
+// revoga SÓ o token deste dispositivo; outras sessões continuam logadas</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <b>Toda mensagem de erro da API já vem pronta pra exibir</b> — o <code>message</code> no topo do 422 traz a primeira,
+    <code>errors.&lt;campo&gt;[]</code> traz todas. Use a chave (<code>email</code>, <code>password</code>, <code>code</code>)
+    pra saber em qual input pintar o erro; o texto já está em português, não precisa de dicionário de mensagens no front.
+  </div>
+
+  <div class="tut-nav">
+    <span class="step-count">01 / 04</span>
+    <a href="documento-academico.html">próximo: importar o histórico escolar →</a>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <p><a href="../index.html">← voltar ao mapa do sistema</a> · <a href="../../docs/dominio/ACESSO.md">regras de negócio: ACESSO.md</a></p>
+</footer>
+
+<script src="../assets/site-chrome.js" defer></script>
+</body>
+</html>

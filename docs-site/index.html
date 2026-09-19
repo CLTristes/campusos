@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CampusOS · Mapa do Sistema</title>
-<meta name="description" content="Documentação viva do CampusOS — a graduação inteira num lugar, mais o acervo que cada veterano deixa pro calouro. Desenho completo antes da primeira linha de código.">
+<meta name="description" content="Documentação viva do CampusOS — a graduação inteira num lugar, mais o acervo que cada veterano deixa pro calouro. Modelo de dados, identidade visual e o tutorial de integração pra quem constrói a tela.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,6 +118,32 @@
   .pend ol { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.65rem; }
   .pend li { font-size: 0.88rem; color: var(--ink-soft); }
   .pend li b { color: var(--ink); }
+
+  /* Um .tutorial-group por feature — a cabeça linka pro card, os tutoriais
+     dessa feature ficam logo abaixo. Escala: cada feature nova com tutorial
+     próprio vira só mais um bloco igual a este, sem legenda solta no topo. */
+  .tutorial-group { margin-bottom: 2.5rem; }
+  .tutorial-group:last-child { margin-bottom: 0; }
+  .tutorial-group-head {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.6rem 0.95rem;
+    margin-bottom: 0.9rem;
+    border: 1px solid var(--border-strong);
+    border-left: 3px solid var(--brand-500);
+    border-radius: 6px;
+    background: var(--surface);
+    text-decoration: none;
+  }
+  .tutorial-group-head:hover { border-left-color: var(--brand-700); }
+  .tutorial-group-head:hover .tgh-title { color: var(--brand-700); }
+  .tutorial-group-head .tgh-kicker {
+    font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-faint); flex-shrink: 0;
+  }
+  .tutorial-group-head .tgh-title { color: var(--ink); font-weight: 600; }
+  .tutorial-group-head .tgh-arrow {
+    margin-left: auto; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); flex-shrink: 0;
+  }
 
   footer.site-footer .sig {
     display: block;
@@ -331,6 +357,85 @@
       </a>
 
     </div>
+  </div>
+
+  <div class="section-rule"><span class="label">Tutorial · integração frontend</span></div>
+  <div class="cards-field">
+
+    <div class="tutorial-group">
+      <a class="tutorial-group-head" href="features/matricula-e-progressao.html">
+        <span class="tgh-kicker">feature</span>
+        <span class="tgh-title">Do documento à barra de progresso</span>
+        <span class="tgh-arrow">ver o fluxo completo →</span>
+      </a>
+      <div class="cards">
+
+        <a class="card card--ink" href="tutorial/cadastro-e-login.html">
+          <span class="card-accent" aria-hidden="true"></span>
+          <span class="card-body">
+            <span>
+              <span class="card-category">01 · Entrada</span>
+              <h3 class="card-title">Cadastro e login</h3>
+              <p class="card-desc">Cadastro livre pelo domínio do e-mail (sem seletor de universidade), acesso imediato, e a verificação por código em paralelo — nunca um portão.</p>
+              <span class="card-tags"><span class="tag">POST /auth/signup</span><span class="tag">POST /auth/login</span><span class="tag">POST /verify-email</span></span>
+            </span>
+            <span class="card-arrow">ler →</span>
+          </span>
+        </a>
+
+        <a class="card card--ink" href="tutorial/documento-academico.html">
+          <span class="card-accent" aria-hidden="true"></span>
+          <span class="card-body">
+            <span>
+              <span class="card-category">02 · Coleta</span>
+              <h3 class="card-title">Documento acadêmico</h3>
+              <p class="card-desc">Sobe → a IA lê em fila → o aluno confere e confirma. O momento "uau" da demo, com o ciclo de status completo e o que fazer com cada um.</p>
+              <span class="card-tags"><span class="tag">POST /academic-documents</span><span class="tag">GET /academic-documents/{id}</span><span class="tag">POST /confirm</span></span>
+            </span>
+            <span class="card-arrow">ler →</span>
+          </span>
+        </a>
+
+        <a class="card card--ink" href="tutorial/progressao-e-catalogo.html">
+          <span class="card-accent" aria-hidden="true"></span>
+          <span class="card-body">
+            <span>
+              <span class="card-category">03 · Resultado</span>
+              <h3 class="card-title">Progressão e catálogo</h3>
+              <p class="card-desc">Um endpoint que desenha a tela principal: quanto falta pra formar, o que está pendente por período, a previsão pelo ritmo real do aluno.</p>
+              <span class="card-tags"><span class="tag">GET /me/progress</span><span class="tag">GET /courses/{id}/curriculum</span></span>
+            </span>
+            <span class="card-arrow">ler →</span>
+          </span>
+        </a>
+
+      </div>
+    </div>
+
+    <div class="tutorial-group">
+      <a class="tutorial-group-head" href="features/acervo-compartilhado.html">
+        <span class="tgh-kicker">feature</span>
+        <span class="tgh-title">O acervo do veterano</span>
+        <span class="tgh-arrow">ver o desenho completo →</span>
+      </a>
+      <div class="cards">
+
+        <a class="card card--ink" href="tutorial/acervo-do-veterano.html">
+          <span class="card-accent" aria-hidden="true"></span>
+          <span class="card-body">
+            <span>
+              <span class="card-category">04 · A rede</span>
+              <h3 class="card-title">O acervo do veterano</h3>
+              <p class="card-desc">O caderno pessoal e o acervo compartilhado são o mesmo endpoint — a escada de 5 visibilidades, criar, publicar/despublicar e listar o acervo de uma disciplina.</p>
+              <span class="card-tags"><span class="tag">POST /notes</span><span class="tag">POST /notes/{id}/visibility</span><span class="tag">GET /notes?subject_id=</span></span>
+            </span>
+            <span class="card-arrow">ler →</span>
+          </span>
+        </a>
+
+      </div>
+    </div>
+
   </div>
 
   <div class="section-rule"><span class="label">Endpoints operacionais</span></div>

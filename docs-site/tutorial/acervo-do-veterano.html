@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial 04 · Acervo do veterano · CampusOS</title>
+<meta name="description" content="O caderno pessoal e o acervo compartilhado são o mesmo endpoint — o que muda é a visibilidade. Requests, respostas e o que mostrar em cada passo.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Instrument+Sans:ital,wght@0,400..700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 1.75rem 5rem; }
+  .page-head { padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); }
+  .page-head .kicker { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.85rem; }
+  .page-head h1 { font-size: clamp(1.9rem, 5vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 0.85rem; text-wrap: balance; }
+  .page-head p.lede { max-width: 66ch; color: var(--ink-soft); font-size: 1.02rem; }
+
+  .screen { margin: 2.25rem 0; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; background: var(--surface); }
+  .screen-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.1rem; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .screen-num { font-family: var(--font-mono); font-weight: 700; font-size: 0.75rem; color: #fff; background: var(--ink-faint); width: 1.6rem; height: 1.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .screen-title { font-family: var(--font-serif); font-weight: 600; font-size: 1.1rem; }
+  .screen-body { padding: 1.2rem 1.3rem; }
+  .screen-body p { color: var(--ink-soft); margin: 0 0 0.9rem; font-size: 0.93rem; }
+  .screen-body p:last-child { margin-bottom: 0; }
+
+  .code-block { margin: 0.9rem 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .code-path { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.85rem; background: var(--surface-2); border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); }
+  .code-block pre { margin: 0; padding: 0.9rem 1rem; overflow-x: auto; background: var(--surface); }
+  .code-block code { font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink); white-space: pre; }
+
+  .ladder { list-style: none; margin: 0.9rem 0; padding: 0; display: grid; gap: 0.4rem; }
+  .ladder li { display: grid; grid-template-columns: 7rem 1fr; gap: 0.6rem; padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: 5px; font-size: 0.85rem; }
+  .ladder li.threshold { border-color: var(--amber-500); background: var(--amber-50); }
+  .ladder code { font-family: var(--font-mono); font-weight: 700; color: var(--brand-700); }
+  .ladder span { color: var(--ink-soft); }
+
+  .callout { margin: 1.2rem 0; border: 1px solid var(--border-strong); border-left: 3px solid var(--brand-500); background: var(--brand-50); border-radius: 4px; padding: 0.85rem 1.05rem; font-size: 0.88rem; color: var(--ink-soft); }
+  .callout b { color: var(--ink); }
+  .callout.warn { border-left-color: var(--rust-500); background: var(--rust-50); }
+
+  .tut-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.78rem; }
+  .tut-nav a { text-decoration: none; color: var(--ink-soft); }
+  .tut-nav a:hover { color: var(--brand-700); }
+  .tut-nav .step-count { color: var(--ink-faint); }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 0 1.1rem 4rem; }
+    .page-head { padding: 2.25rem 0 1.5rem; }
+    .ladder li { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="brand" href="../index.html"><span class="mark" aria-hidden="true"></span> CampusOS · Mapa do Sistema</a>
+  <span class="crumbs"><a href="../index.html">docs-site</a><span class="sep">/</span>tutorial<span class="sep">/</span>acervo-do-veterano.html</span>
+</header>
+
+<div class="page-head">
+  <div class="wrap">
+    <div class="kicker">tutorial frontend · 04 de 04 · a rede</div>
+    <h1>O acervo do veterano</h1>
+    <p class="lede">O caderno pessoal do aluno (5.1) e o acervo compartilhado entre semestres (5.2) são o MESMO endpoint — o que muda é só o campo <code>visibility</code>. Uma nota nasce sempre privada; publicar é um passo separado e deliberado.</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="callout" style="margin: 1.5rem 0 2rem;">
+    <b>A escada de cinco degraus.</b> Toda nota nasce <code>private</code>. Publicar sobe um degrau; despublicar (voltar pra
+    <code>private</code>) sempre funciona, sem pré-condição nenhuma.
+  </div>
+
+  <ul class="ladder">
+    <li><code>private</code><span>padrão — só o autor enxerga</span></li>
+    <li><code>offering</code><span>a turma, naquele semestre específico</span></li>
+    <li class="threshold"><code>subject</code><span><b>qualquer pessoa que já cursou a disciplina, em qualquer semestre</b> — é aqui que o acervo do veterano acontece</span></li>
+    <li><code>course</code><span>todo o curso</span></li>
+    <li><code>institution</code><span>a instituição inteira</span></li>
+  </ul>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">1</span><span class="screen-title">Criar uma nota</span></div>
+    <div class="screen-body">
+      <p>Nasce sempre privada — mesmo que você mande outra visibilidade no request, ela é ignorada.</p>
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/notes</div>
+        <pre><code>// request
+{
+  "title": "Resumo da P2 — Séries e integrais impróprias",
+  "body_md": "## O que cai\n\nA prova cobra séries e quase nada de integrais impróprias...",
+  "kind": "summary",
+  "subject_id": "01a0b8..."
+}
+
+// 201 Created — sempre "private", não importa o que foi mandado
+{
+  "data": {
+    "id": "01a0b8...",
+    "title": "Resumo da P2 — Séries e integrais impróprias",
+    "body_md": "## O que cai...",
+    "kind": "summary", "kind_label": "Resumo",
+    "visibility": "private", "visibility_label": "Privada",
+    "author": { "id": "01a0b8...", "name": "Um Veterano" },
+    "subject_id": "01a0b8...", "offering_id": null, "course_id": null,
+    "term": null,
+    "published_at": null,
+    "created_at": "2026-09-19T10:00:00+00:00"
+  }
+}</code></pre>
+      </div>
+      <p><code>kind</code>: <code>summary</code> (resumo) · <code>past_exam</code> (prova antiga) · <code>solved_exercise_list</code> (lista resolvida) · <code>material</code> · <code>tip</code> (dica). São filtráveis — deixe o aluno escolher o tipo antes de escrever, não depois.</p>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">2</span><span class="screen-title">Publicar — subir na escada</span></div>
+    <div class="screen-body">
+      <p>Um botão "compartilhar" separado do botão "salvar" — publicar é sempre um ato deliberado.</p>
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/notes/{note}/visibility</div>
+        <pre><code>// request — publicar pra quem já cursou a disciplina, em qualquer semestre
+{ "visibility": "subject", "subject_id": "01a0b8..." }
+
+// 200 — "published_at" foi preenchido nesta chamada
+{ "data": { "id": "01a0b8...", "visibility": "subject", "visibility_label": "Quem já cursou esta disciplina",
+  "published_at": "2026-09-19T10:05:00+00:00", "..." : "..." } }
+
+// 422 — publicar pra "subject"/"offering" sem a disciplina/turma informada
+{ "errors": { "subject_id": ["Informe a disciplina antes de publicar para quem já a cursou."] } }
+
+// 403 — só o autor muda a visibilidade da própria nota
+{ "message": "Esta nota não é sua." }</code></pre>
+      </div>
+      <p>Despublicar é a mesma chamada, sem pré-condição nenhuma:</p>
+      <div class="code-block">
+        <div class="code-path">POST /api/v1/notes/{note}/visibility</div>
+        <pre><code>{ "visibility": "private" }
+// 200 — sai do acervo na hora. published_at NÃO é apagado (é o histórico
+// de quando a nota entrou no acervo pela primeira vez)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">3</span><span class="screen-title">Ver o acervo de uma disciplina</span></div>
+    <div class="screen-body">
+      <p>
+        A mesma listagem serve pro caderno pessoal (sem filtro) e pro acervo de uma disciplina específica
+        (com <code>subject_id</code>). O que volta já é exatamente o que o usuário autenticado tem direito de ver — sem
+        lógica de permissão nenhuma no front.
+      </p>
+      <div class="code-block">
+        <div class="code-path">GET /api/v1/notes?subject_id={id}</div>
+        <pre><code>// 200 — ordenado por data de publicação (mais recente primeiro)
+{ "data": [
+  {
+    "id": "01a0b8...", "title": "Resumo da P2 — Séries e integrais impróprias",
+    "kind": "summary", "kind_label": "Resumo",
+    "visibility": "subject", "visibility_label": "Quem já cursou esta disciplina",
+    "author": { "id": "01a0b8...", "name": "Um Veterano" },
+    "term": { "year": 2024, "period": 1 },
+    "published_at": "2024-06-10T14:00:00+00:00"
+  }
+] }</code></pre>
+      </div>
+      <p>
+        <b>A autoria sempre aparece</b> (<code>author.name</code>) — acervo anônimo não cria pertencimento, é regra de
+        produto, não detalhe visual. <code>term</code> mostra <b>quando</b> a nota foi escrita: "2024/1" ao lado do resumo
+        muda completamente o valor dela pra quem está lendo em 2027.
+      </p>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">4</span><span class="screen-title">Ver uma nota específica</span></div>
+    <div class="screen-body">
+      <div class="code-block">
+        <div class="code-path">GET /api/v1/notes/{note}</div>
+        <pre><code>// mesmo formato de uma linha da listagem, com body_md completo
+// 404 se o usuário não tiver direito de ver esta nota (o scope de
+// visibilidade filtra ANTES do model binding — não existe 403 aqui,
+// é como se a nota não existisse pra quem não pode vê-la)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <b>Nota de prova nunca aparece aqui.</b> O acervo compartilha <i>conhecimento</i> — resumos, dicas, listas — nunca
+    desempenho. Não existe (e não deveria existir) nenhum jeito de este endpoint devolver nota de matrícula ou situação de
+    aprovação junto de uma anotação.
+  </div>
+
+  <div class="tut-nav">
+    <a href="progressao-e-catalogo.html">← progressão e catálogo</a>
+    <span class="step-count">04 / 04</span>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <p><a href="../index.html">← voltar ao mapa do sistema</a> · <a href="../features/acervo-compartilhado.html">parte da feature: O acervo do veterano</a></p>
+</footer>
+
+<script src="../assets/site-chrome.js" defer></script>
+</body>
+</html>
