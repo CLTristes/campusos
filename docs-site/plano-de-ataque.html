@@ -104,7 +104,7 @@
     <div class="eyebrow">hackathon · 14 horas e 15 minutos</div>
     <h1>Plano de ataque</h1>
     <p class="lede">
-      <b style="color:var(--leaf-700)">Atualizado 06:30 — B0 a B4 fechados. O documento do aluno vira barra de progresso; falta o acervo do veterano (B5), que é a outra metade do pitch.</b><br>
+      <b style="color:var(--leaf-700)">Atualizado v0.5.1 (19/09) — B0 a B5 fechados. O documento do aluno vira barra de progresso E o acervo do veterano entrega nota entre semestres; faltam B6 (tarefas da turma) e B7 (horas complementares).</b><br>
       São <strong>01:45</strong>. A entrega é <strong>hoje às 16:00</strong>. Isso são <strong>14h15</strong> de relógio, das quais
       aproximadamente 13 são de código — o resto é a demo, e a demo não se improvisa.
       Esta página existe por um motivo só: às 05:30 da manhã ninguém decide prioridade direito,
@@ -147,7 +147,7 @@
           <li>Migrations: <code>campuses</code>, <code>users</code> (com <code>usr_role</code> e <code>usr_registration_number</code>).</li>
           <li><code>LoginAction</code> + Sanctum em <code>POST /api/v1/auth/login</code>; middleware <code>tenant.user</code>. <b>✅ feito</b> — mais <code>/auth/me</code> e <code>/auth/logout</code>, com <i>rate limit</i> de 6/min e mensagem idêntica para senha errada e e-mail inexistente.</li>
           <li>Seeder de dev: UTFPR + 1 campus + 1 aluno + 1 coordenador. <b>✅ feito</b></li>
-          <li><b>Extra:</b> console de dados Filament em <code>/data-console</code> — 10 recursos, <code>ResolveTenantFromUser</code> no <code>authMiddleware</code> para o painel não abrir vazio.</li>
+          <li><b>Extra:</b> console de dados Filament em <code>/data-console</code> — 15 recursos (catalog + tenancy + journey), <code>ResolveTenantFromUser</code> no <code>authMiddleware</code> para o painel não abrir vazio.</li>
         </ul>
         <div class="done-when"><b>Pronto quando:</b> login devolve token e uma rota autenticada responde com o tenant correto no <code>TenantContext</code>.</div>
       </div>
@@ -199,14 +199,14 @@
     <div class="blk critical">
       <div class="blk-time">09:00<small>1h30</small></div>
       <div class="blk-card">
-        <div class="blk-head"><span class="blk-id">B5</span><h3>lifeos — notas e o acervo do veterano</h3></div>
+        <div class="blk-head"><span class="blk-id">B5</span><span class="status-pill built">✅ feito</span><h3>lifeos — notas e o acervo do veterano</h3></div>
         <p>O desafio 5.2 inteiro mora numa coluna (<code>nte_visibility</code>) e numa query. Tecnicamente é o bloco mais barato da noite e narrativamente é o mais forte — não deixe escorregar pro fim.</p>
         <ul>
-          <li><code>notes</code> com <code>nte_visibility</code> (5 níveis) + vínculo opcional a disciplina e oferta.</li>
-          <li><code>NoteVisibilityScope</code> — a regra que faz o calouro herdar o acervo. Um teste dedicado: <b>aluno de 2027/1 enxerga nota pública escrita em 2024/1 na mesma disciplina.</b></li>
-          <li><code>GET /api/v1/subjects/{id}/notes</code> — o acervo da disciplina.</li>
+          <li><code>notes</code> com <code>nte_visibility</code> (5 níveis) + vínculo opcional a disciplina e oferta. <b>✅ feito</b></li>
+          <li><code>NoteVisibilityScope</code> — a regra que faz o calouro herdar o acervo. Um teste dedicado: <b>aluno de 2027/1 enxerga nota pública escrita em 2024/1 na mesma disciplina.</b> <b>✅ feito — o teste passa</b></li>
+          <li><code>GET /api/v1/notes?subject_id={id}</code> — o acervo da disciplina (query param, não path — mesmo endpoint lista tanto o caderno pessoal quanto o acervo compartilhado). <b>✅ feito</b></li>
         </ul>
-        <div class="done-when"><b>Pronto quando:</b> o teste de herança entre semestres passa. Ele é a prova do 5.2 — vale mais que a tela.</div>
+        <div class="done-when"><b>Pronto quando:</b> o teste de herança entre semestres passa. Ele é a prova do 5.2 — vale mais que a tela. <b>Passou.</b></div>
       </div>
     </div>
 

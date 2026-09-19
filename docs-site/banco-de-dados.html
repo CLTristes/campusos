@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Modelo de Dados (DER) · CampusOS</title>
-<meta name="description" content="Diagrama entidade-relacionamento do CampusOS — 24 tabelas em 6 módulos, com o porquê de cada decisão de modelagem.">
+<meta name="description" content="Diagrama entidade-relacionamento do CampusOS — 26 tabelas desenhadas em 6 módulos (18 já em código), com o porquê de cada decisão de modelagem.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233d55be'/%3E%3Cstop offset='1' stop-color='%23e5ae3a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -103,16 +103,16 @@
     <div class="eyebrow">CampusOS · modelo de dados</div>
     <h1>Diagrama Entidade‑Relacionamento</h1>
     <p class="lede">
-      <strong>26 tabelas em 6 módulos</strong>, <strong>17 delas já em código</strong> (tenancy, catalog e o núcleo do journey). Convenções do template modular sem exceção:
+      <strong>26 tabelas em 6 módulos</strong>, <strong>18 delas já em código</strong> (tenancy, catalog, journey inteiros e o acervo do lifeos). Convenções do template modular sem exceção:
       prefixo de 3 letras em toda coluna, PK UUID gerada na aplicação, <code>SoftDeletes</code> em tudo que é transacional,
       FK no formato <code>{tabela_singular}_{pk}</code>, e <code>entity_ent_id</code> em toda tabela com escopo de tenant.
-      Cada card traz a <strong>razão</strong> da modelagem — num hackathon, a decisão esquecida às 4 da manhã custa mais que a tabela errada.
+      Cada card traz a <strong>razão</strong> da modelagem — a decisão esquecida às 4 da manhã custa mais que a tabela errada.
     </p>
     <div class="meta-row">
-      <span><b>Código:</b> main — tenancy + catalog + auth</span>
+      <span><b>Código:</b> main — tenancy + catalog + journey + integrations + lifeos (acervo)</span>
       <span><b>API:</b> /api/v1</span>
       <span><b>Tenant:</b> entities = a instituição</span>
-      <span><b>Escrito:</b> 2026-09-19 01:45</span>
+      <span><b>Última sincronização:</b> v0.5.1 · 2026-09-19</span>
     </div>
   </header>
 
@@ -128,10 +128,10 @@
   </div>
 
   <div class="legend">
-    <div class="legend-item"><span class="status-pill mvp">⚑ MVP · hoje</span><p>Precisa existir até as 16:00. Sem ela a demo não fecha.</p></div>
-    <div class="legend-item"><span class="status-pill stretch">◎ esticada</span><p>Entra se sobrar tempo. Melhora o pitch, não sustenta a demo.</p></div>
-    <div class="legend-item"><span class="status-pill planned">◇ planejado</span><p>Desenhada aqui, fora do escopo de hoje. Roadmap honesto na apresentação.</p></div>
-    <div class="legend-item"><span class="status-pill built">✅ em código</span><p><b>Nada tem esta marca ainda</b> — vire os pills conforme a noite andar.</p></div>
+    <div class="legend-item"><span class="status-pill built">✅ em código</span><p>Migration + model + teste existem — o que este card descreve é o schema real.</p></div>
+    <div class="legend-item"><span class="status-pill mvp">⚑ MVP</span><p>Decisão de produto já tomada, ainda sem código. Faz parte do escopo essencial.</p></div>
+    <div class="legend-item"><span class="status-pill stretch">◎ esticada</span><p>Melhora o produto se sobrar tempo — não é essencial ao MVP.</p></div>
+    <div class="legend-item"><span class="status-pill planned">◇ planejado</span><p>Desenhada aqui, fora do escopo atual. Roadmap honesto, não rascunho.</p></div>
   </div>
 
   <div class="diagram-key">
@@ -154,6 +154,7 @@
     <div class="diagram-scroll" id="dgm-main">
 <pre class="mermaid">
 flowchart LR
+    classDef built fill:#e2f1e8,stroke:#2f8253,stroke-width:2px,color:#14432a,font-weight:600;
     classDef mvp fill:#fbf0d4,stroke:#d1911c,stroke-width:2px,color:#875613,font-weight:600;
     classDef stretch fill:#e6ebfb,stroke:#5570d2,stroke-width:2px,color:#2a377e,font-weight:600;
     classDef planned fill:#f0eee9,stroke:#a9a294,stroke-width:1.5px,stroke-dasharray:6 4,color:#4b5468;
@@ -171,7 +172,9 @@ flowchart LR
             CURRICULA
             SUBJECTS
             CURRICULUM_SUBJECTS
+            ELECTIVE_GROUPS
             PREREQUISITES
+            SUBJECT_EQUIVALENCES
             TERMS
             OFFERINGS
             COMPLEMENTARY_CATEGORIES
@@ -214,7 +217,7 @@ flowchart LR
 
     LEFTCOL ~~~ RIGHTCOL
 
-    %% Intra-módulo: relação completa. Entre módulos: só as quatro setas que
+    %% Intra-módulo: relação completa. Entre módulos: só as cinco setas que
     %% contam a história do produto — a FK completa está nos cards abaixo.
     ENTITIES --> CAMPUSES
     ENTITIES --> USERS
@@ -224,7 +227,10 @@ flowchart LR
     COURSES --> CURRICULA
     CURRICULA --> CURRICULUM_SUBJECTS
     SUBJECTS --> CURRICULUM_SUBJECTS
+    CURRICULA --> ELECTIVE_GROUPS
+    ELECTIVE_GROUPS --> CURRICULUM_SUBJECTS
     CURRICULUM_SUBJECTS --> PREREQUISITES
+    CURRICULUM_SUBJECTS --> SUBJECT_EQUIVALENCES
     CURRICULA --> COMPLEMENTARY_CATEGORIES
     TERMS --> OFFERINGS
     SUBJECTS --> OFFERINGS
@@ -244,7 +250,8 @@ flowchart LR
     SUBJECTS -.-> NOTES
     USERS -.-> NOTES
 
-    class ENTITIES,CAMPUSES,USERS,AUDIT_LOGS,COURSES,CURRICULA,SUBJECTS,CURRICULUM_SUBJECTS,PREREQUISITES,TERMS,OFFERINGS,COMPLEMENTARY_CATEGORIES,STUDENTS,REGISTRATIONS,SUBJECT_ENROLLMENTS,ENROLLMENT_REQUESTS,COMPLEMENTARY_ACTIVITIES,NOTES,TASKS mvp
+    class ENTITIES,CAMPUSES,USERS,AUDIT_LOGS,COURSES,CURRICULA,SUBJECTS,CURRICULUM_SUBJECTS,ELECTIVE_GROUPS,PREREQUISITES,SUBJECT_EQUIVALENCES,TERMS,OFFERINGS,STUDENTS,REGISTRATIONS,SUBJECT_ENROLLMENTS,ENROLLMENT_REQUESTS,NOTES built
+    class COMPLEMENTARY_CATEGORIES,COMPLEMENTARY_ACTIVITIES,TASKS mvp
     class NOTE_VOTES,EVENTS stretch
     class NOTE_ATTACHMENTS,PROJECTS,TRANSACTIONS planned
 
@@ -285,18 +292,17 @@ flowchart LR
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>ent_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag"></span><code>ent_name</code><span class="type">string</span></li>
-          <li><span class="key-tag uk">UK</span><code>ent_acronym</code><span class="type">string — "UTFPR"</span></li>
-          <li><span class="key-tag"></span><code>ent_email_domain</code><span class="type">string nullable</span></li>
-          <li><span class="key-tag"></span><code>ent_logo_path</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag"></span><code>ent_email</code><span class="type">string nullable</span></li>
+          <li><span class="key-tag uk">UK</span><code>ent_email_domain</code><span class="type">string nullable — "alunos.utfpr.edu.br"</span></li>
           <li><span class="key-tag"></span><code>ent_created_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>ent_updated_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>ent_deleted_at</code><span class="type">timestamp nullable</span></li>
         </ul>
         <div class="tcard-note">
-          O tenant: <b>uma universidade</b>. <code>ent_email_domain</code> (<code>alunos.utfpr.edu.br</code>) é o que permite o autocadastro
-          descobrir sozinho a qual instituição a pessoa pertence a partir do e-mail — sem ela, o aluno teria que escolher a universidade
-          numa lista, e escolher errado. <b>Pendência aberta:</b> se verificação de e-mail entra hoje ou não (ver
-          <a href="index.html">pendências do dono do produto</a>).
+          O tenant: <b>uma universidade</b>. <code>ent_email_domain</code> (v0.4.0) é o que permite o cadastro livre do aluno
+          descobrir sozinho a qual instituição a pessoa pertence a partir do domínio do e-mail — sem ela, o aluno teria que escolher a
+          universidade numa lista, e escolher errado. Nullable: instituição sem domínio configurado simplesmente não aceita
+          cadastro livre. Ver <a href="../docs/dominio/ACESSO.md">ACESSO.md</a> regra 9.
         </div>
       </article>
 
@@ -322,22 +328,29 @@ flowchart LR
         <div class="tcard-head"><span class="tcard-name">users</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>usr_id</code><span class="type">uuid</span></li>
-          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>campus_cps_id</code><span class="type">uuid nullable</span></li>
           <li><span class="key-tag"></span><code>usr_name</code><span class="type">string</span></li>
           <li><span class="key-tag uk">UK</span><code>usr_email</code><span class="type">string — por entity</span></li>
           <li><span class="key-tag"></span><code>usr_password</code><span class="type">string (hash)</span></li>
-          <li><span class="key-tag"></span><code>usr_role</code><span class="type">enum — 5 valores</span></li>
+          <li><span class="key-tag"></span><code>usr_role</code><span class="type">enum — 4 valores</span></li>
+          <li><span class="key-tag uk">UK</span><code>usr_registration_number</code><span class="type">string nullable — o RA, por entity</span></li>
           <li><span class="key-tag"></span><code>usr_email_verified_at</code><span class="type">timestamp nullable</span></li>
-          <li><span class="key-tag"></span><code>usr_enabled_modules</code><span class="type">json</span></li>
+          <li><span class="key-tag"></span><code>usr_verification_code</code><span class="type">string nullable (hash)</span></li>
+          <li><span class="key-tag"></span><code>usr_verification_code_expires_at</code><span class="type">timestamp nullable</span></li>
+          <li><span class="key-tag"></span><code>usr_enabled_modules</code><span class="type">json nullable</span></li>
           <li><span class="key-tag"></span><code>usr_created_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>usr_updated_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>usr_deleted_at</code><span class="type">timestamp nullable</span></li>
         </ul>
         <div class="tcard-note">
-          <code>usr_role</code>: <code>platform_admin</code> · <code>institution_admin</code> · <code>coordinator</code> ·
-          <code>professor</code> · <code>student</code>. <code>entity_ent_id</code> é nullable só pro admin de plataforma —
-          mesma solução do FibroMais. <code>campus_cps_id</code> só faz sentido pro coordenador (recorte de visão).
+          <code>usr_role</code>: <code>student</code> · <code>coordinator</code> · <code>professor</code> ·
+          <code>institution_admin</code>. <code>entity_ent_id</code> é <b>NOT NULL hoje</b> — o admin de plataforma sem instituição
+          é ◇ planejado (a coluna vira nullable quando ele entrar, com exceção explícita no <code>EntityScope</code>).
+          <code>campus_cps_id</code> só faz sentido pro coordenador (recorte de visão).
+          <code>usr_verification_code</code> (v0.4.0) segue o mesmo tratamento de <code>usr_password</code>: hashado, fora de
+          serialização e do diff de auditoria — é o código de 6 dígitos do cadastro livre, camada de segurança em paralelo,
+          nunca um portão de acesso.
           <b><code>usr_enabled_modules</code></b> é a resposta ao pedido de "não poluir a imagem": Finanças nasce <b>desligada</b>
           e o aluno liga se quiser. Um json em vez de tabela de preferências porque são 3 ou 4 flags booleanas — extrair tabela
           quando a fronteira doer, não antes. <b>RBAC granular</b> (tabela <code>permissions</code> própria, como no FibroMais):
@@ -378,7 +391,7 @@ flowchart LR
 
   <!-- CATALOG -->
   <section class="module">
-    <div class="module-head"><h2>catalog</h2><span class="module-tag">o esqueleto acadêmico · 10 tabelas · ✅ em código</span></div>
+    <div class="module-head"><h2>catalog</h2><span class="module-tag">o esqueleto acadêmico · 10 tabelas · 9 ✅ em código</span></div>
     <p class="module-intro">
       Dados <b>mestres</b>: mudam por resolução de colegiado, não por ação de aluno. É o módulo que o aluno nunca escreve e do qual tudo depende —
       por isso é o primeiro a ser semeado e o mais caro em tempo de digitação, não de código. A separação entre <code>subjects</code>
@@ -409,10 +422,13 @@ flowchart LR
         <div class="tcard-head"><span class="tcard-name">curricula</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>cur_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>course_crs_id</code><span class="type">uuid</span></li>
-          <li><span class="key-tag uk">UK</span><code>cur_code</code><span class="type">string — "2023/1", por curso</span></li>
-          <li><span class="key-tag"></span><code>cur_effective_from</code><span class="type">date</span></li>
-          <li><span class="key-tag"></span><code>cur_is_active</code><span class="type">boolean</span></li>
+          <li><span class="key-tag uk">UK</span><code>cur_code</code><span class="type">string — "45", por curso</span></li>
+          <li><span class="key-tag"></span><code>cur_name</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>cur_version</code><span class="type">smallint</span></li>
+          <li><span class="key-tag"></span><code>cur_effective_from</code><span class="type">date nullable</span></li>
+          <li><span class="key-tag"></span><code>cur_status</code><span class="type">enum — active | inactive</span></li>
           <li><span class="key-tag"></span><code>cur_mandatory_hours</code><span class="type">integer — 2.730 na UTFPR</span></li>
           <li><span class="key-tag"></span><code>cur_elective_hours</code><span class="type">integer — 210</span></li>
           <li><span class="key-tag"></span><code>cur_extension_hours</code><span class="type">integer — 300, exigência total</span></li>
@@ -456,7 +472,6 @@ flowchart LR
           <li><span class="key-tag"></span><code>sbj_extension_hours</code><span class="type">integer — CHEXT</span></li>
           <li><span class="key-tag"></span><code>sbj_model</code><span class="type">enum — 8 valores do PPC</span></li>
           <li><span class="key-tag"></span><code>sbj_workload_breakdown</code><span class="type">json nullable — teóricas/práticas/APS/APCC/AD/CHEAD</span></li>
-          <li><span class="key-tag"></span><code>sbj_credits</code><span class="type">smallint nullable</span></li>
           <li><span class="key-tag"></span><code>sbj_syllabus</code><span class="type">text nullable</span></li>
           <li><span class="key-tag"></span><code>sbj_created_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>sbj_updated_at</code><span class="type">timestamp</span></li>
@@ -503,8 +518,10 @@ flowchart LR
         <div class="tcard-head"><span class="tcard-name">curriculum_subjects</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>cbs_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>curriculum_cur_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>subject_sbj_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>elective_group_elg_id</code><span class="type">uuid nullable — nulo é obrigatória</span></li>
           <li><span class="key-tag"></span><code>cbs_term</code><span class="type">smallint — período sugerido</span></li>
           <li><span class="key-tag"></span><code>cbs_nature</code><span class="type">enum — mandatory | elective | optional</span></li>
           <li><span class="key-tag uk">UK</span><code>(curriculum, subject)</code><span class="type">índice único</span></li>
@@ -523,6 +540,7 @@ flowchart LR
         <div class="tcard-head"><span class="tcard-name">prerequisites</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>prq_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>curriculum_subject_cbs_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>required_cbs_id</code><span class="type">uuid nullable</span></li>
           <li><span class="key-tag"></span><code>prq_type</code><span class="type">enum — subject | minimum_term | corequisite | minimum_hours</span></li>
@@ -674,9 +692,8 @@ flowchart LR
           <li><span class="key-tag">FK</span><code>course_crs_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>curriculum_cur_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entry_term_trm_id</code><span class="type">uuid</span></li>
-          <li><span class="key-tag uk">UK</span><code>reg_number</code><span class="type">string — o RA, por entity</span></li>
+          <li><span class="key-tag uk">UK</span><code>reg_number</code><span class="type">string — o RA "2567857", por entity</span></li>
           <li><span class="key-tag"></span><code>reg_status</code><span class="type">enum — active | locked | graduated | dismissed</span></li>
-          <li><span class="key-tag"></span><code>reg_number</code><span class="type">o RA — "2567857"</span></li>
           <li><span class="key-tag"></span><code>reg_graduated_at</code><span class="type">date nullable</span></li>
           <li><span class="key-tag"></span><code>reg_created_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>reg_updated_at</code><span class="type">timestamp</span></li>
@@ -702,11 +719,11 @@ flowchart LR
           <li><span class="key-tag">FK</span><code>offering_ofr_id</code><span class="type">uuid nullable</span></li>
           <li><span class="key-tag"></span><code>sen_status</code><span class="type">enum — 10 valores reais</span></li>
           <li><span class="key-tag"></span><code>sen_class_code</code><span class="type">string nullable — "5SI"</span></li>
-          <li><span class="key-tag"></span><code>sen_class_type</code><span class="type">enum — R | F | E | D | S | I</span></li>
+          <li><span class="key-tag"></span><code>sen_class_type</code><span class="type">string(2) nullable — R | F | E | D | S, texto cru do documento</span></li>
           <li><span class="key-tag"></span><code>sen_grade</code><span class="type">decimal(5,2) nullable</span></li>
-          <li><span class="key-tag"></span><code>sen_attendance</code><span class="type">smallint nullable (%)</span></li>
+          <li><span class="key-tag"></span><code>sen_attendance</code><span class="type">decimal(5,2) nullable (%)</span></li>
           <li><span class="key-tag"></span><code>sen_hours_earned</code><span class="type">integer</span></li>
-          <li><span class="key-tag"></span><code>sen_source</code><span class="type">enum — transcript | request | manual</span></li>
+          <li><span class="key-tag"></span><code>sen_source</code><span class="type">enum — transcript | enrollment_request | manual</span></li>
           <li><span class="key-tag uk">UK</span><code>(registration, subject, term)</code><span class="type">índice único</span></li>
           <li><span class="key-tag"></span><code>sen_created_at</code><span class="type">timestamp</span></li>
           <li><span class="key-tag"></span><code>sen_updated_at</code><span class="type">timestamp</span></li>
@@ -732,12 +749,15 @@ flowchart LR
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>erq_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
-          <li><span class="key-tag">FK</span><code>registration_reg_id</code><span class="type">uuid nullable</span></li>
-          <li><span class="key-tag"></span><code>erq_kind</code><span class="type">enum — transcript | enrollment_request</span></li>
+          <li><span class="key-tag">FK</span><code>user_usr_id</code><span class="type">uuid</span></li>
+          <li><span class="key-tag">FK</span><code>registration_reg_id</code><span class="type">uuid nullable — opcional desde v0.3.1</span></li>
+          <li><span class="key-tag"></span><code>erq_kind</code><span class="type">string — transcript | enrollment_request</span></li>
           <li><span class="key-tag"></span><code>erq_file_path</code><span class="type">string</span></li>
+          <li><span class="key-tag"></span><code>erq_mime</code><span class="type">string</span></li>
           <li><span class="key-tag"></span><code>erq_status</code><span class="type">enum — 5 valores</span></li>
           <li><span class="key-tag"></span><code>erq_extraction</code><span class="type">json nullable</span></li>
           <li><span class="key-tag"></span><code>erq_confidence</code><span class="type">decimal(4,3) nullable</span></li>
+          <li><span class="key-tag"></span><code>erq_provider</code><span class="type">string nullable — "gemini:gemini-3.6-flash"</span></li>
           <li><span class="key-tag"></span><code>erq_failure_reason</code><span class="type">string nullable</span></li>
           <li><span class="key-tag"></span><code>erq_parsed_at</code><span class="type">timestamp nullable</span></li>
           <li><span class="key-tag"></span><code>erq_confirmed_at</code><span class="type">timestamp nullable</span></li>
@@ -751,8 +771,11 @@ flowchart LR
           conferência, e só a confirmação cria <code>subject_enrollments</code>. Isso transforma um erro de OCR em uma correção de
           30 segundos, em vez de um histórico corrompido — e é o que torna aceitável usar IA num dado sensível.
           <code>registration_reg_id</code> é nullable porque o documento pode chegar <b>antes</b> do vínculo existir:
-          é do próprio documento que se descobre o curso e o RA. <code>erq_file_path</code> fica fora do diff de auditoria
-          (<code>$hidden</code> do observer).
+          é do próprio documento que se descobre o curso e o RA — <b>desde v0.3.1, a própria confirmação cria o vínculo</b>
+          quando ele falta, lendo curso/RA/ingresso de <code>erq_extraction.meta</code>. <code>erq_file_path</code> e
+          <code>erq_extraction</code> ficam fora do diff de auditoria (<code>$hidden</code> do observer) — histórico escolar é
+          dado sensível. <b>Validado contra o Gemini real</b> (v0.3.1): as 57 linhas do histórico da UTFPR bateram 100% com
+          o documento.
         </div>
       </article>
 
@@ -789,7 +812,7 @@ flowchart LR
 
   <!-- LIFEOS -->
   <section class="module">
-    <div class="module-head"><h2>lifeos</h2><span class="module-tag">o caderno do aluno · 7 tabelas</span></div>
+    <div class="module-head"><h2>lifeos</h2><span class="module-tag">o caderno do aluno · 7 tabelas · 1 ✅ em código</span></div>
     <p class="module-intro">
       Herdado em <b>forma</b>, não em código, do LifeOS do Psyches Archive (que é HTML estático + Edge Functions, mono-usuário por
       construção — nada dele é portável). O que atravessa é a divisão em nota, tarefa, evento, projeto e movimentação.
@@ -798,18 +821,19 @@ flowchart LR
     </p>
     <div class="card-grid">
 
-      <article class="tcard mvp wide">
-        <div class="tcard-head"><span class="tcard-name">notes</span><span class="status-pill mvp">⚑ MVP · o coração do 5.2</span></div>
+      <article class="tcard built wide">
+        <div class="tcard-head"><span class="tcard-name">notes</span><span class="status-pill built">✅ em código · o coração do 5.2</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>nte_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>author_usr_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag"></span><code>nte_title</code><span class="type">string</span></li>
-          <li><span class="key-tag"></span><code>nte_content_md</code><span class="type">text nullable — markdown</span></li>
-          <li><span class="key-tag"></span><code>nte_kind</code><span class="type">enum — summary | exam | exercise | material | tip</span></li>
+          <li><span class="key-tag"></span><code>nte_body_md</code><span class="type">text — markdown</span></li>
+          <li><span class="key-tag"></span><code>nte_kind</code><span class="type">enum — summary | past_exam | solved_exercise_list | material | tip</span></li>
           <li><span class="key-tag"></span><code>nte_visibility</code><span class="type">enum — private | offering | subject | course | institution</span></li>
           <li><span class="key-tag">FK</span><code>subject_sbj_id</code><span class="type">uuid nullable</span></li>
           <li><span class="key-tag">FK</span><code>offering_ofr_id</code><span class="type">uuid nullable</span></li>
+          <li><span class="key-tag">FK</span><code>course_crs_id</code><span class="type">uuid nullable</span></li>
           <li><span class="key-tag">FK</span><code>term_trm_id</code><span class="type">uuid nullable</span></li>
           <li><span class="key-tag"></span><code>nte_published_at</code><span class="type">timestamp nullable</span></li>
           <li><span class="key-tag"></span><code>nte_created_at</code><span class="type">timestamp</span></li>
@@ -826,8 +850,12 @@ flowchart LR
           um veterano escreveu em 2024, sem os dois se conhecerem e sem ninguém precisar "compartilhar" nada.
           <code>term_trm_id</code> guarda <b>quando</b> foi escrita — é o que permite a interface dizer "resumo de 2024/1, professor X",
           informação que muda completamente o valor da nota pra quem lê.
-          <b>Sem <code>subject_sbj_id</code>, toda visibilidade acima de <code>private</code> é inválida</b> — sem disciplina não há a quem mostrar.
-          Ver <a href="features/acervo-compartilhado.html">o desenho completo da regra</a>.
+          <b>Nota nasce sempre <code>private</code></b> (v0.5.0) — publicar é ato deliberado, e <code>UpdateNoteVisibilityAction</code>
+          recusa subir pra <code>subject</code>/<code>offering</code>/<code>course</code> sem a FK correspondente preenchida.
+          A entrega automática entre semestres é um global scope (<code>NoteVisibilityScope</code>) consultando
+          <code>EnrolledSubjectsProvider</code> — contrato no <code>core</code>, implementado no <code>journey</code>, pra não furar a
+          fronteira modular. Ver <a href="features/acervo-compartilhado.html">o desenho completo da regra</a> e
+          <a href="../docs/dominio/ACERVO.md">ACERVO.md</a>.
         </div>
       </article>
 
@@ -1017,8 +1045,8 @@ flowchart LR
 </div>
 
 <footer class="site-footer">
-  CampusOS · docs-site — 24 tabelas, 6 módulos, nenhuma linha de código
-  <span class="sig">Desenhado antes da primeira migration, que é o único momento em que mudar uma decisão ainda é de graça.</span>
+  CampusOS · docs-site — 26 tabelas desenhadas em 6 módulos, 18 já em código
+  <span class="sig">Desenhado antes da primeira migration — divergiu ao implementar? Mude o código e vire o card junto.</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
