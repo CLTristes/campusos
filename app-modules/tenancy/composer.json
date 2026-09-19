@@ -1,5 +1,5 @@
 {
-	"name": "modules/tenancy",
+	"name": "campus-os/tenancy",
 	"description": "O tenant (Entity) — a raiz do multi-tenancy. Cresce para abrigar User, papéis e onboarding quando o sistema precisar.",
 	"type": "library",
 	"version": "1.0",
@@ -7,17 +7,17 @@
 	"require": {},
 	"autoload": {
 		"psr-4": {
-			"Modules\\Tenancy\\": "src/",
-			"Modules\\Tenancy\\Tests\\": "tests/",
-			"Modules\\Tenancy\\Database\\Factories\\": "database/factories/",
-			"Modules\\Tenancy\\Database\\Seeders\\": "database/seeders/"
+			"CampusOs\\Tenancy\\": "src/",
+			"CampusOs\\Tenancy\\Tests\\": "tests/",
+			"CampusOs\\Tenancy\\Database\\Factories\\": "database/factories/",
+			"CampusOs\\Tenancy\\Database\\Seeders\\": "database/seeders/"
 		}
 	},
 	"minimum-stability": "stable",
 	"extra": {
 		"laravel": {
 			"providers": [
-				"Modules\\Tenancy\\Providers\\TenancyServiceProvider"
+				"CampusOs\\Tenancy\\Providers\\TenancyServiceProvider"
 			]
 		}
 	}

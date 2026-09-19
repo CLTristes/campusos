@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Tenancy;
+namespace CampusOs\Core\Tenancy;
 
 /**
  * Ponto ÚNICO de acesso ao contexto de tenant (entity_id) do request/processo atual.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Modules\Core\Tenancy\TenantContext;
+use CampusOs\Core\Tenancy\TenantContext;
 
 // Precisa do container (session) — não toca o banco.
 uses(Tests\TestCase::class);

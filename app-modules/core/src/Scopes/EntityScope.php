@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Scopes;
+namespace CampusOs\Core\Scopes;
 
+use CampusOs\Core\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
-use Modules\Core\Tenancy\TenantContext;
 
 /**
  * Global scope que filtra todo model multi-tenant pelo entity_id do contexto atual.

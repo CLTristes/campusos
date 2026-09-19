@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Actions\Input;
+namespace CampusOs\Core\Actions\Input;
 
 use Illuminate\Http\Request;
 

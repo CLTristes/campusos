@@ -8,7 +8,7 @@ return [
     | Modules Namespace
     |--------------------------------------------------------------------------
     |
-    | Namespace PHP em que os módulos vivem. O template usa `Modules\` (default
+    | Namespace PHP em que os módulos vivem. O template usa `CampusOs\` (default
     | do pacote) para funcionar de imediato; ao iniciar um sistema real, a skill
     | /prontuario renomeia para o nome do SEU projeto em PascalCase (ex.:
     | `MeuSistema\`) — imports mais legíveis e extração futura de módulo para
@@ -17,7 +17,7 @@ return [
     |
     */
 
-    'modules_namespace' => 'Modules',
+    'modules_namespace' => 'CampusOs',
 
     /*
     |--------------------------------------------------------------------------
@@ -29,7 +29,7 @@ return [
     |
     */
 
-    'modules_vendor' => 'modules',
+    'modules_vendor' => 'campus-os',
 
     /*
     |--------------------------------------------------------------------------

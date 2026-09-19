@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use CampusOs\Core\Actions\AbstractAction;
 use Illuminate\Validation\ValidationException;
-use Modules\Core\Actions\AbstractAction;
 
 // Precisa do container (facade Validator), então usa o TestCase do Laravel — mas
 // não toca o banco.

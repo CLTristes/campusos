@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use CampusOs\Core\Actions\Input\HttpInputAdapter;
+use CampusOs\Core\Actions\Input\McpInputAdapter;
 use Illuminate\Http\Request;
-use Modules\Core\Actions\Input\HttpInputAdapter;
-use Modules\Core\Actions\Input\McpInputAdapter;
 
 it('funde rota, query e corpo num array canônico com precedência corpo > query > rota', function () {
     $request = Request::create(

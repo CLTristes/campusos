@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Actions\Input;
+namespace CampusOs\Core\Actions\Input;
 
 /**
  * Adapta os argumentos de uma Tool MCP para o **array canônico** que a Action

@@ -1,0 +1,24 @@
+{
+	"name": "campus-os/lifeos",
+	"description": "O caderno do aluno: notas, tarefas, eventos e projetos, com a escada de visibilidade que faz o acervo do veterano chegar ao calouro.",
+	"type": "library",
+	"version": "1.0",
+	"license": "proprietary",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"CampusOs\\Lifeos\\": "src/",
+			"CampusOs\\Lifeos\\Tests\\": "tests/",
+			"CampusOs\\Lifeos\\Database\\Factories\\": "database/factories/",
+			"CampusOs\\Lifeos\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"CampusOs\\Lifeos\\Providers\\LifeosServiceProvider"
+			]
+		}
+	}
+}

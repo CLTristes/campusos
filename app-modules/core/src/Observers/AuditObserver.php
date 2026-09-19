@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Observers;
+namespace CampusOs\Core\Observers;
 
+use CampusOs\Core\Models\AuditLog;
+use CampusOs\Core\Scopes\EntityScope;
+use CampusOs\Core\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Modules\Core\Models\AuditLog;
-use Modules\Core\Scopes\EntityScope;
-use Modules\Core\Tenancy\TenantContext;
 use Throwable;
 
 /**

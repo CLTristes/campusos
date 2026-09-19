@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Console\Commands;
+namespace CampusOs\Core\Console\Commands;
 
+use CampusOs\Core\Models\AuditLog;
 use Illuminate\Console\Command;
-use Modules\Core\Models\AuditLog;
 
 /** Lista a trilha de auditoria de um registro: `php artisan audit:query orders <uuid>`. */
 final class AuditQueryCommand extends Command

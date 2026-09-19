@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use CampusOs\Core\Tenancy\TenantContext;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Modules\Core\Tenancy\TenantContext;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

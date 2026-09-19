@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Modules\Tenancy\Observers;
+namespace CampusOs\Tenancy\Observers;
 
-use Modules\Core\Observers\AuditObserver;
+use CampusOs\Core\Observers\AuditObserver;
 
 /**
  * Auditoria do tenant. Sem colunas ocultas por enquanto — quando o Entity ganhar

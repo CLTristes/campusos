@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Modules\Tenancy\Models;
+namespace CampusOs\Tenancy\Models;
 
+use CampusOs\Tenancy\Database\Factories\EntityFactory;
+use CampusOs\Tenancy\Observers\EntityObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Modules\Tenancy\Database\Factories\EntityFactory;
-use Modules\Tenancy\Observers\EntityObserver;
 
 /**
  * O tenant. NÃO usa Entityable — é a própria raiz do multi-tenancy.

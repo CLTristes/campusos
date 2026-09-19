@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Actions;
+namespace CampusOs\Core\Actions;
 
 use Illuminate\Support\Facades\Validator;
 

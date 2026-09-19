@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Modules\Tenancy\Database\Factories;
+namespace CampusOs\Tenancy\Database\Factories;
 
+use CampusOs\Tenancy\Models\Entity;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Tenancy\Models\Entity;
 
 /** @extends Factory<Entity> */
 final class EntityFactory extends Factory

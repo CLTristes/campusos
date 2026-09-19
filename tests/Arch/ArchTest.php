@@ -8,12 +8,14 @@ declare(strict_types=1);
 // Ao criar um módulo novo (skill /novo-modulo), adicione o namespace dele à
 // constante DOMAIN_MODULES — ele ganha todas as regras de graça.
 
-/** Todos os módulos de domínio (namespace raiz Modules\<Modulo>). */
+/** Todos os módulos de domínio (namespace raiz CampusOs\<Modulo>). */
 const DOMAIN_MODULES = [
-    'Modules\Tenancy',
-    'Modules\Orders',
-    'Modules\Payments',
-    'Modules\Notifications',
+    'CampusOs\Tenancy',
+    'CampusOs\Catalog',
+    'CampusOs\Journey',
+    'CampusOs\Lifeos',
+    'CampusOs\Insights',
+    'CampusOs\Integrations',
 ];
 
 arch('todo o código dos módulos declara strict types')
@@ -21,7 +23,7 @@ arch('todo o código dos módulos declara strict types')
     ->toUseStrictTypes();
 
 arch('o core não depende de nenhum módulo de domínio')
-    ->expect('Modules\Core')
+    ->expect('CampusOs\Core')
     ->not->toUse(DOMAIN_MODULES);
 
 // Cada módulo de domínio só pode importar o core (e a si mesmo) — nunca o

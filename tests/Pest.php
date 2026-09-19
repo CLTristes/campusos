@@ -30,11 +30,11 @@ pest()->extend(Tests\TestCase::class)
  * Monta o contexto mínimo multi-tenant dos testes: cria um tenant e o define
  * como contexto atual. Devolve a Entity criada.
  */
-function tenantContext(): Modules\Tenancy\Models\Entity
+function tenantContext(): CampusOs\Tenancy\Models\Entity
 {
-    $entity = Modules\Tenancy\Models\Entity::factory()->create();
+    $entity = CampusOs\Tenancy\Models\Entity::factory()->create();
 
-    Modules\Core\Tenancy\TenantContext::set($entity->ent_id);
+    CampusOs\Core\Tenancy\TenantContext::set($entity->ent_id);
 
     return $entity;
 }

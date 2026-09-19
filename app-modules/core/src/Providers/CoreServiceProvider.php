@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Providers;
+namespace CampusOs\Core\Providers;
 
 use Illuminate\Support\ServiceProvider;
 

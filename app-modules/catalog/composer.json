@@ -1,0 +1,24 @@
+{
+	"name": "campus-os/catalog",
+	"description": "Dados mestres academicos: curso, matriz curricular, disciplina, pre-requisito, semestre letivo e oferta. Mudam por resolucao de colegiado, nunca por acao de aluno.",
+	"type": "library",
+	"version": "1.0",
+	"license": "proprietary",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"CampusOs\\Catalog\\": "src/",
+			"CampusOs\\Catalog\\Tests\\": "tests/",
+			"CampusOs\\Catalog\\Database\\Factories\\": "database/factories/",
+			"CampusOs\\Catalog\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"CampusOs\\Catalog\\Providers\\CatalogServiceProvider"
+			]
+		}
+	}
+}

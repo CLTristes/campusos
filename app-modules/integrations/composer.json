@@ -1,0 +1,24 @@
+{
+	"name": "campus-os/integrations",
+	"description": "Adaptadores para servicos externos atras de contrato do core: extracao de documentos academicos por IA e e-mail transacional.",
+	"type": "library",
+	"version": "1.0",
+	"license": "proprietary",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"CampusOs\\Integrations\\": "src/",
+			"CampusOs\\Integrations\\Tests\\": "tests/",
+			"CampusOs\\Integrations\\Database\\Factories\\": "database/factories/",
+			"CampusOs\\Integrations\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"CampusOs\\Integrations\\Providers\\IntegrationsServiceProvider"
+			]
+		}
+	}
+}

@@ -20,5 +20,7 @@ return [
     |
     */
 
-    'entity' => Modules\Tenancy\Models\Entity::class,
+    'entity' => CampusOs\Tenancy\Models\Entity::class,
+    'campus' => CampusOs\Tenancy\Models\Campus::class,
+    'user' => CampusOs\Tenancy\Models\User::class,
 ];

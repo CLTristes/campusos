@@ -2,68 +2,80 @@
 
 declare(strict_types=1);
 
+use CampusOs\Core\Models\AuditLog;
+use CampusOs\Tenancy\Enums\UserRole;
+use CampusOs\Tenancy\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Core\Models\AuditLog;
-use Modules\Orders\Enums\OrderStatus;
-use Modules\Orders\Models\Order;
 
+/**
+ * Trilha de auditoria — append-only, com o diff real e sem coluna sensível.
+ *
+ * Testado sobre User: além de ser um model real, é o que carrega a coluna
+ * genuinamente sensível do sistema (o hash da senha), então o teste de $hidden
+ * verifica um risco de verdade e não um campo inventado para o teste.
+ * Substituiu o model de exemplo `Order`, removido no B0.
+ */
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     tenantContext();
 });
 
-it('cria registro em audit_logs ao criar um pedido', function () {
-    $order = Order::factory()->create();
+it('cria registro em audit_logs ao criar um usuário', function () {
+    $user = User::factory()->create();
 
     $audit = AuditLog::query()
-        ->where('aud_table', 'orders')
-        ->where('aud_record_id', $order->ord_id)
+        ->where('aud_table', 'users')
+        ->where('aud_record_id', $user->usr_id)
         ->where('aud_action', 'created')
         ->first();
 
     expect($audit)->not->toBeNull()
         ->and($audit->aud_before)->toBeNull()
         ->and($audit->aud_after)->not->toBeNull()
-        ->and($audit->entity_ent_id)->toBe($order->entity_ent_id);
+        ->and($audit->entity_ent_id)->toBe($user->entity_ent_id);
 });
 
 it('registra o diff real (antes/depois) em updated', function () {
-    $order = Order::factory()->create(['ord_customer_name' => 'Cliente Velho']);
+    $user = User::factory()->create(['usr_name' => 'Nome Antigo']);
 
-    $order->update(['ord_customer_name' => 'Cliente Novo']);
+    $user->update(['usr_name' => 'Nome Novo']);
 
     $audit = AuditLog::query()
-        ->where('aud_table', 'orders')
+        ->where('aud_table', 'users')
         ->where('aud_action', 'updated')
         ->latest('aud_created_at')
         ->first();
 
-    expect($audit->aud_before['ord_customer_name'])->toBe('Cliente Velho')
-        ->and($audit->aud_after['ord_customer_name'])->toBe('Cliente Novo');
+    expect($audit->aud_before['usr_name'])->toBe('Nome Antigo')
+        ->and($audit->aud_after['usr_name'])->toBe('Nome Novo');
 });
 
-it('não expõe colunas sensíveis ($hidden do observer) no diff', function () {
-    $order = Order::factory()->create(['ord_internal_notes' => 'segredo interno']);
+it('o hash da senha nunca entra no diff de auditoria', function () {
+    $user = User::factory()->create(['usr_password' => 'senha-secreta']);
 
-    $audit = AuditLog::query()
-        ->where('aud_table', 'orders')
-        ->where('aud_record_id', $order->ord_id)
-        ->where('aud_action', 'created')
-        ->first();
+    $trail = AuditLog::query()
+        ->where('aud_table', 'users')
+        ->where('aud_record_id', $user->usr_id)
+        ->get();
 
-    expect($audit)->not->toBeNull()
-        ->and($audit->aud_after)->not->toHaveKey('ord_internal_notes');
+    expect($trail)->not->toBeEmpty();
+
+    foreach ($trail as $audit) {
+        expect($audit->aud_after ?? [])->not->toHaveKey('usr_password')
+            ->and($audit->aud_after ?? [])->not->toHaveKey('remember_token')
+            ->and($audit->aud_before ?? [])->not->toHaveKey('usr_password');
+    }
 });
 
 it('registra deleted com o estado anterior', function () {
-    $order = Order::factory()->create();
+    $user = User::factory()->create();
 
-    $order->delete();
+    $user->delete();
 
     $audit = AuditLog::query()
-        ->where('aud_table', 'orders')
-        ->where('aud_record_id', $order->ord_id)
+        ->where('aud_table', 'users')
+        ->where('aud_record_id', $user->usr_id)
         ->where('aud_action', 'deleted')
         ->first();
 
@@ -73,36 +85,35 @@ it('registra deleted com o estado anterior', function () {
 });
 
 it('update sem mudança real não gera audit_log', function () {
-    $order = Order::factory()->create();
+    $user = User::factory()->create();
     $before = AuditLog::query()->count();
 
-    $order->update(['ord_status' => $order->ord_status]);
+    $user->update(['usr_name' => $user->usr_name]);
 
     expect(AuditLog::query()->count())->toBe($before);
 });
 
 it('audit_logs registra mutações de todos os tenants (sem EntityScope)', function () {
-    Order::factory()->create();
+    User::factory()->create();
 
-    $other = tenantContext(); // troca o tenant do contexto
-    Order::factory()->create();
+    tenantContext(); // troca o tenant do contexto
+    User::factory()->create();
 
     $tenants = AuditLog::query()
-        ->where('aud_table', 'orders')
+        ->where('aud_table', 'users')
         ->pluck('entity_ent_id')
         ->unique();
 
     expect($tenants)->toHaveCount(2);
 });
 
-// A máquina de estados fica legível na trilha: created → updated(paid).
 it('conta a história completa do registro em ordem cronológica', function () {
-    $order = Order::factory()->create();
-    $order->update(['ord_status' => OrderStatus::Paid, 'ord_paid_at' => now()]);
+    $user = User::factory()->create();
+    $user->update(['usr_role' => UserRole::Coordinator]);
 
     $trail = AuditLog::query()
-        ->where('aud_table', 'orders')
-        ->where('aud_record_id', $order->ord_id)
+        ->where('aud_table', 'users')
+        ->where('aud_record_id', $user->usr_id)
         ->orderBy('aud_created_at')
         ->pluck('aud_action');
 

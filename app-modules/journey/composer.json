@@ -1,0 +1,24 @@
+{
+	"name": "campus-os/journey",
+	"description": "A trajetoria do aluno: vinculo, historico de matriculas, importacao de documentos academicos, atividades complementares e o calculo de progressao da graduacao.",
+	"type": "library",
+	"version": "1.0",
+	"license": "proprietary",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"CampusOs\\Journey\\": "src/",
+			"CampusOs\\Journey\\Tests\\": "tests/",
+			"CampusOs\\Journey\\Database\\Factories\\": "database/factories/",
+			"CampusOs\\Journey\\Database\\Seeders\\": "database/seeders/"
+		}
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"CampusOs\\Journey\\Providers\\JourneyServiceProvider"
+			]
+		}
+	}
+}

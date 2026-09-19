@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Models\Concerns;
+namespace CampusOs\Core\Models\Concerns;
 
+use CampusOs\Core\Scopes\EntityScope;
+use CampusOs\Core\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Core\Scopes\EntityScope;
-use Modules\Core\Tenancy\TenantContext;
 
 /**
  * Torna um Model multi-tenant de forma declarativa: aplica o EntityScope (filtro
