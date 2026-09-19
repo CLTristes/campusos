@@ -50,6 +50,7 @@ negócio. Contrato de cada documento em [dominio/README.md](dominio/README.md).
 | [ACESSO.md](dominio/ACESSO.md) | **Quem entra, no quê.** Tenant = instituição, 4 papéis, e-mail único por instituição, cadastro livre do aluno pelo domínio do e-mail, verificação por código |
 | [ACERVO.md](dominio/ACERVO.md) | **O acervo do veterano (5.2).** A escada de 5 visibilidades, a regra que faz a nota atravessar semestres, o que não entrou ainda (curadoria por voto) |
 | [TAREFAS.md](dominio/TAREFAS.md) | **Tarefas da turma (B6, 5.2).** Tarefa não nasce privada, adotar copia (nunca compartilha a linha), a agenda filtra por termo corrente — ao contrário do acervo de notas |
+| [HORAS_COMPLEMENTARES.md](dominio/HORAS_COMPLEMENTARES.md) | **Horas complementares e certificados (B7, 5.1).** O teto por categoria, o corte calculado por categoria (nunca por certificado), e por que o contador nunca soma no `ProgressReadModel` |
 
 > O **desenho de produto** — inclusive das features que ainda não existem — vive
 > em [`docs-site/`](../docs-site/index.html) e é canônico para elas, no mesmo

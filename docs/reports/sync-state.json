@@ -1,7 +1,7 @@
 {
     "version": 1,
     "project": "campusos",
-    "current_release": "v0.6.0",
+    "current_release": "v0.7.0",
     "last_sync": {
         "at": "2026-09-19",
         "by": "claude-sonnet-5",
@@ -159,6 +159,22 @@
                 "CLAUDE.md",
                 "docs/arquitetura/BANCO.md",
                 "docs-site/features/acervo-compartilhado.html",
+                "docs-site/plano-de-ataque.html",
+                "docs-site/banco-de-dados.html"
+            ]
+        },
+        {
+            "id": "v0.7.0/feat_horas_complementares",
+            "file": "docs/reports/v0.7.0/feat_horas_complementares.md",
+            "title": "Horas complementares e certificados (B7) — teto por categoria, corte calculado por categoria, tracker paralelo ao ProgressReadModel",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
+            "synced_at": null,
+            "touches": [
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md",
+                "docs/arquitetura/BANCO.md",
+                "docs-site/features/horas-e-certificados.html",
                 "docs-site/plano-de-ataque.html",
                 "docs-site/banco-de-dados.html"
             ]
