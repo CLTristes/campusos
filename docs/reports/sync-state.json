@@ -4,9 +4,9 @@
     "current_release": "v0.3.0",
     "last_sync": {
         "at": "2026-09-19",
-        "by": "claude-opus-5",
+        "by": "claude-sonnet-5",
         "reports_processed": [
-            "v0.3.0/feat_importacao_documento"
+            "v0.3.1/feat_gemini_real_e_vinculo_automatico"
         ]
     },
     "targets": [
@@ -99,7 +99,8 @@
             "file": "docs/reports/v0.3.1/feat_gemini_real_e_vinculo_automatico.md",
             "title": "Gemini plugado contra a API real (modelo trocado) + confirmação cria o vínculo sozinha a partir do documento",
             "delivered_at": "2026-09-19",
-            "status": "pending",
+            "status": "synced",
+            "synced_at": "2026-09-19",
             "touches": [
                 "docs/dominio/DOCUMENTOS_ACADEMICOS.md",
                 "docs/reports/SISTEMA.md",

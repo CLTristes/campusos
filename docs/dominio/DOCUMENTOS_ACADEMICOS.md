@@ -443,6 +443,16 @@ e corrige, e só a confirmação grava. É o que transforma um erro de leitura n
 correção de 30 segundos em vez de um histórico corrompido — e é o que torna
 aceitável usar IA num dado sensível.
 
+**`registration_id` na confirmação é opcional** (v0.3.1). Sem ele, `Confirm
+AcademicDocumentAction::resolveRegistration()` acha ou cria o `Student` do
+usuário autenticado, reaproveita um vínculo já existente no mesmo curso (o
+mesmo aluno pode ter dois vínculos — um por curso) ou cria um novo via
+`CreateRegistrationAction`, usando curso, RA e semestre de ingresso do `meta`
+que a IA leu do cabeçalho oficial do documento. É mais confiável do que pedir
+para o aluno digitar de novo o que o documento já imprime. Sem
+`course_code`/`entry_term` reconhecíveis, falha pedindo o vínculo explícito —
+regra de ouro nº 1, nunca adivinha.
+
 ### O provedor é decisão de um lugar só
 
 `journey` fala com o contrato `AcademicDocumentExtractor` (no `core`) e **não

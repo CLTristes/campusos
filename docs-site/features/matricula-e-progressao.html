@@ -319,6 +319,13 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
         Linha cujo código não existe no catálogo entra como <b>pendência</b> na resposta, não como erro fatal — histórico
         real tem disciplina extinta, e derrubar a importação inteira por causa de uma linha de 2019 é o pior dos mundos.
       </p>
+      <div class="callout good">
+        <b>v0.3.1 — <code>registration_id</code> virou opcional.</b> Sem ele, a própria confirmação acha ou cria o
+        <code>Student</code> e chama <code>CreateRegistrationAction</code> (Fase 1) usando curso, RA e semestre de
+        ingresso do cabeçalho que a IA já leu — o aluno nunca digita essa informação de novo, e "aluno sem vínculo não
+        consegue importar nada" deixou de existir. Validado ponta a ponta contra o histórico real: vínculo certo,
+        50 matrículas, barra de progresso em 76,5%.
+      </div>
     </div>
   </section>
 

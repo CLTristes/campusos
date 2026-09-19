@@ -5,8 +5,8 @@
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-09-19 · reports até `v0.3.0/feat_importacao_documento` ·
-> por claude-opus-5
+> **Última sincronização:** 2026-09-19 · reports até `v0.3.1/feat_gemini_real_e_vinculo_automatico` ·
+> por claude-sonnet-5
 
 ## Índice
 
@@ -141,6 +141,13 @@ HTTP direto, sem SDK: a API é um POST com JSON, e o client do Laravel já dá
 timeout, retry e `Http::fake`. Saída estruturada por `responseSchema`, não por
 pedido no prompt.
 
+**Validado contra a API real** (modelo `gemini-3.6-flash` — `gemini-2.0-flash`
+foi descontinuado) com o histórico e a matriz reais do dono do produto: as 57
+linhas do histórico bateram 100% com as seis tabelas do documento (obrigatórias,
+optativas, enriquecimento, exame de suficiência, disciplinas matriculadas), e
+todo `"*"` de frequência voltou `null`. A camada gratuita devolveu um 503
+transitório em parte das chamadas — tratado como transporte, a fila reprocessa.
+
 ## IV.6 `lifeos` · `insights` — esqueletos
 
 Criados, registrados no ArchTest, sem código de domínio. `insights` **não terá
@@ -221,6 +228,14 @@ tenant) → token Sanctum. Toda rota autenticada passa por
 `erq_status` vira `parsed` → o aluno revisa na tela de conferência →
 `POST .../confirm` cria as `subject_enrollments`.
 
+`registration_id` na confirmação é **opcional**. Sem ele,
+`ConfirmAcademicDocumentAction::resolveRegistration()` acha ou cria o `Student`
+do usuário autenticado, reaproveita um vínculo já existente no mesmo curso, ou
+cria um novo via `CreateRegistrationAction` usando curso, RA e semestre de
+ingresso do `meta` que a IA leu do cabeçalho — o aluno nunca digita essa
+informação de novo. Sem `course_code`/`entry_term` reconhecíveis no `meta`, a
+Action falha pedindo o vínculo explícito, em vez de adivinhar.
+
 **A IA nunca escreve matrícula.** E a fronteira transporte × negócio é rígida:
 5xx, timeout, 429 de cota e credencial ausente **sobem** (a fila reprocessa);
 "não é documento acadêmico" vira estado final. Num provedor gratuito o 429 é o
@@ -230,7 +245,7 @@ erro mais provável, e tratá-lo como documento ruim apagaria o upload do aluno.
 
 # Parte IX — Testes e qualidade
 
-**140 testes / 409 asserções verdes** · Pint verde · ArchTest verde.
+**144 testes / 425 asserções verdes** · Pint verde · ArchTest verde.
 
 O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
 rodapé do documento da matriz imprime os totais de fechamento, então a
@@ -238,12 +253,18 @@ importação é conferida contra quatro somatórios independentes (2730, 240, 31
 a distribuição por período). O mesmo vale para a regra de aprovação, testada
 contra sete pares (média, frequência, situação) do histórico real.
 
-**Duas lições de teste registradas:**
+**Três lições de teste registradas:**
 
 1. Testar o método não substitui renderizar a página. `canAccessPanel()` passava
    com o painel quebrado por falta do contrato `HasName`.
 2. O guard do Laravel cacheia o usuário dentro do mesmo teste — um token
    revogado ainda passa sem `forgetGuards()`.
+3. Validação de tamanho de string em campo que só transcreve documento é
+   armadilha: `lines.*.status` com `max:64` derrubava a confirmação **inteira**
+   por causa de uma única situação administrativa do histórico real ("Enade -
+   Estudante Dispensado..." com 84 caracteres), quando deveria virar pendência
+   de UMA linha, não erro fatal de todas. Só apareceu testando com o documento
+   de verdade — subiu para `max:255`.
 
 ---
 
@@ -285,10 +306,10 @@ php artisan serve
 
 | Área | O que falta |
 | --- | --- |
-| `journey` | Elegibilidade/pré-requisitos em runtime, simulação de reprovação, atividades complementares, cálculo do período por déficit de CHS, **endpoint para criar vínculo** (hoje só por seeder — trava a importação de quem não tem vínculo) |
+| `tenancy` | **Cadastro (sign-up) de conta** — `User` só nasce por seeder/coordenação. Pendência nº 4 do `docs-site/index.html` ("como o aluno prova que é aluno?"), ainda aberta |
+| `journey` | Elegibilidade/pré-requisitos em runtime, simulação de reprovação, atividades complementares, cálculo do período por déficit de CHS |
 | `lifeos` | Tudo — notas, tarefas, a escada de visibilidade (desafio 5.2) |
 | `insights` | Tudo — os agregados da coordenação |
-| `integrations` | **O extrator nunca rodou contra o Gemini real** — todos os testes usam `Http::fake`. A primeira chamada pode exigir ajuste em `inline_data`/`responseSchema` |
 | Transversal | CCE autônomo (as 60 h de extensão que ninguém consegue cumprir pelo sistema), RBAC granular, guard próprio do console |
 
 ---
@@ -301,3 +322,4 @@ php artisan serve
 | 2026-09-19 | **Reescrito como retrato do CampusOS** — 6 módulos, 16 tabelas, os três documentos acadêmicos, login e console | `v0.1.0/feat_fundacao_catalogo_e_acesso` |
 | 2026-09-19 | Módulo `journey`: vínculo, histórico, `ApprovalPolicy` e a barra de progresso | `v0.2.0/feat_journey_progressao` |
 | 2026-09-19 | Importação de documento por IA: contrato no `core`, Gemini no `integrations`, fluxo sobe→confere→confirma | `v0.3.0/feat_importacao_documento` |
+| 2026-09-19 | Gemini validado contra a API real (modelo trocado para `gemini-3.6-flash`); confirmação cria o vínculo sozinha a partir do documento; `lines.*.status` de 64 para 255 caracteres | `v0.3.1/feat_gemini_real_e_vinculo_automatico` |

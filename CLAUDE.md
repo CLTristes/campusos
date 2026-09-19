@@ -274,7 +274,7 @@ test` antes de commitar.
 
 ## Estado atual
 
-**v0.3.0 (19/09/2026) — 140 testes / 409 asserções verdes**, Pint verde,
+**v0.3.1 (19/09/2026) — 144 testes / 425 asserções verdes**, Pint verde,
 ArchTest verde. 17 tabelas em código, 9 endpoints documentados em `/docs/api`.
 
 O **catálogo acadêmico** está completo, com a matriz 45 da UTFPR real semeada:
@@ -291,16 +291,22 @@ A **importação de documento** funciona ponta a ponta: sobe → a IA lê em fil
 o aluno confere → confirma → as matrículas nascem e a barra anda. O provedor é o
 Gemini, atrás de contrato; `DOCUMENT_EXTRACTOR=null` desliga a leitura e manda
 tudo para a tela de conferência (é o extrator dos testes e o plano B da demo).
+**Validado contra a API real** (`gemini-3.6-flash`) com o histórico e a matriz
+reais do dono do produto — leitura das 57 linhas do histórico batendo 100% com
+o documento, `"*"` de frequência sempre virando `null`.
+
+`registration_id` na confirmação é **opcional**: sem ele, o vínculo (Student +
+Registration) nasce sozinho do `meta` que a IA leu do cabeçalho do documento
+(curso, RA, semestre de ingresso) — não existe mais o buraco de "aluno sem
+vínculo não consegue importar nada".
 
 **Acesso:** login por token, 4 papéis, console de dados Filament em
 `/data-console` (só coordenação e gestão) e documentação de API em `/docs/api`.
+**Não existe cadastro (sign-up) de conta ainda** — `User` só nasce por seeder;
+é a pendência nº 4 do `docs-site/index.html` ("como o aluno prova que é
+aluno?"), ainda aberta.
 
-> ⚠️ **O extrator nunca rodou contra o Gemini de verdade** — todos os testes
-> usam `Http::fake`. A primeira chamada real pode exigir ajuste no formato de
-> `inline_data` ou `responseSchema`.
-
-**Ainda não existe:** elegibilidade e pré-requisitos em runtime, simulação de
-reprovação, horas complementares, endpoint para criar vínculo (hoje só por
-seeder — trava a importação de quem não tem vínculo), e os módulos
-`lifeos`/`insights` inteiros. Lista completa em
+**Ainda não existe:** cadastro (sign-up) de conta, elegibilidade e
+pré-requisitos em runtime, simulação de reprovação, horas complementares, e os
+módulos `lifeos`/`insights` inteiros. Lista completa em
 [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.
