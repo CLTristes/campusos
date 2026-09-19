@@ -30,5 +30,8 @@ Route::middleware('api')->prefix('api/v1')->group(function (): void {
         Route::post('auth/verify-email/resend', [AuthController::class, 'resendVerification'])
             ->middleware('throttle:3,10')
             ->name('auth.verify-email.resend');
+
+        // B8 — o token do copiloto MCP, separado do token de login.
+        Route::post('auth/mcp-token', [AuthController::class, 'mcpToken'])->name('auth.mcp-token');
     });
 });

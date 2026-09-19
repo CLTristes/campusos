@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CampusOs\Tenancy\Http\Controllers;
 
+use CampusOs\Tenancy\Actions\IssueMcpTokenAction;
 use CampusOs\Tenancy\Actions\LoginAction;
 use CampusOs\Tenancy\Actions\ResendVerificationCodeAction;
 use CampusOs\Tenancy\Actions\SignupAction;
@@ -144,5 +145,30 @@ final class AuthController
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(status: 204);
+    }
+
+    /**
+     * Token do copiloto (B8)
+     *
+     * Um token SEPARADO do login, com o menor escopo possível — `mcp:read`
+     * sempre, `mcp:write` só se pedido (habilita a única tool de escrita,
+     * `criar_anotacao`). Chamar de novo troca o token anterior: nunca existe
+     * mais de um token de copiloto por vez.
+     *
+     * @authenticated
+     *
+     * @bodyParam allow_write boolean Habilita a tool de escrita. Default: false. Example: false
+     *
+     * @response 200 scenario="só leitura" {"token":"2|xyz…","abilities":["mcp:read"]}
+     * @response 200 scenario="leitura e escrita" {"token":"2|xyz…","abilities":["mcp:read","mcp:write"]}
+     */
+    public function mcpToken(Request $request, IssueMcpTokenAction $action): JsonResponse
+    {
+        $result = $action->execute([
+            'user_id' => $request->user()->usr_id,
+            'allow_write' => $request->boolean('allow_write'),
+        ]);
+
+        return response()->json($result);
     }
 }

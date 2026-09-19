@@ -8,6 +8,7 @@ use App\Http\Middleware\ResolveTenantFromUser;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,6 +30,10 @@ return Application::configure(basePath: dirname(__DIR__))
             // RBAC de borda: role:coordinator,institution_admin. Roda depois
             // de tenant.user (precisa do usuário autenticado já resolvido).
             'role' => EnsureUserHasRole::class,
+            // Escopo de token Sanctum: abilities:mcp:read. Usado só pela rota
+            // do copiloto MCP (B8) — o token de login normal não tem
+            // abilities restritas, então isto nunca afeta o resto da API.
+            'abilities' => CheckAbilities::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
