@@ -112,7 +112,8 @@ def main(path: Path) -> None:
     out = HERE / "matriz-45-utfpr-fb.csv"
     with out.open("w", encoding="utf-8", newline="") as f:
         f.write(header)
-        w = csv.DictWriter(f, fieldnames=list(subjects[0].keys()))
+        # lineterminator LF: o padrão do módulo csv é CRLF, e o git avisa a cada commit.
+        w = csv.DictWriter(f, fieldnames=list(subjects[0].keys()), lineterminator="\n")
         w.writeheader()
         w.writerows(subjects)
 
@@ -120,7 +121,7 @@ def main(path: Path) -> None:
     with out_eq.open("w", encoding="utf-8", newline="") as f:
         f.write("# Disciplinas equivalentes — a origem do \"Crédito Consignado\"\n"
                 "# do histórico (mudança de matriz). GERADO por parse_matriz_html.py.\n")
-        w = csv.DictWriter(f, fieldnames=["codigo", "equivalente", "cht", "grupo"])
+        w = csv.DictWriter(f, fieldnames=["codigo", "equivalente", "cht", "grupo"], lineterminator="\n")
         w.writeheader()
         w.writerows(equivalences)
 
