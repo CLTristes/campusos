@@ -39,6 +39,9 @@
         <env name="MAIL_MAILER" value="array"/>
         <!-- Fila síncrona nos testes: o job roda inline e o teste assevera o efeito -->
         <env name="QUEUE_CONNECTION" value="sync"/>
+        <!-- Nenhum teste de domínio depende de rede: o extrator dos testes é o
+             null, e os testes do Gemini usam Http::fake. -->
+        <env name="DOCUMENT_EXTRACTOR" value="null"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>

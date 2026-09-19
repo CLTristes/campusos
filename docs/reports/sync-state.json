@@ -1,7 +1,7 @@
 {
     "version": 1,
     "project": "campusos",
-    "current_release": "v0.2.0",
+    "current_release": "v0.3.0",
     "last_sync": {
         "at": "2026-09-19",
         "by": "claude-opus-5",
@@ -77,6 +77,22 @@
                 "docs/dominio/DOCUMENTOS_ACADEMICOS.md",
                 "docs-site/features/matricula-e-progressao.html",
                 "docs-site/banco-de-dados.html"
+            ]
+        },
+        {
+            "id": "v0.3.0/feat_importacao_documento",
+            "file": "docs/reports/v0.3.0/feat_importacao_documento.md",
+            "title": "Importação do documento acadêmico por IA (B4) — provedor Gemini atrás de contrato",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
+            "synced_at": null,
+            "touches": [
+                "docs/dominio/DOCUMENTOS_ACADEMICOS.md",
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md",
+                "docs/arquitetura/BANCO.md",
+                "docs/arquitetura/COMUNICACAO.md",
+                "docs-site/features/matricula-e-progressao.html"
             ]
         }
     ]

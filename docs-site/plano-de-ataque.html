@@ -104,7 +104,7 @@
     <div class="eyebrow">hackathon · 14 horas e 15 minutos</div>
     <h1>Plano de ataque</h1>
     <p class="lede">
-      <b style="color:var(--leaf-700)">Atualizado 05:40 — B0, B1, B2 e B3 fechados. A barra de progresso existe; faltam a importação por IA (B4) e o acervo (B5).</b><br>
+      <b style="color:var(--leaf-700)">Atualizado 06:30 — B0 a B4 fechados. O documento do aluno vira barra de progresso; falta o acervo do veterano (B5), que é a outra metade do pitch.</b><br>
       São <strong>01:45</strong>. A entrega é <strong>hoje às 16:00</strong>. Isso são <strong>14h15</strong> de relógio, das quais
       aproximadamente 13 são de código — o resto é a demo, e a demo não se improvisa.
       Esta página existe por um motivo só: às 05:30 da manhã ninguém decide prioridade direito,
@@ -185,14 +185,14 @@
     <div class="blk">
       <div class="blk-time">07:30<small>1h30</small></div>
       <div class="blk-card">
-        <div class="blk-head"><span class="blk-id">B4</span><h3>journey — importar o documento com IA</h3></div>
+        <div class="blk-head"><span class="blk-id">B4</span><span class="status-pill built">✅ feito</span><h3>journey — importar o documento com IA</h3></div>
         <p>O momento "uau" da demo: o aluno sobe uma foto e a graduação dele aparece. Também é o bloco com mais risco técnico da noite, por depender de coisa fora da máquina.</p>
         <ul>
           <li><code>enrollment_requests</code> + upload → <b>202</b> + <code>ParseAcademicDocumentJob</code> na fila <code>imports</code>.</li>
-          <li>Contrato <code>AcademicDocumentExtractor</code> no <code>core</code>; implementação com Claude em <code>integrations</code> (visão + structured outputs).</li>
+          <li>Contrato <code>AcademicDocumentExtractor</code> no <code>core</code>; implementação com <b>Gemini</b> em <code>integrations</code> (camada gratuita, saída estruturada por schema). <b>✅ feito</b></li>
           <li>Tela de conferência: o aluno revisa o que a IA leu e confirma — <b>só a confirmação grava matrícula</b>.</li>
         </ul>
-        <div class="cutline"><b>Ponto de corte 2 —</b> se às 09:00 o OCR não estiver confiável: entregue o <b>cadastro manual</b> da matrícula (mesma tela de conferência, campos vazios) e apresente o OCR como roadmap. A barra de progresso é o que o 5.1 pede; o OCR é como ela se enche. Nunca troque o fim pelo meio.</div>
+        <div class="cutline"><b>Ponto de corte 2 (já construído) —</b> <code>DOCUMENT_EXTRACTOR=null</code> desliga a leitura automática e manda tudo para a tela de conferência. Se o OCR não estiver confiável: entregue o <b>cadastro manual</b> da matrícula (mesma tela de conferência, campos vazios) e apresente o OCR como roadmap. A barra de progresso é o que o 5.1 pede; o OCR é como ela se enche. Nunca troque o fim pelo meio.</div>
       </div>
     </div>
 

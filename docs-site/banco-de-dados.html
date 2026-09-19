@@ -103,7 +103,7 @@
     <div class="eyebrow">CampusOS · modelo de dados</div>
     <h1>Diagrama Entidade‑Relacionamento</h1>
     <p class="lede">
-      <strong>26 tabelas em 6 módulos</strong>, <strong>16 delas já em código</strong> (tenancy, catalog e o núcleo do journey). Convenções do template modular sem exceção:
+      <strong>26 tabelas em 6 módulos</strong>, <strong>17 delas já em código</strong> (tenancy, catalog e o núcleo do journey). Convenções do template modular sem exceção:
       prefixo de 3 letras em toda coluna, PK UUID gerada na aplicação, <code>SoftDeletes</code> em tudo que é transacional,
       FK no formato <code>{tabela_singular}_{pk}</code>, e <code>entity_ent_id</code> em toda tabela com escopo de tenant.
       Cada card traz a <strong>razão</strong> da modelagem — num hackathon, a decisão esquecida às 4 da manhã custa mais que a tabela errada.
@@ -638,7 +638,7 @@ flowchart LR
 
   <!-- JOURNEY -->
   <section class="module">
-    <div class="module-head"><h2>journey</h2><span class="module-tag">a trajetória do aluno · 5 tabelas · 3 ✅ em código</span></div>
+    <div class="module-head"><h2>journey</h2><span class="module-tag">a trajetória do aluno · 5 tabelas · 4 ✅ em código</span></div>
     <p class="module-intro">
       O desafio 5.1 inteiro mora aqui. É o módulo que <b>lê</b> o catálogo e <b>escreve</b> o que aconteceu de fato com uma pessoa.
       Toda a progressão — percentual, horas, pendências, previsão de formatura — é <b>calculada</b> sobre estas tabelas, nunca
@@ -727,8 +727,8 @@ flowchart LR
         </div>
       </article>
 
-      <article class="tcard mvp">
-        <div class="tcard-head"><span class="tcard-name">enrollment_requests</span><span class="status-pill mvp">⚑ MVP</span></div>
+      <article class="tcard built">
+        <div class="tcard-head"><span class="tcard-name">enrollment_requests</span><span class="status-pill built">✅ em código</span></div>
         <ul class="cols">
           <li><span class="key-tag pk">PK</span><code>erq_id</code><span class="type">uuid</span></li>
           <li><span class="key-tag">FK</span><code>entity_ent_id</code><span class="type">uuid</span></li>

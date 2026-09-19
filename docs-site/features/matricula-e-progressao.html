@@ -202,7 +202,7 @@ $curriculum = $this->curricula
 
   <!-- FASE 2 -->
   <section class="step" id="fase-2">
-    <div class="step-head"><span class="step-num">2</span><h2>O documento — o aluno fotografa, a IA lê, o aluno confirma</h2></div>
+    <div class="step-head"><span class="step-num">2</span><h2>O documento — o aluno fotografa, a IA lê, o aluno confirma</h2><span class="status-pill built">✅ em código</span></div>
 
     <div class="view-business">
       <p>
@@ -254,68 +254,53 @@ return $request;  // controller devolve 202 + Location do recurso</code></pre>
     public function extract(string $absolutePath, string $mimeType): ExtractionResult;
 }</code></pre>
 
-      <div class="code-path"><span>app-modules/integrations/src/Extractors/ClaudeDocumentExtractor.php</span><span class="status-pill mvp">⚑ B4</span></div>
+      <div class="code-path"><span>app-modules/integrations/src/Extractors/GeminiDocumentExtractor.php</span><span class="status-pill built">✅ em código</span></div>
       <p>
-        SDK oficial <code>anthropic-ai/sdk</code>, modelo <code>claude-opus-5</code>, com <b>structured outputs</b> —
-        o schema é declarado, então o retorno não precisa de parser tolerante nem de <i>"responda só JSON, por favor"</i> no prompt.
+        O provedor escolhido é o <b>Gemini</b> (camada gratuita do Google AI Studio, que cobre um MVP inteiro).
+        HTTP direto, sem SDK: a API é um POST com JSON, e o client do Laravel já dá timeout, retry e
+        <code>Http::fake</code> — um SDK seria dependência a mais para um endpoint só.
       </p>
-      <pre><code>use Anthropic\Client;
+      <pre><code>$response = Http::timeout($this-&gt;timeout)
+    -&gt;retry(2, 1500, fn ($e) =&gt; $e instanceof ConnectionException, throw: false)
+    -&gt;withHeaders(['x-goog-api-key' =&gt; $this-&gt;apiKey])
+    -&gt;post("{$this-&gt;baseUrl}/models/{$this-&gt;model}:generateContent", [
+        'contents' =&gt; [[ 'parts' =&gt; [
+            ['inline_data' =&gt; ['mime_type' =&gt; $mime, 'data' =&gt; base64_encode($bytes)]],
+            ['text' =&gt; AcademicDocumentPrompt::INSTRUCTION],
+        ]]],
+        'systemInstruction' =&gt; ['parts' =&gt; [['text' =&gt; AcademicDocumentPrompt::SYSTEM]]],
+        'generationConfig' =&gt; [
+            'temperature' =&gt; 0.0,                    // transcrição quer a leitura
+                                                     // mais provável, sempre igual
+            'responseMimeType' =&gt; 'application/json',
+            'responseSchema' =&gt; AcademicDocumentPrompt::schema(),
+        ],
+    ]);</code></pre>
+      <div class="callout good">
+        <b>Saída estruturada por schema, não por pedido educado.</b> Com <code>responseSchema</code> o modelo devolve JSON que
+        casa com a estrutura declarada — sem <i>"responda só JSON, por favor"</i> no prompt e sem parser tolerante do nosso lado.
+      </div>
 
-final class ClaudeDocumentExtractor implements AcademicDocumentExtractor
-{
-    public function __construct(private Client $claude) {}
+      <div class="code-path"><span>app-modules/integrations/src/Providers/IntegrationsServiceProvider.php</span><span class="status-pill built">✅ em código</span></div>
+      <p><b>Trocar de provedor é esta linha.</b> O <code>journey</code> não conhece o Google:</p>
+      <pre><code>$this-&gt;app-&gt;bind(AcademicDocumentExtractor::class, fn () =&gt; match (config('extractors.default')) {
+    'gemini' =&gt; new GeminiDocumentExtractor(...),
+    'null'   =&gt; new NullDocumentExtractor,   // plano B da demo e extrator dos testes
+});</code></pre>
+      <div class="callout grifo">
+        <b>Verificado, não prometido:</b> no fechamento da entrega, um <code>grep</code> confirma que não existe nenhuma menção a
+        Gemini, Google ou <code>Http::</code> dentro de <code>app-modules/journey/src/</code> — e nenhuma menção a
+        <code>CampusOs\Journey</code> dentro de <code>app-modules/integrations/src/</code>. A fronteira não é retórica.
+      </div>
 
-    public function extract(string $path, string $mime): ExtractionResult
-    {
-        $isPdf = $mime === 'application/pdf';
+      <div class="callout warn">
+        <b>Transporte × negócio — a fronteira que estes testes mais protegem:</b><br>
+        <b>5xx, timeout, 429 de cota, credencial ausente</b> → exceção que <b>sobe</b>, e a fila reprocessa. Marcar o documento
+        como ilegível aqui apagaria o upload do aluno por uma instabilidade de 30 segundos — ou por um limite nosso.
+        <i>Num provedor gratuito, o 429 é o erro mais provável de todos.</i><br>
+        <b>"não é documento acadêmico", "nenhuma disciplina"</b> → estado <b>final</b> com motivo. Tentar de novo daria o mesmo.
+      </div>
 
-        $message = $this-&gt;claude-&gt;messages-&gt;create(
-            model: 'claude-opus-5',
-            maxTokens: 16000,
-            system: self::SYSTEM,
-            messages: [[
-                'role' =&gt; 'user',
-                'content' =&gt; [
-                    // o bloco do documento vem ANTES do texto
-                    $isPdf
-                        ? ['type' =&gt; 'document', 'source' =&gt; [
-                              'type' =&gt; 'base64',
-                              'media_type' =&gt; 'application/pdf',
-                              'data' =&gt; base64_encode(file_get_contents($path)),
-                          ]]
-                        : ['type' =&gt; 'image', 'source' =&gt; [
-                              'type' =&gt; 'base64',
-                              'media_type' =&gt; $mime,
-                              'data' =&gt; base64_encode(file_get_contents($path)),
-                          ]],
-                    ['type' =&gt; 'text', 'text' =&gt; self::INSTRUCTION],
-                ],
-            ]],
-            outputConfig: ['format' =&gt; AcademicDocument::class],
-        );
-
-        return ExtractionResult::fromModel($message-&gt;parsedOutput());
-    }
-}</code></pre>
-      <p>O schema é uma classe PHP — os tipos saem das próprias anotações, sem JSON Schema escrito à mão:</p>
-      <pre><code>use Anthropic\Lib\Contracts\StructuredOutputModel;
-use Anthropic\Lib\Concerns\StructuredOutputModelTrait;
-use Anthropic\Lib\Attributes\Constrained;
-
-final class AcademicDocument implements StructuredOutputModel
-{
-    use StructuredOutputModelTrait;
-
-    #[Constrained(description: 'Nome do curso exatamente como impresso')]
-    public string $course;
-
-    #[Constrained(description: 'Registro acadêmico / matrícula do aluno')]
-    public string $registrationNumber;
-
-    /** @var AcademicDocumentLine[] */
-    public array $lines;          // código, nome, ano, período, turma, situação, nota
-    public ?string $curriculumCode = null;   // nullable = campo opcional
-}</code></pre>
       <div class="callout warn">
         <b>Três regras que o Job precisa respeitar (regra de ouro nº 7):</b><br>
         1. <code>TenantContext::runAs()</code> como <b>primeira linha</b> — worker não tem sessão HTTP, e sem isso o <code>EntityScope</code> não filtra nada.<br>

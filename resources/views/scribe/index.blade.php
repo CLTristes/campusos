@@ -103,6 +103,15 @@
                                                     <li class="tocify-item level-2" data-unique="jornada-academica-GETapi-v1-me-progress">
                                 <a href="#jornada-academica-GETapi-v1-me-progress">Minha progressão</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="jornada-academica-POSTapi-v1-me-academic-documents">
+                                <a href="#jornada-academica-POSTapi-v1-me-academic-documents">Enviar documento</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="jornada-academica-GETapi-v1-me-academic-documents--erq_id-">
+                                <a href="#jornada-academica-GETapi-v1-me-academic-documents--erq_id-">Status da leitura</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="jornada-academica-POSTapi-v1-me-academic-documents--document_erq_id--confirm">
+                                <a href="#jornada-academica-POSTapi-v1-me-academic-documents--document_erq_id--confirm">Confirmar a leitura</a>
+                            </li>
                                                                         </ul>
                             </ul>
             </div>
@@ -1049,6 +1058,579 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>Example: <code>application/json</code></p>
             </div>
                         </form>
+
+                    <h2 id="jornada-academica-POSTapi-v1-me-academic-documents">Enviar documento</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Aceita o <strong>histórico escolar</strong> (reconstitui a graduação inteira) ou o
+<strong>requerimento de matrícula</strong> (atualiza o semestre corrente). Responde
+<strong>202</strong>: a leitura roda em segundo plano, e o front consulta o status.</p>
+
+<span id="example-requests-POSTapi-v1-me-academic-documents">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/me/academic-documents" \
+    --header "Content-Type: multipart/form-data" \
+    --header "Accept: application/json" \
+    --form "kind=transcript"\
+    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php44qk2r5siobq4HE5WqQ" </code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/me/academic-documents"
+);
+
+const headers = {
+    "Content-Type": "multipart/form-data",
+    "Accept": "application/json",
+};
+
+const body = new FormData();
+body.append('kind', 'transcript');
+body.append('file', document.querySelector('input[name="file"]').files[0]);
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-me-academic-documents">
+            <blockquote>
+            <p>Example response (202, recebido):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;status&quot;: &quot;uploaded&quot;,
+        &quot;status_label&quot;: &quot;Recebido&quot;,
+        &quot;is_pending&quot;: true
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-me-academic-documents" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-me-academic-documents"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-me-academic-documents"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-me-academic-documents" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-me-academic-documents">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-me-academic-documents" data-method="POST"
+      data-path="api/v1/me/academic-documents"
+      data-authed="1"
+      data-hasfiles="1"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-me-academic-documents', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-me-academic-documents"
+                    onclick="tryItOut('POSTapi-v1-me-academic-documents');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-me-academic-documents"
+                    onclick="cancelTryOut('POSTapi-v1-me-academic-documents');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-me-academic-documents"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/me/academic-documents</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-me-academic-documents"
+               value="multipart/form-data"
+               data-component="header">
+    <br>
+<p>Example: <code>multipart/form-data</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-me-academic-documents"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>kind</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="kind"                data-endpoint="POSTapi-v1-me-academic-documents"
+               value="transcript"
+               data-component="body">
+    <br>
+<p><code>transcript</code> ou <code>enrollment_request</code>. Example: <code>transcript</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>file</code></b>&nbsp;&nbsp;
+<small>file</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="file" style="display: none"
+                              name="file"                data-endpoint="POSTapi-v1-me-academic-documents"
+               value=""
+               data-component="body">
+    <br>
+<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php44qk2r5siobq4HE5WqQ</code></p>
+        </div>
+        </form>
+
+                    <h2 id="jornada-academica-GETapi-v1-me-academic-documents--erq_id-">Status da leitura</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>O que a tela de conferência consome. Enquanto <code>is_pending</code> for <code>true</code>, o
+front continua consultando; quando vira <code>parsed</code>, <code>extraction</code> traz o que
+foi lido para o aluno revisar.</p>
+
+<span id="example-requests-GETapi-v1-me-academic-documents--erq_id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/me/academic-documents/architecto" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/me/academic-documents/architecto"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-me-academic-documents--erq_id-">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+access-control-allow-origin: *
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-me-academic-documents--erq_id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-me-academic-documents--erq_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-me-academic-documents--erq_id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-me-academic-documents--erq_id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-me-academic-documents--erq_id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-me-academic-documents--erq_id-" data-method="GET"
+      data-path="api/v1/me/academic-documents/{erq_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-me-academic-documents--erq_id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-me-academic-documents--erq_id-"
+                    onclick="tryItOut('GETapi-v1-me-academic-documents--erq_id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-me-academic-documents--erq_id-"
+                    onclick="cancelTryOut('GETapi-v1-me-academic-documents--erq_id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-me-academic-documents--erq_id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/me/academic-documents/{erq_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-me-academic-documents--erq_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-me-academic-documents--erq_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>erq_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="erq_id"                data-endpoint="GETapi-v1-me-academic-documents--erq_id-"
+               value="architecto"
+               data-component="url">
+    <br>
+<p>The ID of the erq. Example: <code>architecto</code></p>
+            </div>
+                    </form>
+
+                    <h2 id="jornada-academica-POSTapi-v1-me-academic-documents--document_erq_id--confirm">Confirmar a leitura</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Recebe as linhas <strong>já revisadas pelo aluno</strong> e cria as matrículas. Linha
+cujo código não existe no catálogo volta em <code>pending</code> — nunca derruba a
+importação inteira, porque histórico real tem disciplina extinta.</p>
+
+<span id="example-requests-POSTapi-v1-me-academic-documents--document_erq_id--confirm">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/me/academic-documents/architecto/confirm" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"registration_id\": \"architecto\",
+    \"lines\": [
+        {
+            \"code\": \"ARC102\",
+            \"year\": 2023,
+            \"period\": 1,
+            \"status\": \"Aprovado Por Nota\\/Frequência\",
+            \"grade\": 8.5,
+            \"attendance\": 91.2
+        }
+    ]
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/me/academic-documents/architecto/confirm"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "registration_id": "architecto",
+    "lines": [
+        {
+            "code": "ARC102",
+            "year": 2023,
+            "period": 1,
+            "status": "Aprovado Por Nota\/Frequência",
+            "grade": 8.5,
+            "attendance": 91.2
+        }
+    ]
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-me-academic-documents--document_erq_id--confirm">
+            <blockquote>
+            <p>Example response (200, confirmado):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;status&quot;: &quot;confirmed&quot;
+    },
+    &quot;imported&quot;: 46,
+    &quot;pending&quot;: [
+        {
+            &quot;code&quot;: &quot;XYZ999&quot;,
+            &quot;reason&quot;: &quot;Disciplina n&atilde;o est&aacute; no cat&aacute;logo do curso.&quot;
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-me-academic-documents--document_erq_id--confirm" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-me-academic-documents--document_erq_id--confirm"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-me-academic-documents--document_erq_id--confirm" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-me-academic-documents--document_erq_id--confirm">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-me-academic-documents--document_erq_id--confirm" data-method="POST"
+      data-path="api/v1/me/academic-documents/{document_erq_id}/confirm"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-me-academic-documents--document_erq_id--confirm', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+                    onclick="tryItOut('POSTapi-v1-me-academic-documents--document_erq_id--confirm');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+                    onclick="cancelTryOut('POSTapi-v1-me-academic-documents--document_erq_id--confirm');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/me/academic-documents/{document_erq_id}/confirm</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>document_erq_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="document_erq_id"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="architecto"
+               data-component="url">
+    <br>
+<p>The ID of the document erq. Example: <code>architecto</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>registration_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="registration_id"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>O vínculo que recebe as matrículas. Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>lines</code></b>&nbsp;&nbsp;
+<small>object[]</small>&nbsp;
+ &nbsp;
+ &nbsp;
+<br>
+<p>As linhas conferidas.</p>
+            </summary>
+                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>code</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="lines.0.code"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="ARC102"
+               data-component="body">
+    <br>
+<p>Código da disciplina. Example: <code>ARC102</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>year</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="lines.0.year"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="2023"
+               data-component="body">
+    <br>
+<p>Example: <code>2023</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>period</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="lines.0.period"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="1"
+               data-component="body">
+    <br>
+<p>1 ou 2. Example: <code>1</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="lines.0.status"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="Aprovado Por Nota/Frequência"
+               data-component="body">
+    <br>
+<p>O texto da situação. Example: <code>Aprovado Por Nota/Frequência</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>grade</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="lines.0.grade"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="8.5"
+               data-component="body">
+    <br>
+<p>Nota de 0 a 10. Example: <code>8.5</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>attendance</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="lines.0.attendance"                data-endpoint="POSTapi-v1-me-academic-documents--document_erq_id--confirm"
+               value="91.2"
+               data-component="body">
+    <br>
+<p>Frequência em %. Example: <code>91.2</code></p>
+                    </div>
+                                    </details>
+        </div>
+        </form>
 
             
 

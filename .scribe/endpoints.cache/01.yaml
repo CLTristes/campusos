@@ -63,3 +63,284 @@ endpoints:
     controller: null
     method: null
     route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/me/academic-documents
+    metadata:
+      custom: []
+      groupName: 'Jornada acadêmica'
+      groupDescription: |-
+
+        Importação do documento acadêmico do aluno. Três passos: **sobe**, **confere**
+        e **confirma** — e só o último escreve matrícula. Um erro de leitura vira uma
+        correção de 30 segundos, em vez de um histórico corrompido.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Enviar documento'
+      description: |-
+        Aceita o **histórico escolar** (reconstitui a graduação inteira) ou o
+        **requerimento de matrícula** (atualiza o semestre corrente). Responde
+        **202**: a leitura roda em segundo plano, e o front consulta o status.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      kind:
+        custom: []
+        name: kind
+        description: '`transcript` ou `enrollment_request`.'
+        required: true
+        example: transcript
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      file:
+        custom: []
+        name: file
+        description: 'PDF ou foto (PNG/JPG), até 20 MB.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      kind: transcript
+    fileParameters:
+      file: null
+    responses:
+      -
+        custom: []
+        status: 202
+        content: '{"data":{"id":"01a0…","status":"uploaded","status_label":"Recebido","is_pending":true}}'
+        headers: []
+        description: recebido
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/me/academic-documents/{erq_id}'
+    metadata:
+      custom: []
+      groupName: 'Jornada acadêmica'
+      groupDescription: |-
+
+        Importação do documento acadêmico do aluno. Três passos: **sobe**, **confere**
+        e **confirma** — e só o último escreve matrícula. Um erro de leitura vira uma
+        correção de 30 segundos, em vez de um histórico corrompido.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Status da leitura'
+      description: |-
+        O que a tela de conferência consome. Enquanto `is_pending` for `true`, o
+        front continua consultando; quando vira `parsed`, `extraction` traz o que
+        foi lido para o aluno revisar.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      erq_id:
+        custom: []
+        name: erq_id
+        description: 'The ID of the erq.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      erq_id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/me/academic-documents/{document_erq_id}/confirm'
+    metadata:
+      custom: []
+      groupName: 'Jornada acadêmica'
+      groupDescription: |-
+
+        Importação do documento acadêmico do aluno. Três passos: **sobe**, **confere**
+        e **confirma** — e só o último escreve matrícula. Um erro de leitura vira uma
+        correção de 30 segundos, em vez de um histórico corrompido.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Confirmar a leitura'
+      description: |-
+        Recebe as linhas **já revisadas pelo aluno** e cria as matrículas. Linha
+        cujo código não existe no catálogo volta em `pending` — nunca derruba a
+        importação inteira, porque histórico real tem disciplina extinta.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      document_erq_id:
+        custom: []
+        name: document_erq_id
+        description: 'The ID of the document erq.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      document_erq_id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      registration_id:
+        custom: []
+        name: registration_id
+        description: 'O vínculo que recebe as matrículas.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      lines:
+        custom: []
+        name: lines
+        description: 'As linhas conferidas.'
+        required: true
+        example:
+          - []
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'lines[].code':
+        custom: []
+        name: 'lines[].code'
+        description: 'Código da disciplina.'
+        required: true
+        example: ARC102
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].year':
+        custom: []
+        name: 'lines[].year'
+        description: ''
+        required: true
+        example: 2023
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].period':
+        custom: []
+        name: 'lines[].period'
+        description: '1 ou 2.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].status':
+        custom: []
+        name: 'lines[].status'
+        description: 'O texto da situação.'
+        required: true
+        example: 'Aprovado Por Nota/Frequência'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].grade':
+        custom: []
+        name: 'lines[].grade'
+        description: 'Nota de 0 a 10.'
+        required: false
+        example: 8.5
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'lines[].attendance':
+        custom: []
+        name: 'lines[].attendance'
+        description: 'Frequência em %.'
+        required: false
+        example: 91.2
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      registration_id: architecto
+      lines:
+        -
+          code: ARC102
+          year: 2023
+          period: 1
+          status: 'Aprovado Por Nota/Frequência'
+          grade: 8.5
+          attendance: 91.2
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"id":"01a0…","status":"confirmed"},"imported":46,"pending":[{"code":"XYZ999","reason":"Disciplina não está no catálogo do curso."}]}'
+        headers: []
+        description: confirmado
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
