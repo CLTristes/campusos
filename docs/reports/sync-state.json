@@ -1,7 +1,7 @@
 {
     "version": 1,
     "project": "campusos",
-    "current_release": "v0.4.0",
+    "current_release": "v0.5.0",
     "last_sync": {
         "at": "2026-09-19",
         "by": "claude-sonnet-5",
@@ -118,6 +118,20 @@
                 "docs/dominio/ACESSO.md",
                 "docs/reports/SISTEMA.md",
                 "CLAUDE.md"
+            ]
+        },
+        {
+            "id": "v0.5.0/feat_acervo_do_veterano",
+            "file": "docs/reports/v0.5.0/feat_acervo_do_veterano.md",
+            "title": "O acervo do veterano (B5) — escada de visibilidade de 5 níveis, entrega automática entre semestres",
+            "delivered_at": "2026-09-19",
+            "status": "pending",
+            "touches": [
+                "docs/dominio/",
+                "docs/reports/SISTEMA.md",
+                "CLAUDE.md",
+                "docs/arquitetura/BANCO.md",
+                "docs-site/features/acervo-compartilhado.html"
             ]
         }
     ]
