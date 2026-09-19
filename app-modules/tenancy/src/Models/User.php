@@ -26,6 +26,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $usr_id
  * @property string $entity_ent_id
  * @property ?string $campus_cps_id
+ * @property ?string $course_crs_id o curso que este coordenador coordena (B8)
  * @property string $usr_name
  * @property string $usr_email
  * @property UserRole $usr_role
@@ -93,6 +94,15 @@ final class User extends Authenticatable implements FilamentUser, HasName
     public function campus(): BelongsTo
     {
         return $this->belongsTo(Campus::class, 'campus_cps_id', 'cps_id');
+    }
+
+    /**
+     * O curso deste coordenador (B8) — `catalog` é outro módulo, resolvido
+     * por `config('models.course')` pra não furar a fronteira modular.
+     */
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(config('models.course'), 'course_crs_id', 'crs_id');
     }
 
     protected static function newFactory(): UserFactory

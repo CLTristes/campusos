@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\ResolveTenantFromHeader;
 use App\Http\Middleware\ResolveTenantFromUser;
 use Illuminate\Foundation\Application;
@@ -25,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
             // A borda real: tenant vindo do usuário autenticado. Vale para a API
             // (token Sanctum) e para o painel /data-console (sessão web).
             'tenant.user' => ResolveTenantFromUser::class,
+            // RBAC de borda: role:coordinator,institution_admin. Roda depois
+            // de tenant.user (precisa do usuário autenticado já resolvido).
+            'role' => EnsureUserHasRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

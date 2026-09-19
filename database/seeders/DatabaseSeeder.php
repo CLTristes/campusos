@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use CampusOs\Catalog\Database\Seeders\ComplementaryCategorySeeder;
 use CampusOs\Catalog\Database\Seeders\MatrizUtfprSeeder;
+use CampusOs\Catalog\Models\Course;
 use CampusOs\Core\Tenancy\TenantContext;
 use CampusOs\Tenancy\Enums\UserRole;
 use CampusOs\Tenancy\Models\Campus;
@@ -59,7 +60,7 @@ class DatabaseSeeder extends Seeder
                 ],
             );
 
-            User::query()->firstOrCreate(
+            $coordenacao = User::query()->firstOrCreate(
                 ['usr_email' => 'coordenacao@utfpr.edu.br'],
                 [
                     'usr_name' => 'Coordenação de Sistemas de Informação',
@@ -72,6 +73,10 @@ class DatabaseSeeder extends Seeder
             // O catálogo é dado mestre e nasce do documento da matriz — aqui ele
             // é semeado do CSV transcrito, que é a mesma informação.
             $this->call(MatrizUtfprSeeder::class);
+
+            // O escopo do painel da coordenação (B8): só depois da matriz
+            // semeada o curso 25 existe pra vincular.
+            $coordenacao->update(['course_crs_id' => Course::query()->where('crs_code', '25')->value('crs_id')]);
 
             // Fictício até a resolução real do curso — ver
             // docs/dominio/HORAS_COMPLEMENTARES.md.
