@@ -6,8 +6,7 @@
         "at": "2026-09-19",
         "by": "claude-sonnet-5",
         "reports_processed": [
-            "v0.4.0/feat_cadastro_aluno_com_verificacao_de_email",
-            "v0.5.0/feat_acervo_do_veterano"
+            "v0.5.1/fix_data_console_jornada_e_scribe_desatualizado"
         ]
     },
     "targets": [
@@ -142,7 +141,8 @@
             "file": "docs/reports/v0.5.1/fix_data_console_jornada_e_scribe_desatualizado.md",
             "title": "Console de dados ganha os 4 Resources da jornada; Scribe regenerado com os 16 endpoints reais",
             "delivered_at": "2026-09-19",
-            "status": "pending",
+            "status": "synced",
+            "synced_at": "2026-09-19",
             "touches": [
                 "docs/reports/SISTEMA.md"
             ]

@@ -5,7 +5,7 @@
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-09-19 · reports até `v0.5.0/feat_acervo_do_veterano` ·
+> **Última sincronização:** 2026-09-19 · reports até `v0.5.1/fix_data_console_jornada_e_scribe_desatualizado` ·
 > por claude-sonnet-5
 
 ## Índice
@@ -265,7 +265,7 @@ erro mais provável, e tratá-lo como documento ruim apagaria o upload do aluno.
 
 # Parte IX — Testes e qualidade
 
-**163 testes / 488 asserções verdes** · Pint verde · ArchTest verde.
+**164 testes / 496 asserções verdes** · Pint verde · ArchTest verde.
 
 O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
 rodapé do documento da matriz imprime os totais de fechamento, então a
@@ -294,7 +294,7 @@ contra sete pares (média, frequência, situação) do histórico real.
 | --- | --- |
 | `/docs/api` | Documentação interativa (Scribe → OpenAPI → UI Scalar). `composer docs` regenera |
 | `/docs/api/openapi.yaml` · `postman.json` | A spec e a coleção |
-| `/data-console` | Console de dados (Filament), 11 recursos. Só coordenação e gestão |
+| `/data-console` | Console de dados (Filament), 15 recursos (catalog + tenancy + journey). Só coordenação e gestão |
 | `/up` | Health check |
 
 **16 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
@@ -345,3 +345,4 @@ php artisan serve
 | 2026-09-19 | Gemini validado contra a API real (modelo trocado para `gemini-3.6-flash`); confirmação cria o vínculo sozinha a partir do documento; `lines.*.status` de 64 para 255 caracteres | `v0.3.1/feat_gemini_real_e_vinculo_automatico` |
 | 2026-09-19 | Cadastro livre do aluno: instituição resolvida por `ent_email_domain`, acesso imediato, verificação por código em paralelo | `v0.4.0/feat_cadastro_aluno_com_verificacao_de_email` |
 | 2026-09-19 | O acervo do veterano (B5): escada de visibilidade de 5 níveis, `EnrolledSubjectsProvider` como fronteira com o `journey` | `v0.5.0/feat_acervo_do_veterano` |
+| 2026-09-19 | Console de dados ganha os 4 Resources da jornada (11→15); Scribe regenerado | `v0.5.1/fix_data_console_jornada_e_scribe_desatualizado` |
