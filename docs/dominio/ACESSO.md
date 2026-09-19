@@ -1,6 +1,6 @@
 # Acesso — quem entra, no quê, e com qual recorte
 
-> **Área:** `tenancy` · **Última sincronização:** v0.2.0 · 2026-09-19
+> **Área:** `tenancy` · **Última sincronização:** v0.4.0 · 2026-09-19
 
 ## O problema
 
@@ -74,15 +74,28 @@ da API. O painel não tem recorte por curso — quem entra vê a instituição i
 > (`data_console`, fora do RBAC de domínio) + MFA obrigatória, como no FibroMais.
 > Hoje usa o guard `web` padrão porque o painel não sai do ambiente do hackathon.
 
+### 9. O aluno se cadastra sozinho — a instituição vem do domínio do e-mail
+
+`entities.ent_email_domain` guarda o domínio que autoriza cadastro livre do
+**aluno** (ex.: `alunos.utfpr.edu.br` — não o domínio da coordenação/staff,
+que continua nascendo só por seeder). `SignupAction` extrai o domínio de
+`Str::after($email, '@')`, acha a instituição fora do escopo de tenant (mesma
+postura do login) e recusa com 422 se nenhuma instituição tiver aquele domínio
+habilitado. O cliente nunca escolhe a instituição numa lista.
+
+**Acesso é imediato**: o cadastro já devolve o token Sanctum, igual ao login.
+A verificação por e-mail (código de 6 dígitos, expira em 15 minutos,
+guardado hashado como `usr_password`) é uma camada de segurança **em
+paralelo**, não um portão — nenhuma rota depende de `usr_email_verified_at`
+hoje. Despublicar não existe aqui, mas o padrão é o mesmo do resto do
+domínio: nada bloqueia por padrão além do que foi decidido explicitamente.
+
 ## ⚠️ Pendências do dono do produto
 
-1. **Verificação de e-mail institucional.** `ent_email_domain` existe na tabela e
-   permitiria descobrir a instituição pelo domínio do e-mail, mas nada valida o
-   endereço hoje. Custa ~40 min; ficou fora do MVP.
-2. **O `professor` não tem superfície.** O papel existe no enum e nada o usa —
+1. **O `professor` não tem superfície.** O papel existe no enum e nada o usa —
    `offerings.ofr_professor_name` é texto, não FK. Decidir se o docente entra no
    produto ou se o papel sai do enum.
-3. **Admin de plataforma.** `users.entity_ent_id` é NOT NULL, então não há como
+2. **Admin de plataforma.** `users.entity_ent_id` é NOT NULL, então não há como
    existir um usuário sem instituição. Quando entrar, a coluna vira nullable e o
    `EntityScope` ganha a exceção explícita, com teste próprio.
 
@@ -96,3 +109,4 @@ da API. O painel não tem recorte por curso — quem entra vê a instituição i
 | 6 | `app/Http/Middleware/ResolveTenantFromUser.php` | `AutenticacaoTest`, `DataConsoleTest` |
 | 7 | `tenancy/src/Http/Controllers/AuthController.php` | `AutenticacaoTest` |
 | 8 | `tenancy/src/Models/User.php::canAccessPanel` | `DataConsoleTest` |
+| 9 | `tenancy/src/Actions/{Signup,VerifyEmail,ResendVerificationCode}Action.php` | `CadastroAlunoTest` |

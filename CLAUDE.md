@@ -106,10 +106,10 @@ e **eventos** declarados no módulo `core`. Detalhe completo em
 | Módulo | Estado | Responsabilidade |
 | --- | --- | --- |
 | `core` | do template | shared kernel: `AbstractAction`, `Entityable`, `EntityScope`, `TenantContext`, `AuditObserver` |
-| `tenancy` | **em código** | `Entity` (a instituição) + `Campus` + `User` (4 papéis) + login Sanctum |
+| `tenancy` | **em código** | `Entity` (a instituição) + `Campus` + `User` (4 papéis) + login/cadastro Sanctum |
 | `catalog` | **em código** | dados mestres: curso, matriz, disciplina, pré-requisito, equivalência, conjunto de optativas, semestre, oferta |
 | `journey` | **parcial** | vínculo, histórico, `ApprovalPolicy`, `ProgressReadModel`, importação de documento (sobe→confere→confirma). Falta: elegibilidade, horas complementares, endpoint de criar vínculo |
-| `lifeos` | esqueleto | o acervo do veterano (desafio 5.2) — notas, tarefas, visibilidade |
+| `lifeos` | **parcial** | o acervo do veterano (B5): `Note` + escada de visibilidade de 5 níveis. Falta B6 (tarefas da turma) e curadoria por voto (esticada) |
 | `insights` | esqueleto | agregados da coordenação. **Sem tabelas por desenho** — lê por read model |
 | `integrations` | **em código** | `GeminiDocumentExtractor` + `NullDocumentExtractor` atrás do contrato `AcademicDocumentExtractor`. **O único lugar que sabe qual IA lê os documentos** |
 
@@ -171,7 +171,8 @@ app-modules/                  # <- todo o domínio vive aqui
     database/data/            #   CSVs da matriz + parse_matriz_html.py (o gerador)
   journey/                    # students, registrations, subject_enrollments +
                               #   ApprovalPolicy + ProgressReadModel (/api/v1/me/progress)
-  lifeos/                     # esqueleto — o acervo do veterano (desafio 5.2)
+  lifeos/                     # parcial — Note + escada de visibilidade (B5);
+                              #   falta B6 (tarefas da turma)
   insights/                   # esqueleto — agregados da coordenação, SEM tabelas
   integrations/               # GeminiDocumentExtractor + NullDocumentExtractor
                               #   atrás do contrato do core. O bind no provider é
@@ -274,8 +275,8 @@ test` antes de commitar.
 
 ## Estado atual
 
-**v0.3.1 (19/09/2026) — 144 testes / 425 asserções verdes**, Pint verde,
-ArchTest verde. 17 tabelas em código, 9 endpoints documentados em `/docs/api`.
+**v0.4.0 (19/09/2026) — 152 testes / 463 asserções verdes**, Pint verde,
+ArchTest verde. 17 tabelas em código, 12 endpoints documentados em `/docs/api`.
 
 O **catálogo acadêmico** está completo, com a matriz 45 da UTFPR real semeada:
 121 disciplinas, 34 pré-requisitos, 98 equivalências. O total a integralizar
@@ -302,11 +303,11 @@ vínculo não consegue importar nada".
 
 **Acesso:** login por token, 4 papéis, console de dados Filament em
 `/data-console` (só coordenação e gestão) e documentação de API em `/docs/api`.
-**Não existe cadastro (sign-up) de conta ainda** — `User` só nasce por seeder;
-é a pendência nº 4 do `docs-site/index.html` ("como o aluno prova que é
-aluno?"), ainda aberta.
+**Cadastro livre do aluno** existe: a instituição é resolvida pelo domínio do
+e-mail (`entities.ent_email_domain`), acesso é imediato (token sai do próprio
+cadastro), e um código de verificação por e-mail confirma o endereço como
+camada de segurança em paralelo, sem bloquear nada.
 
-**Ainda não existe:** cadastro (sign-up) de conta, elegibilidade e
-pré-requisitos em runtime, simulação de reprovação, horas complementares, e os
-módulos `lifeos`/`insights` inteiros. Lista completa em
-[`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.
+**Ainda não existe:** elegibilidade e pré-requisitos em runtime, simulação de
+reprovação, horas complementares, e os módulos `lifeos`/`insights` inteiros.
+Lista completa em [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.

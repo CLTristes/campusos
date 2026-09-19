@@ -6,7 +6,8 @@
         "at": "2026-09-19",
         "by": "claude-sonnet-5",
         "reports_processed": [
-            "v0.3.1/feat_gemini_real_e_vinculo_automatico"
+            "v0.4.0/feat_cadastro_aluno_com_verificacao_de_email",
+            "v0.5.0/feat_acervo_do_veterano"
         ]
     },
     "targets": [
@@ -113,7 +114,8 @@
             "file": "docs/reports/v0.4.0/feat_cadastro_aluno_com_verificacao_de_email.md",
             "title": "Cadastro livre do aluno por domínio de e-mail, com verificação por código (acesso imediato)",
             "delivered_at": "2026-09-19",
-            "status": "pending",
+            "status": "synced",
+            "synced_at": "2026-09-19",
             "touches": [
                 "docs/dominio/ACESSO.md",
                 "docs/reports/SISTEMA.md",
@@ -125,7 +127,8 @@
             "file": "docs/reports/v0.5.0/feat_acervo_do_veterano.md",
             "title": "O acervo do veterano (B5) — escada de visibilidade de 5 níveis, entrega automática entre semestres",
             "delivered_at": "2026-09-19",
-            "status": "pending",
+            "status": "synced",
+            "synced_at": "2026-09-19",
             "touches": [
                 "docs/dominio/",
                 "docs/reports/SISTEMA.md",

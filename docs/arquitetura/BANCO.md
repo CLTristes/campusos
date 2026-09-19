@@ -33,6 +33,7 @@ em `app-modules/<modulo>/database/`.
 | `registrations` | `reg_` | `reg_id` | `journey` |
 | `subject_enrollments` | `sen_` | `sen_id` | `journey` |
 | `enrollment_requests` | `erq_` | `erq_id` | `journey` — o documento que o aluno subiu |
+| `notes` | `nte_` | `nte_id` | `lifeos` — o acervo do veterano (5.2); FKs de escopo (`subject_sbj_id`, `offering_ofr_id`, `course_crs_id`) todas nullable |
 | `users`(framework), `cache`, `jobs`, `sessions`, `personal_access_tokens` | — | — | host (infra do Laravel/Sanctum) |
 
 > As tabelas de infraestrutura do framework não seguem as convenções de domínio

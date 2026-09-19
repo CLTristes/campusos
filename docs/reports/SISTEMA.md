@@ -5,7 +5,7 @@
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-09-19 · reports até `v0.3.1/feat_gemini_real_e_vinculo_automatico` ·
+> **Última sincronização:** 2026-09-19 · reports até `v0.5.0/feat_acervo_do_veterano` ·
 > por claude-sonnet-5
 
 ## Índice
@@ -99,6 +99,11 @@ sanitize→validate→authorize→handle), `Entityable`, `EntityScope`,
 - `LoginAction` (Sanctum) — o e-mail é único **por instituição**, então o login
   roda fora do escopo de tenant e, em ambiguidade, pede `entity_id`.
 - `User` implementa `FilamentUser` + `HasName` para o console de dados.
+- `SignupAction` — cadastro livre do **aluno**: a instituição é resolvida por
+  `entities.ent_email_domain` (o domínio do e-mail), nunca escolhida pelo
+  cliente. Acesso é imediato (token sai do próprio cadastro);
+  `VerifyEmailAction`/`ResendVerificationCodeAction` confirmam um código de 6
+  dígitos por e-mail como camada de segurança em paralelo, sem bloquear nada.
 
 ## IV.3 `catalog` — o esqueleto acadêmico
 
@@ -148,10 +153,21 @@ optativas, enriquecimento, exame de suficiência, disciplinas matriculadas), e
 todo `"*"` de frequência voltou `null`. A camada gratuita devolveu um 503
 transitório em parte das chamadas — tratado como transporte, a fila reprocessa.
 
-## IV.6 `lifeos` · `insights` — esqueletos
+## IV.6 `lifeos` (parcial) · `insights` (esqueleto)
 
-Criados, registrados no ArchTest, sem código de domínio. `insights` **não terá
-tabelas por desenho**: lê por read model o que `journey` e `catalog` já possuem.
+`lifeos` tem o acervo do veterano (desafio 5.2, B5): `Note` + `Visibility`
+(enum de 5 níveis: private/offering/subject/course/institution) +
+`NoteVisibilityScope` (global scope aplicado a toda leitura de `Note`). A
+regra que faz a nota atravessar semestres é a ausência de filtro por
+`term_trm_id` na leitura — ver [`ACERVO.md`](../dominio/ACERVO.md). Falta B6
+(tarefas da turma) e a curadoria por voto (◎ esticada no desenho).
+
+A fronteira com `journey` passa por `EnrolledSubjectsProvider` (contrato no
+`core`, implementado em `JourneyEnrolledSubjectsProvider`): o `lifeos` nunca
+lê `subject_enrollments` direto, e o `ArchTest` prova isso a cada build.
+
+`insights` continua esqueleto. **Não terá tabelas por desenho**: lê por read
+model o que `journey` e `catalog` já possuem.
 
 ## IV.7 App host (`app/`) — só borda
 
@@ -163,7 +179,7 @@ Nenhuma regra de negócio.
 
 # Parte V — A camada de dados
 
-**17 tabelas em código.** Convenções sem exceção: prefixo de 3 letras em toda
+**18 tabelas em código.** Convenções sem exceção: prefixo de 3 letras em toda
 coluna, PK UUID gerada na aplicação, `SoftDeletes` no que é transacional, FK no
 formato `{tabela_singular}_{pk_origem}`, `entity_ent_id` em toda tabela com
 escopo de tenant.
@@ -174,6 +190,10 @@ Ownership e ER completos em [`BANCO.md`](../arquitetura/BANCO.md).
 (5.1) e o direito de ver o acervo (5.2). Índice único
 `(registration, subject, term)`: cursar de novo em outro semestre gera linha
 nova, que é como reprovação aparece no histórico.
+
+**`notes`** é a tabela do acervo: três FKs nullable (`subject_sbj_id`,
+`offering_ofr_id`, `course_crs_id`) — cada nível da escada de visibilidade usa
+uma delas ou nenhuma — e `nte_visibility` default `private`.
 
 ---
 
@@ -245,7 +265,7 @@ erro mais provável, e tratá-lo como documento ruim apagaria o upload do aluno.
 
 # Parte IX — Testes e qualidade
 
-**144 testes / 425 asserções verdes** · Pint verde · ArchTest verde.
+**163 testes / 488 asserções verdes** · Pint verde · ArchTest verde.
 
 O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
 rodapé do documento da matriz imprime os totais de fechamento, então a
@@ -277,9 +297,10 @@ contra sete pares (média, frequência, situação) do histórico real.
 | `/data-console` | Console de dados (Filament), 11 recursos. Só coordenação e gestão |
 | `/up` | Health check |
 
-**9 endpoints** na spec: `auth/{login,me,logout}`, `courses`,
-`courses/{id}/curriculum`, `me/progress`, e os três de
-`me/academic-documents` (enviar, consultar, confirmar).
+**16 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
+verify-email/resend}`, `courses`, `courses/{id}/curriculum`, `me/progress`, os
+três de `me/academic-documents` (enviar, consultar, confirmar), e os quatro de
+`notes` (listar, criar, ver, mudar visibilidade).
 
 ---
 
@@ -306,9 +327,8 @@ php artisan serve
 
 | Área | O que falta |
 | --- | --- |
-| `tenancy` | **Cadastro (sign-up) de conta** — `User` só nasce por seeder/coordenação. Pendência nº 4 do `docs-site/index.html` ("como o aluno prova que é aluno?"), ainda aberta |
 | `journey` | Elegibilidade/pré-requisitos em runtime, simulação de reprovação, atividades complementares, cálculo do período por déficit de CHS |
-| `lifeos` | Tudo — notas, tarefas, a escada de visibilidade (desafio 5.2) |
+| `lifeos` | B6 (tarefas da turma) e a curadoria por voto (◎ esticada) — o acervo de notas (B5) está pronto |
 | `insights` | Tudo — os agregados da coordenação |
 | Transversal | CCE autônomo (as 60 h de extensão que ninguém consegue cumprir pelo sistema), RBAC granular, guard próprio do console |
 
@@ -323,3 +343,5 @@ php artisan serve
 | 2026-09-19 | Módulo `journey`: vínculo, histórico, `ApprovalPolicy` e a barra de progresso | `v0.2.0/feat_journey_progressao` |
 | 2026-09-19 | Importação de documento por IA: contrato no `core`, Gemini no `integrations`, fluxo sobe→confere→confirma | `v0.3.0/feat_importacao_documento` |
 | 2026-09-19 | Gemini validado contra a API real (modelo trocado para `gemini-3.6-flash`); confirmação cria o vínculo sozinha a partir do documento; `lines.*.status` de 64 para 255 caracteres | `v0.3.1/feat_gemini_real_e_vinculo_automatico` |
+| 2026-09-19 | Cadastro livre do aluno: instituição resolvida por `ent_email_domain`, acesso imediato, verificação por código em paralelo | `v0.4.0/feat_cadastro_aluno_com_verificacao_de_email` |
+| 2026-09-19 | O acervo do veterano (B5): escada de visibilidade de 5 níveis, `EnrolledSubjectsProvider` como fronteira com o `journey` | `v0.5.0/feat_acervo_do_veterano` |
