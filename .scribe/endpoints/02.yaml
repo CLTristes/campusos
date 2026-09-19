@@ -1,34 +1,29 @@
-name: 'Acervo do veterano'
+name: 'Horas complementares'
 description: |-
 
-  O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
-  turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
-  leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
-  exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
-  aqui.
+  O tracker pessoal do aluno para atividades complementares (B7) — teto por
+  categoria e certificado guardado. Puramente informativo: não muda
+  `GET /me/progress` (ver docs/dominio/HORAS_COMPLEMENTARES.md).
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/notes
+    uri: api/v1/me/complementary-activities
     metadata:
       custom: []
-      groupName: 'Acervo do veterano'
+      groupName: 'Horas complementares'
       groupDescription: |-
 
-        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
-        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
-        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
-        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
-        aqui.
+        O tracker pessoal do aluno para atividades complementares (B7) — teto por
+        categoria e certificado guardado. Puramente informativo: não muda
+        `GET /me/progress` (ver docs/dominio/HORAS_COMPLEMENTARES.md).
       subgroup: ''
       subgroupDescription: ''
-      title: 'Listar notas'
+      title: 'Minhas atividades complementares'
       description: |-
-        As próprias (qualquer visibilidade) mais o que outros compartilharam com
-        este usuário, pela escada de visibilidade. Filtre por `subject_id` para
-        ver o acervo de uma disciplina específica — é a tela do 5.2.
+        A lista mais o resumo por categoria (`summary`): quanto foi declarado,
+        quanto conta depois do teto, e quanto foi perdido.
       authenticated: true
       deprecated: false
     headers:
@@ -36,200 +31,6 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
-    queryParameters:
-      subject_id:
-        custom: []
-        name: subject_id
-        description: 'O acervo de uma disciplina específica.'
-        required: false
-        example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-    cleanQueryParameters:
-      subject_id: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":[{"id":"01a0…","title":"Resumo da P2","kind":"summary","visibility":"subject","author":{"id":"01a0…","name":"Um Veterano"},"term":{"year":2024,"period":1}}]}'
-        headers: []
-        description: 'acervo de uma disciplina'
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/notes
-    metadata:
-      custom: []
-      groupName: 'Acervo do veterano'
-      groupDescription: |-
-
-        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
-        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
-        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
-        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
-        aqui.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Criar nota'
-      description: 'Nasce privada — publicar é um passo separado (`.../visibility`).'
-      authenticated: true
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      title:
-        custom: []
-        name: title
-        description: ''
-        required: true
-        example: 'Resumo da P2'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      body_md:
-        custom: []
-        name: body_md
-        description: 'Conteúdo em markdown.'
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      kind:
-        custom: []
-        name: kind
-        description: 'summary, past_exam, solved_exercise_list, material ou tip.'
-        required: true
-        example: summary
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      subject_id:
-        custom: []
-        name: subject_id
-        description: 'A disciplina, se houver.'
-        required: false
-        example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      offering_id:
-        custom: []
-        name: offering_id
-        description: 'A turma, se houver.'
-        required: false
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      course_id:
-        custom: []
-        name: course_id
-        description: 'O curso, se houver.'
-        required: false
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      term_id:
-        custom: []
-        name: term_id
-        description: 'O semestre em que foi escrita, se houver.'
-        required: false
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      title: 'Resumo da P2'
-      body_md: architecto
-      kind: summary
-      subject_id: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
-      offering_id: architecto
-      course_id: architecto
-      term_id: architecto
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 201
-        content: '{"data":{"id":"01a0…","title":"Resumo da P2","visibility":"private"}}'
-        headers: []
-        description: criada
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: 'api/v1/notes/{nte_id}'
-    metadata:
-      custom: []
-      groupName: 'Acervo do veterano'
-      groupDescription: |-
-
-        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
-        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
-        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
-        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
-        aqui.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Ver uma nota'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      nte_id:
-        custom: []
-        name: nte_id
-        description: 'The ID of the nte.'
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      nte_id: architecto
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -254,60 +55,68 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: 'api/v1/notes/{note_nte_id}/visibility'
+    uri: api/v1/me/complementary-activities
     metadata:
       custom: []
-      groupName: 'Acervo do veterano'
+      groupName: 'Horas complementares'
       groupDescription: |-
 
-        O caderno pessoal do aluno (organizador do 5.1) e o acervo que atravessa
-        turmas (o 5.2) são o MESMO recurso — o que muda é só `visibility`. Toda
-        leitura já passa pelo `NoteVisibilityScope`: o que este controller devolve é
-        exatamente o que o usuário autenticado tem direito de ver, sem `if` nenhum
-        aqui.
+        O tracker pessoal do aluno para atividades complementares (B7) — teto por
+        categoria e certificado guardado. Puramente informativo: não muda
+        `GET /me/progress` (ver docs/dominio/HORAS_COMPLEMENTARES.md).
       subgroup: ''
       subgroupDescription: ''
-      title: 'Mudar a visibilidade'
+      title: 'Declarar atividade complementar'
       description: |-
-        Publicar (subir na escada) ou despublicar (voltar para `private`, que
-        sempre funciona, sem pré-condição nenhuma). Só o autor pode chamar.
+        Sem fila de homologação nesta entrega — o contador anda na hora, com
+        `capped`/`hours_not_counted` avisando se a categoria estourou o teto.
       authenticated: true
       deprecated: false
     headers:
-      Content-Type: application/json
+      Content-Type: multipart/form-data
       Accept: application/json
-    urlParameters:
-      note_nte_id:
-        custom: []
-        name: note_nte_id
-        description: 'The ID of the note nte.'
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      note_nte_id: architecto
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      visibility:
+      category_id:
         custom: []
-        name: visibility
-        description: 'private, offering, subject, course ou institution.'
+        name: category_id
+        description: ''
         required: true
-        example: subject
+        example: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-      subject_id:
+      title:
         custom: []
-        name: subject_id
-        description: 'Obrigatório se a nota ainda não tiver disciplina e o alvo exigir uma.'
+        name: title
+        description: ''
+        required: true
+        example: 'Semana Acadêmica de Sistemas de Informação'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      hours_claimed:
+        custom: []
+        name: hours_claimed
+        description: ''
+        required: true
+        example: 20
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      issued_at:
+        custom: []
+        name: issued_at
+        description: 'Data do certificado (ISO 8601).'
         required: false
         example: architecto
         type: string
@@ -315,23 +124,37 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      certificate:
+        custom: []
+        name: certificate
+        description: 'O certificado (PDF, PNG ou JPG).'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
     cleanBodyParameters:
-      visibility: subject
-      subject_id: architecto
-    fileParameters: []
+      category_id: 01a0b823-b7d7-72d8-8db9-810d0e28d9c7
+      title: 'Semana Acadêmica de Sistemas de Informação'
+      hours_claimed: 20
+      issued_at: architecto
+    fileParameters:
+      certificate: null
     responses:
       -
         custom: []
-        status: 200
-        content: '{"data":{"id":"01a0…","visibility":"subject"}}'
+        status: 201
+        content: '{"data":{"id":"01a0…","hours_claimed":20},"capped":false,"hours_not_counted":0}'
         headers: []
-        description: publicada
+        description: 'dentro do teto'
       -
         custom: []
-        status: 403
-        content: '{"message":"Esta nota não é sua."}'
+        status: 201
+        content: '{"data":{"id":"01a0…","hours_claimed":46},"capped":true,"hours_not_counted":46}'
         headers: []
-        description: 'não é o autor'
+        description: 'estourou o teto'
     responseFields: []
     auth: []
     controller: null

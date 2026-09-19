@@ -123,6 +123,19 @@
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-horas-complementares" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="horas-complementares">
+                    <a href="#horas-complementares">Horas complementares</a>
+                </li>
+                                    <ul id="tocify-subheader-horas-complementares" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="horas-complementares-GETapi-v1-me-complementary-activities">
+                                <a href="#horas-complementares-GETapi-v1-me-complementary-activities">Minhas atividades complementares</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="horas-complementares-POSTapi-v1-me-complementary-activities">
+                                <a href="#horas-complementares-POSTapi-v1-me-complementary-activities">Declarar atividade complementar</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-jornada-academica" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="jornada-academica">
                     <a href="#jornada-academica">Jornada acadêmica</a>
@@ -2176,6 +2189,355 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                     </form>
 
+                <h1 id="horas-complementares">Horas complementares</h1>
+
+    <p>O tracker pessoal do aluno para atividades complementares (B7) — teto por
+categoria e certificado guardado. Puramente informativo: não muda
+<code>GET /me/progress</code> (ver docs/dominio/HORAS_COMPLEMENTARES.md).</p>
+
+                                <h2 id="horas-complementares-GETapi-v1-me-complementary-activities">Minhas atividades complementares</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>A lista mais o resumo por categoria (<code>summary</code>): quanto foi declarado,
+quanto conta depois do teto, e quanto foi perdido.</p>
+
+<span id="example-requests-GETapi-v1-me-complementary-activities">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/v1/me/complementary-activities" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/me/complementary-activities"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-me-complementary-activities">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+access-control-allow-origin: *
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-me-complementary-activities" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-me-complementary-activities"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-me-complementary-activities"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-me-complementary-activities" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-me-complementary-activities">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-me-complementary-activities" data-method="GET"
+      data-path="api/v1/me/complementary-activities"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-me-complementary-activities', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-me-complementary-activities"
+                    onclick="tryItOut('GETapi-v1-me-complementary-activities');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-me-complementary-activities"
+                    onclick="cancelTryOut('GETapi-v1-me-complementary-activities');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-me-complementary-activities"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/me/complementary-activities</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-me-complementary-activities"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-me-complementary-activities"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="horas-complementares-POSTapi-v1-me-complementary-activities">Declarar atividade complementar</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Sem fila de homologação nesta entrega — o contador anda na hora, com
+<code>capped</code>/<code>hours_not_counted</code> avisando se a categoria estourou o teto.</p>
+
+<span id="example-requests-POSTapi-v1-me-complementary-activities">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/v1/me/complementary-activities" \
+    --header "Content-Type: multipart/form-data" \
+    --header "Accept: application/json" \
+    --form "category_id=01a0b823-b7d7-72d8-8db9-810d0e28d9c7"\
+    --form "title=Semana Acadêmica de Sistemas de Informação"\
+    --form "hours_claimed=20"\
+    --form "issued_at=architecto"\
+    --form "certificate=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpilav51sh8gfd7SaDrWr" </code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/v1/me/complementary-activities"
+);
+
+const headers = {
+    "Content-Type": "multipart/form-data",
+    "Accept": "application/json",
+};
+
+const body = new FormData();
+body.append('category_id', '01a0b823-b7d7-72d8-8db9-810d0e28d9c7');
+body.append('title', 'Semana Acadêmica de Sistemas de Informação');
+body.append('hours_claimed', '20');
+body.append('issued_at', 'architecto');
+body.append('certificate', document.querySelector('input[name="certificate"]').files[0]);
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-me-complementary-activities">
+            <blockquote>
+            <p>Example response (201, dentro do teto):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;hours_claimed&quot;: 20
+    },
+    &quot;capped&quot;: false,
+    &quot;hours_not_counted&quot;: 0
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (201, estourou o teto):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: &quot;01a0&hellip;&quot;,
+        &quot;hours_claimed&quot;: 46
+    },
+    &quot;capped&quot;: true,
+    &quot;hours_not_counted&quot;: 46
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-v1-me-complementary-activities" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-me-complementary-activities"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-me-complementary-activities"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-me-complementary-activities" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-me-complementary-activities">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-me-complementary-activities" data-method="POST"
+      data-path="api/v1/me/complementary-activities"
+      data-authed="1"
+      data-hasfiles="1"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-me-complementary-activities', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-me-complementary-activities"
+                    onclick="tryItOut('POSTapi-v1-me-complementary-activities');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-me-complementary-activities"
+                    onclick="cancelTryOut('POSTapi-v1-me-complementary-activities');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-me-complementary-activities"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/me/complementary-activities</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-me-complementary-activities"
+               value="multipart/form-data"
+               data-component="header">
+    <br>
+<p>Example: <code>multipart/form-data</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-me-complementary-activities"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>category_id</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="category_id"                data-endpoint="POSTapi-v1-me-complementary-activities"
+               value="01a0b823-b7d7-72d8-8db9-810d0e28d9c7"
+               data-component="body">
+    <br>
+<p>Example: <code>01a0b823-b7d7-72d8-8db9-810d0e28d9c7</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>title</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="title"                data-endpoint="POSTapi-v1-me-complementary-activities"
+               value="Semana Acadêmica de Sistemas de Informação"
+               data-component="body">
+    <br>
+<p>Example: <code>Semana Acadêmica de Sistemas de Informação</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>hours_claimed</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="hours_claimed"                data-endpoint="POSTapi-v1-me-complementary-activities"
+               value="20"
+               data-component="body">
+    <br>
+<p>Example: <code>20</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>issued_at</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="issued_at"                data-endpoint="POSTapi-v1-me-complementary-activities"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Data do certificado (ISO 8601). Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>certificate</code></b>&nbsp;&nbsp;
+<small>file</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="file" style="display: none"
+                              name="certificate"                data-endpoint="POSTapi-v1-me-complementary-activities"
+               value=""
+               data-component="body">
+    <br>
+<p>O certificado (PDF, PNG ou JPG). Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpilav51sh8gfd7SaDrWr</code></p>
+        </div>
+        </form>
+
                 <h1 id="jornada-academica">Jornada acadêmica</h1>
 
     <p>A progressão da graduação do aluno autenticado — o endpoint que sozinho
@@ -2344,7 +2706,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "kind=transcript"\
-    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpr00d1rmedfl21TvVIX0" </code></pre></div>
+    --form "file=@/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php4kpqgnu4i706fr9RU3Z" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -2479,7 +2841,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/phpr00d1rmedfl21TvVIX0</code></p>
+<p>PDF ou foto (PNG/JPG), até 20 MB. Example: <code>/private/var/folders/8h/z9rd082525gcjrf6hpb1cp900000gn/T/php4kpqgnu4i706fr9RU3Z</code></p>
         </div>
         </form>
 
