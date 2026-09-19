@@ -156,6 +156,9 @@ app/                          # app host ENXUTA: borda e ferramenta interna. SÓ
   Http/Middleware/            #   ResolveTenantFromUser (alias tenant.user — a borda
                               #     REAL: tenant vindo do usuário autenticado) +
                               #     ResolveTenantFromHeader (placeholder do template)
+  Mcp/                        #   copiloto MCP (B8): Servers/CampusOsServer +
+                              #     Tools/ (7 tools, adaptadores finos sobre as
+                              #     Actions/read models dos módulos — canal, não módulo)
   Providers/Filament/         #   DataConsolePanelProvider — o painel /data-console
   Filament/                   #   Auth/Login (a coluna é usr_email, não email) +
                               #     Resources/ do console (ferramenta de dev/QA,
@@ -278,8 +281,8 @@ test` antes de commitar.
 
 ## Estado atual
 
-**v0.9.0 (19/09/2026) — 201 testes / 616 asserções verdes**, Pint verde,
-ArchTest verde. 21 tabelas em código, 28 endpoints documentados em `/docs/api`.
+**v0.10.0 (19/09/2026) — 217 testes / 679 asserções verdes**, Pint verde,
+ArchTest verde. 21 tabelas em código, 29 endpoints documentados em `/docs/api`.
 
 O **catálogo acadêmico** está completo, com a matriz 45 da UTFPR real semeada:
 121 disciplinas, 34 pré-requisitos, 98 equivalências. O total a integralizar
@@ -356,8 +359,19 @@ inteira (`institution_admin`). RBAC de borda genérico
 `EntityScope` — as duas perguntas em SQL puro filtram `entity_ent_id` na mão.
 Ver [`PAINEL_COORDENACAO.md`](docs/dominio/PAINEL_COORDENACAO.md).
 
+**O copiloto MCP** (`app/Mcp/`, desafio 5.2, B8 terceira e última esticada)
+fecha o B8: sete tools (`CampusOsServer`) sobre os MESMOS Actions e read
+models do REST — seis de leitura (`minha_progressao`,
+`disciplinas_liberadas`, `acervo_da_disciplina`, `buscar_anotacoes`,
+`minha_agenda`, `minhas_horas`) mais `criar_anotacao`, a única de escrita.
+`POST /mcp` (`routes/ai.php`) exige `auth:sanctum` + `tenant.user` +
+`abilities:mcp:read`; o token do copiloto é separado do de login
+(`POST /api/v1/auth/mcp-token`, `IssueMcpTokenAction` em `tenancy`), com
+`mcp:write` opt-in que `criar_anotacao` confere dentro do próprio `handle()`
+como defesa em profundidade. Ver
+[`COPILOTO_MCP.md`](docs/dominio/COPILOTO_MCP.md).
+
 **Ainda não existe:** cálculo do período por déficit de CHS completo
-(obrigatórias+optativas), curadoria por voto e `events` no `lifeos`,
-homologação da coordenação para horas complementares, e o copiloto MCP
-(B8, terceira esticada). Lista completa em
+(obrigatórias+optativas), curadoria por voto e `events` no `lifeos`, e
+homologação da coordenação para horas complementares. Lista completa em
 [`SISTEMA.md`](docs/reports/SISTEMA.md) Parte XII.

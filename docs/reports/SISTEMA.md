@@ -5,7 +5,7 @@
 > (`sync-state.json`) — os relatórios de entrega (`vX.Y.Z/`) são as fotografias
 > históricas; este é o filme montado.
 >
-> **Última sincronização:** 2026-09-19 · reports até `v0.9.0/feat_painel_da_coordenacao` ·
+> **Última sincronização:** 2026-09-19 · reports até `v0.10.0/feat_copiloto_mcp` ·
 > por claude-sonnet-5
 
 ## Índice
@@ -221,6 +221,22 @@ real, `EnsureUserHasRole` — RBAC genérico por papel, B8), o
 `DataConsolePanelProvider` do Filament e os Resources do console.
 Nenhuma regra de negócio.
 
+**O copiloto MCP** (B8, terceira e última esticada) também mora aqui, em
+`app/Mcp/` — é canal, como o REST, não módulo. `CampusOsServer` declara sete
+tools (`app/Mcp/Tools/*.php`), seis de leitura (adaptadores finos sobre
+`ProgressReadModel`, `EligibilityReadModel`, `AgendaReadModel`,
+`ComplementaryHoursReadModel` e `Note` via Eloquent puro) e uma de escrita
+(`criar_anotacao`, sobre `CreateNoteAction`). `routes/ai.php` registra
+`POST /mcp` com `auth:sanctum` + `tenant.user` + `abilities:mcp:read`. O
+token do copiloto é separado do de login: `IssueMcpTokenAction` (`tenancy`)
+emite, via `POST /api/v1/auth/mcp-token`, um token Sanctum com ability
+`mcp:read` sempre e `mcp:write` opt-in, revogando qualquer token `mcp`
+anterior do mesmo usuário. `criar_anotacao` confere `mcp:write` dentro do
+próprio `handle()`, além do middleware de rota — defesa em profundidade e a
+única forma de testar essa regra pelo harness rápido do pacote
+(`Server::test()`), que não passa pelo middleware real. Ver
+[`COPILOTO_MCP.md`](../dominio/COPILOTO_MCP.md).
+
 ---
 
 # Parte V — A camada de dados
@@ -326,7 +342,7 @@ erro mais provável, e tratá-lo como documento ruim apagaria o upload do aluno.
 
 # Parte IX — Testes e qualidade
 
-**201 testes / 616 asserções verdes** · Pint verde · ArchTest verde.
+**217 testes / 679 asserções verdes** · Pint verde · ArchTest verde.
 
 O padrão que mais rende aqui: **o gabarito não fomos nós que calculamos.** O
 rodapé do documento da matriz imprime os totais de fechamento, então a
@@ -346,6 +362,19 @@ contra sete pares (média, frequência, situação) do histórico real.
    Estudante Dispensado..." com 84 caracteres), quando deveria virar pendência
    de UMA linha, não erro fatal de todas. Só apareceu testando com o documento
    de verdade — subiu para `max:255`.
+4. O harness de teste rápido do `laravel/mcp` (`Server::test()`) roda sobre um
+   transporte fake que **não passa pelo middleware de rota real** — uma regra
+   de autorização de borda (ex.: `abilities:mcp:read`) só é provada de fato
+   por um `postJson('/mcp', ...)` real; testar só pelo harness dá falso
+   positivo de cobertura numa camada que ele nunca exercitou.
+5. A grammar do Postgres emite `alter table ... add primary key` como a
+   ÚLTIMA statement de um `Schema::create` — uma foreign key
+   auto-referenciada declarada no mesmo bloco (`origin_tsk_id` → `tasks.tsk_id`
+   em `tasks`, B6) falha porque a PK ainda não existe nesse ponto. O sqlite
+   (banco de teste) não reproduz essa ordem, então passou despercebido por
+   três esticadas — só apareceu rodando `migrate` contra Postgres real.
+   Corrigido movendo a FK para um `Schema::table()` separado, depois do
+   `create` (B8 esticada 3).
 
 ---
 
@@ -358,14 +387,17 @@ contra sete pares (média, frequência, situação) do histórico real.
 | `/data-console` | Console de dados (Filament), 15 recursos (catalog + tenancy + journey). Só coordenação e gestão |
 | `/up` | Health check |
 
-**28 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
+**29 endpoints** na spec: `auth/{login,signup,me,logout,verify-email,
 verify-email/resend}`, `courses`, `courses/{id}/curriculum`, `me/progress`, os
 três de `me/academic-documents` (enviar, consultar, confirmar), os quatro de
 `notes` (listar, criar, ver, mudar visibilidade), `me/agenda` e os três de
 `tasks` (criar, adotar, mudar status) — B6 —, os dois de
 `me/complementary-activities` (listar+resumo, declarar) — B7 —,
-`me/next-term` + `me/simulate` — B8 esticada 1 — e os quatro de
-`staff/insights/{bottlenecks,cohorts,at-risk,demand}` — B8 esticada 2.
+`me/next-term` + `me/simulate` — B8 esticada 1 —, os quatro de
+`staff/insights/{bottlenecks,cohorts,at-risk,demand}` — B8 esticada 2 — e
+`auth/mcp-token` — B8 esticada 3. Fora da spec (não é REST): `POST /mcp`, a
+rota do canal MCP em si (`routes/ai.php`), com sete tools — ver
+[IV.7](#iv7-app-host-app--só-borda).
 
 ---
 
@@ -379,7 +411,7 @@ cp .env.example .env && php artisan key:generate
 createuser campusos --createdb && createdb campusos -O campusos
 
 php artisan migrate:fresh --seed     # matriz 45 da UTFPR semeada
-composer test                        # 140 testes verdes
+composer test                        # 217 testes verdes
 php artisan serve
 ```
 
@@ -414,3 +446,4 @@ php artisan serve
 | 2026-09-19 | Horas complementares (B7): teto por categoria (`complementary_categories`, catalog) + tracker do aluno (`complementary_activities`, journey); corte calculado agregado por categoria, nunca por certificado; decisão do dono do produto — nunca soma no `ProgressReadModel` (`ATV001` continua sendo o que conta) | `v0.7.0/feat_horas_complementares` |
 | 2026-09-19 | Pré-requisitos e simulação de reprovação (B8, esticada 1): `EligibilityReadModel` checa os 4 tipos de `prq_type` sem `journey` importar `catalog`; `POST /me/simulate` recalcula em memória o impacto em cascata de uma reprovação hipotética; "período atual" usa `termsAttended` como aproximação validada — mas incompleta — do déficit de CHS do documento | `v0.8.0/feat_prerequisitos_e_simulacao` |
 | 2026-09-19 | Painel da coordenação (B8, esticada 2): `AcademicStatsProvider` (core/journey), as quatro perguntas agregadas com piso de anonimato; `users.course_crs_id` resolve o escopo do coordenador; corrigido antes do merge um vazamento de tenant em `DB::table()` (não aplica `EntityScope`) | `v0.9.0/feat_painel_da_coordenacao` |
+| 2026-09-19 | Copiloto MCP (B8, esticada 3 — fecha o B8): sete tools em `app/Mcp/` (canal, não módulo) sobre os mesmos Actions/read models do REST; token separado do login via `POST /auth/mcp-token` (`mcp:read` sempre, `mcp:write` opt-in); corrigida uma FK auto-referenciada de `tasks` (B6) que nunca migrava em Postgres real | `v0.10.0/feat_copiloto_mcp` |
