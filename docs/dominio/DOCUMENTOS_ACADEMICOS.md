@@ -513,15 +513,20 @@ dos mundos.
    a ter uma função só: o passado de UM aluno. **O atalho de hackathon deixou de
    ser necessário, e isso muda o pitch**: o fluxo demonstrado é o real.
 
+### ✅ Resolvida por decisão do dono do produto (19/09/2026)
+
+4. ~~**Atividades complementares são uma DISCIPLINA**~~ **Resolvido (19/09/2026,
+   B7).** Confirmado o palpite: `complementary_activities` continua como o
+   tracker do aluno (teto por categoria, certificado guardado) e `ATV001` é só
+   como a universidade registra o desfecho no histórico oficial — os dois nunca
+   se tocam, e o contador **não soma** no `ProgressReadModel` (ver
+   [`PROGRESSAO.md`](PROGRESSAO.md) pendência 3 e
+   [`HORAS_COMPLEMENTARES.md`](HORAS_COMPLEMENTARES.md)). **Ainda falta a
+   resolução do curso com os tetos reais por categoria** — o seed de
+   `complementary_categories` é fictício até lá.
+
 ### Abertas
 
-4. **Atividades complementares são uma DISCIPLINA** (`ATV001`, 90 h, modelo
-   `ATIVIDADES COMPLEMENTARES`), confirmado pela matriz. Decidir: a tabela
-   `complementary_activities` continua como **acervo de evidência** que justifica
-   a aprovação de `ATV001` (com o contador por categoria), ou o produto trata tudo
-   como disciplina e abre mão do contador? *Palpite: manter — o contador por
-   categoria é a feature; `ATV001` é só como a universidade registra o desfecho.*
-   **Ainda falta a resolução do curso com os tetos por categoria.**
 5. **Frequência mínima não aparece em documento nenhum.** A escala de nota está
    confirmada (0,0–10,0), mas `MAT032` reprovou com 47,1 % e `NEO001` **aprovou**
    com 52,9 % — então não é um corte simples em 75 %. Precisa da resolução para

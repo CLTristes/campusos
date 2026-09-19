@@ -171,6 +171,17 @@ extra: histórico escolar é dado pessoal sensível.
    (`complementary_activities` como acervo de evidência que justifica a aprovação
    de `ATV001`) ou se o produto trata tudo como disciplina.
 
+   **Decisão do dono do produto (19/09/2026):** os dois coexistem, mas **nunca se
+   tocam**. `complementary_activities`/`complementary_categories` (B7) são o
+   tracker pessoal do aluno — teto por categoria, certificado guardado —
+   puramente informativo, e **não somam no `ProgressReadModel`**. `ATV001`,
+   quando aparecer no histórico oficial importado, continua sendo o que de fato
+   conta como aprovado dentro de "obrigatórias" (2730 h). Motivo: inventar uma
+   segunda faixa de progresso a partir do B7 arriscaria contar as mesmas horas
+   duas vezes (uma como `ATV001` na importação, outra como faixa nova) sem uma
+   regra de conciliação — e o desafio pede o estudante *acompanhar* atividades
+   complementares, não uma segunda fonte de verdade para o total de horas.
+
 ## Mapa de código
 
 | Regra | Onde vive | Teste |
